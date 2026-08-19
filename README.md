@@ -1,4 +1,4 @@
-# cheesey-scribe
+# cheesy-scribe
 
 An app based on the tasting note book from [33Books](https://www.33books.com), specifically for cheese tastings. Track, record, and look back at your favorite cheeses of all time.
 
