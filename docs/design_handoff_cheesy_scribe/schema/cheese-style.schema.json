@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tkforgeworks.com/schemas/cheesy-scribe/cheese-style.json",
+  "title": "CheeseStyle",
+  "type": "object",
+  "required": ["id", "name"],
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string", "examples": ["Alpine", "Blue", "Bloomy rind", "Washed rind", "Fresh", "Hard aged"] },
+    "examples": { "type": "string", "description": "Comma list shown on library cards, e.g. \"Comté, Gruyère, Appenzeller\"" },
+    "description": { "type": "string" },
+    "typicalMilk": { "type": "array", "items": { "enum": ["cow", "goat", "sheep", "buffalo", "other"] } },
+    "typicalTexture": { "enum": ["runny", "soft", "semiSoft", "semiFirm", "firm", "hard"] }
+  }
+}

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400;1,600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap">
+<style>body{margin:0;background:#f0eee9;font-family:Poppins,system-ui,sans-serif}a{color:#93500f}a:hover{color:#b3641b}.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}.dv-tid{font:600 10px 'JetBrains Mono',monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 Poppins,sans-serif;color:#1a1a1a}.dv-intro{font:italic 400 12.5px/1.6 'Source Serif 4',serif;color:rgba(0,0,0,.55);max-width:720px;margin:0 0 22px}.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px 'JetBrains Mono',monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Poppins,sans-serif;color:rgba(0,0,0,.55)}.dv-card{max-width:100%;background:#fbfaf7;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}.dv-opt:target .dv-oid{background:#b3641b;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 Poppins,sans-serif;color:rgba(0,0,0,.5)}.ph{display:flex;flex-direction:column;gap:8px}.ph-l{font:500 10.5px 'JetBrains Mono',monospace;color:rgba(0,0,0,.42);letter-spacing:.8px}</style>
+</helmet>
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Cheesy Scribe — cheese tasting notes · two palette directions</span></div>
+<p class="dv-intro">Working name "Cheesy Scribe" (say the word and I'll rename everything). Both directions drop the TKFW purple, keep the forge-warm gradient as the one brand spark (FAB + logo badge), and keep the Poppins / Source Serif 4 / JetBrains Mono stack — mono labels echo your journal card. Layouts are Material 3–shaped (search bar, nav drawer, extended FAB, chips) so they translate to Flutter cleanly. <a class="dv-oid" href="#1a">1a</a> is airy cream with rind-amber accents; <a class="dv-oid" href="#1b">1b</a> is the same bones with charcoal chrome + gouda caramel. <a class="dv-oid" href="#1c">1c</a> holds the extra screens (shown in the <a class="dv-oid" href="#1a">1a</a> palette — they'll follow whichever you pick).</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Cream &amp; rind amber — light, journal-like</div>
+<div class="dv-card" style="padding:24px;display:flex;gap:24px;align-items:flex-start">
+
+<div class="ph" data-screen-label="1a Login"><div class="ph-l">LOGIN</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#faf6ee" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;display:flex;flex-direction:column;background:#faf6ee;font-family:Poppins,sans-serif;color:#35291a;padding:36px 28px 20px;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px;margin:18px 0 30px">
+<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#fbdf19,#f68f25 55%,#ee3423);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 14px rgba(238,52,35,.25)">{{ icWedgeBig }}</div>
+<div style="font:700 30px Poppins,sans-serif;letter-spacing:-.5px">Cheesy Scribe</div>
+<div style="font:italic 400 14px 'Source Serif 4',serif;color:#8a7a5f;text-align:center;max-width:260px">Tasting notes for cheese you'll pretend to remember.</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">EMAIL</div><div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:14px 16px;font-size:14px;color:#35291a">tyler@example.com</div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">PASSWORD</div><div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:14px 16px;font-size:14px;color:#8a7a5f;letter-spacing:3px">••••••••••</div></div>
+<div style="font:500 12px Poppins,sans-serif;color:#93500f;text-align:right">Forgot password?</div>
+<div style="background:#b3641b;color:#fff;border-radius:8px;padding:15px;text-align:center;font:600 15px Poppins,sans-serif">Sign in</div>
+<div style="display:flex;align-items:center;gap:12px;margin:4px 0"><div style="flex:1;height:1px;background:#e6d9bf"></div><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f">OR CONTINUE WITH</div><div style="flex:1;height:1px;background:#e6d9bf"></div></div>
+<div style="display:flex;gap:12px"><div style="flex:1;border:1px solid #e6d9bf;background:#fffdf8;border-radius:8px;padding:13px;text-align:center;font:500 14px Poppins,sans-serif;color:#5f5138">Google</div><div style="flex:1;border:1px solid #e6d9bf;background:#fffdf8;border-radius:8px;padding:13px;text-align:center;font:500 14px Poppins,sans-serif;color:#5f5138">Apple</div></div>
+</div>
+<div style="flex:1"></div>
+<div style="text-align:center;font:400 13px Poppins,sans-serif;color:#8a7a5f">New here? <span style="color:#93500f;font-weight:600">Create an account</span></div>
+<div style="text-align:center;margin-top:16px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#b5a684">A TK FORGEWORKS PRODUCT</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1a Home"><div class="ph-l">HOME · SEARCH + CTA</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#faf6ee" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;background:#faf6ee;font-family:Poppins,sans-serif;color:#35291a">
+<div style="padding:8px 16px 0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:12px;background:#f2e8d5;border-radius:28px;height:52px;padding:0 10px 0 16px"><span style="color:#5f5138;display:flex">{{ icMenu }}</span><span style="flex:1;font-size:14px;color:#8a7a5f">Search your tasting notes</span><span style="color:#5f5138;display:flex">{{ icSearch }}</span><div style="width:32px;height:32px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center;font:600 13px Poppins,sans-serif">T</div></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font:600 22px Poppins,sans-serif">Your tastings</div><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1px;color:#8a7a5f">128 NOTES</div></div>
+<div style="display:flex;gap:8px;overflow:hidden"><div style="padding:7px 14px;border:1px solid #b3641b;background:#f6e5c8;border-radius:8px;font:500 12px Poppins,sans-serif;color:#93500f;white-space:nowrap">All</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138;white-space:nowrap">4★ and up</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138;white-space:nowrap">Blue</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138;white-space:nowrap">Alpine</div></div>
+</div>
+<div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:14px">
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;overflow:hidden"><div style="height:4px;background:linear-gradient(90deg,#fbdf19,#f68f25,#ee3423)"></div><div style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+<div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">LATEST TASTING · AUG 12</div>
+<div style="font:600 21px 'Source Serif 4',serif">Rogue River Blue</div>
+<div style="font-size:12.5px;color:#8a7a5f">Rogue Creamery — Central Point, Oregon</div>
+<div style="display:flex;align-items:center;gap:8px"><span style="color:#b3641b;font-size:16px;letter-spacing:2px">★★★★★</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#8a7a5f">5.0</span></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#6b5a3d;padding:4px 8px;border-radius:4px">CARAMEL</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#6b5a3d;padding:4px 8px;border-radius:4px">EARTHY</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#6b5a3d;padding:4px 8px;border-radius:4px">MOLDY/BLUE</span></div>
+<div style="font:italic 400 13px 'Source Serif 4',serif;color:#6b5a3d">"Wrapped in pear-brandy leaves. Tastes like winning an argument."</div>
+</div></div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:14px;align-items:center;padding:13px 4px;border-bottom:1px solid #efe4cf"><div style="width:42px;height:42px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace;flex-shrink:0">CO</div><div style="flex:1;min-width:0"><div style="font:500 15px Poppins,sans-serif">Comté 24 mo</div><div style="font-size:11.5px;color:#8a7a5f">Marcel Petite · Jura, France — Aug 3</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="color:#b3641b;font-size:12px;letter-spacing:1px">★★★★☆</span><span style="font:500 9px 'JetBrains Mono',monospace;color:#b5a684">COW</span></div></div>
+<div style="display:flex;gap:14px;align-items:center;padding:13px 4px;border-bottom:1px solid #efe4cf"><div style="width:42px;height:42px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace;flex-shrink:0">HF</div><div style="flex:1;min-width:0"><div style="font:500 15px Poppins,sans-serif">Humboldt Fog</div><div style="font-size:11.5px;color:#8a7a5f">Cypress Grove · California — Jul 27</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="color:#b3641b;font-size:12px;letter-spacing:1px">★★★★☆</span><span style="font:500 9px 'JetBrains Mono',monospace;color:#b5a684">GOAT</span></div></div>
+<div style="display:flex;gap:14px;align-items:center;padding:13px 4px;border-bottom:1px solid #efe4cf"><div style="width:42px;height:42px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace;flex-shrink:0">ÉP</div><div style="flex:1;min-width:0"><div style="font:500 15px Poppins,sans-serif">Époisses</div><div style="font-size:11.5px;color:#8a7a5f">Fromagerie Berthaut · Burgundy — Jul 19</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="color:#b3641b;font-size:12px;letter-spacing:1px">★★★☆☆</span><span style="font:500 9px 'JetBrains Mono',monospace;color:#b5a684">COW</span></div></div>
+<div style="display:flex;gap:14px;align-items:center;padding:13px 4px;border-bottom:1px solid #efe4cf"><div style="width:42px;height:42px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace;flex-shrink:0">MA</div><div style="flex:1;min-width:0"><div style="font:500 15px Poppins,sans-serif">Manchego Viejo</div><div style="font-size:11.5px;color:#8a7a5f">La Mancha, Spain — Jul 11</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="color:#b3641b;font-size:12px;letter-spacing:1px">★★★★☆</span><span style="font:500 9px 'JetBrains Mono',monospace;color:#b5a684">SHEEP</span></div></div>
+</div>
+</div>
+<div style="position:absolute;right:16px;bottom:20px;display:flex;align-items:center;gap:10px;padding:16px 20px;border-radius:16px;background:linear-gradient(135deg,#f9a825,#f68f25 45%,#ee3423);color:#fff;font:600 14px Poppins,sans-serif;box-shadow:0 6px 18px rgba(238,52,35,.35)">{{ icPlus }}New tasting notes</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1a Drawer"><div class="ph-l">FLYOUT MENU</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#faf6ee" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;position:relative;overflow:hidden;background:#faf6ee;font-family:Poppins,sans-serif">
+<div style="padding:8px 16px;display:flex;flex-direction:column;gap:14px;opacity:.9">
+<div style="background:#f2e8d5;border-radius:28px;height:52px"></div>
+<div style="height:24px;width:60%;background:#f2e8d5;border-radius:6px"></div>
+<div style="height:180px;background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px"></div>
+<div style="height:60px;background:#f5eedd;border-radius:8px"></div>
+<div style="height:60px;background:#f5eedd;border-radius:8px"></div>
+<div style="height:60px;background:#f5eedd;border-radius:8px"></div>
+</div>
+<div style="position:absolute;inset:0;background:rgba(35,24,8,.38)"></div>
+<div style="position:absolute;top:0;bottom:0;left:0;width:300px;background:#fffdf8;border-radius:0 16px 16px 0;display:flex;flex-direction:column;padding:20px 0 16px;box-shadow:8px 0 30px rgba(35,24,8,.2)">
+<div style="display:flex;align-items:center;gap:10px;padding:0 22px 16px"><div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#fbdf19,#f68f25 55%,#ee3423);display:flex;align-items:center;justify-content:center;color:#fff">{{ icWedge }}</div><div style="font:700 18px Poppins,sans-serif;color:#35291a">Cheesy Scribe</div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 22px;border-top:1px solid #efe4cf;border-bottom:1px solid #efe4cf;margin-bottom:8px"><div style="width:42px;height:42px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center;font:600 15px Poppins,sans-serif">T</div><div><div style="font:600 14px Poppins,sans-serif;color:#35291a">Tyler</div><div style="font-size:11.5px;color:#8a7a5f">tyler@example.com</div></div></div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;background:#f6e5c8;font:500 14px Poppins,sans-serif;color:#93500f"><span style="display:flex">{{ icNotes }}</span>My tasting notes</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#5f5138"><span style="display:flex;color:#8a7a5f">{{ icPlus }}</span>New tasting note</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#5f5138"><span style="display:flex;color:#8a7a5f">{{ icBook }}</span>Cheese library</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#5f5138"><span style="display:flex;color:#8a7a5f">{{ icChart }}</span>Stats &amp; insights</div>
+<div style="height:1px;background:#efe4cf;margin:10px 22px"></div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#5f5138"><span style="display:flex;color:#8a7a5f">{{ icUser }}</span>Account</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#5f5138"><span style="display:flex;color:#8a7a5f">{{ icGear }}</span>Settings</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#5f5138"><span style="display:flex;color:#8a7a5f">{{ icInfo }}</span>About Cheesy Scribe</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#8a7a5f"><span style="display:flex">{{ icLogout }}</span>Sign out</div>
+<div style="padding:10px 22px 0;font:500 8.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#b5a684">A TK FORGEWORKS PRODUCT · V0.1.0</div>
+</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1a New note"><div class="ph-l">NEW TASTING NOTE · FULL JOURNAL (shown unrolled)</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#faf6ee" width="{{ dw }}" height="{{ dht }}" hint-size="428px,1476px">
+<div style="min-height:100%;display:flex;flex-direction:column;background:#faf6ee;font-family:Poppins,sans-serif;color:#35291a;box-sizing:border-box">
+<div style="display:flex;align-items:center;gap:14px;padding:10px 16px"><span style="display:flex;color:#5f5138">{{ icClose }}</span><div style="flex:1;font:600 18px Poppins,sans-serif">New tasting note</div><div style="font:600 14px Poppins,sans-serif;color:#93500f">Save</div></div>
+<div style="padding:8px 20px 24px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">CHEESE NAME</div><div style="border-bottom:1.5px dotted #c4b18b;padding:6px 2px;font:italic 400 14px 'Source Serif 4',serif;color:#b5a684">Start with what the label says</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">CREAMERY</div><div style="border-bottom:1.5px dotted #c4b18b;padding:6px 2px;font-size:14px">&nbsp;</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">ORIGIN</div><div style="border-bottom:1.5px dotted #c4b18b;padding:6px 2px;font-size:14px">&nbsp;</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">DATE</div><div style="border-bottom:1.5px dotted #c4b18b;padding:6px 2px;font-size:14px">Aug 15, 2026</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">RIND</div><div style="border-bottom:1.5px dotted #c4b18b;padding:6px 2px;font-size:14px">&nbsp;</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">PRICE</div><div style="border-bottom:1.5px dotted #c4b18b;padding:6px 2px;font-size:14px">&nbsp;</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">MILK</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138">Buffalo</div><div style="padding:7px 14px;border:1px solid #b3641b;background:#f6e5c8;border-radius:8px;font:500 12px Poppins,sans-serif;color:#93500f">✓ Cow</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138">Goat</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138">Sheep</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138">Other</div></div>
+<div style="height:1px;border-top:1.5px dotted #e6d9bf"></div>
+<div style="display:flex;gap:8px"><div style="padding:7px 14px;border:1px solid #b3641b;background:#f6e5c8;border-radius:8px;font:500 12px Poppins,sans-serif;color:#93500f">✓ Grassfed</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138">Raw</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138">Other</div></div>
+</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">RATING</div><div style="display:flex;align-items:center;gap:10px"><span style="color:#b3641b;font-size:30px;letter-spacing:6px">★★★★</span><span style="color:#e0d2b4;font-size:30px">★</span><span style="font:500 13px 'JetBrains Mono',monospace;color:#8a7a5f;margin-left:6px">4.0</span></div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px 16px 12px;display:flex;flex-direction:column;gap:16px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">TEXTURE METER</div>
+<div style="padding:0 6px"><div style="position:relative;height:4px;background:#f2e8d5;border-radius:2px"><div style="position:absolute;left:0;top:0;bottom:0;width:44%;background:#b3641b;border-radius:2px"></div><div style="position:absolute;left:44%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:#b3641b;border:3px solid #fffdf8;box-shadow:0 1px 4px rgba(53,41,26,.3)"></div></div>
+<div style="display:flex;justify-content:space-between;margin-top:10px;font:500 7.5px 'JetBrains Mono',monospace;color:#8a7a5f"><span>RUNNY</span><span>SOFT</span><span style="color:#93500f;font-weight:600">SEMI-SOFT</span><span>SEMI-FIRM</span><span>FIRM</span><span>HARD</span></div></div>
+</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">NOTES</div>
+<div style="border-bottom:1.5px dotted #c4b18b;padding:4px 2px 8px;font:italic 400 13.5px 'Source Serif 4',serif;color:#b5a684">What did it taste like? Be honest.</div>
+<div style="border-bottom:1.5px dotted #c4b18b;height:26px"></div>
+<div style="border-bottom:1.5px dotted #c4b18b;height:26px"></div>
+</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">FLAVOR WHEEL</div><div style="display:flex;border:1px solid #e6d9bf;border-radius:8px;overflow:hidden;font:500 11px Poppins,sans-serif"><span style="padding:5px 12px;background:#f6e5c8;color:#93500f">Wheel</span><span style="padding:5px 12px;color:#8a7a5f">List</span></div></div><div style="font-size:10.5px;color:#b5a684">Tap a spoke to score 0–5 — or switch to List to enter them one by one</div>{{ wheelNewA }}</div>
+<div style="background:#b3641b;color:#fff;border-radius:8px;padding:15px;text-align:center;font:600 15px Poppins,sans-serif">Save to journal</div>
+</div>
+</div>
+</x-import>
+</div>
+
+</div></div>
+
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Gouda caramel &amp; charcoal — dark chrome, editorial</div>
+<div class="dv-card" style="padding:24px;display:flex;gap:24px;align-items:flex-start">
+
+<div class="ph" data-screen-label="1b Login"><div class="ph-l">LOGIN</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#2b2620" dark="{{ yes }}" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;display:flex;flex-direction:column;background:#f0eadd;font-family:Poppins,sans-serif;color:#26201a">
+<div style="background:#2b2620;padding:36px 28px 30px;display:flex;flex-direction:column;align-items:center;gap:12px">
+<div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#fbdf19,#f68f25 55%,#ee3423);display:flex;align-items:center;justify-content:center;color:#fff">{{ icWedgeBig }}</div>
+<div style="font:700 28px Poppins,sans-serif;color:#f3ead9;letter-spacing:-.5px">Cheesy Scribe</div>
+<div style="font:italic 400 13.5px 'Source Serif 4',serif;color:#b3a68c;text-align:center;max-width:260px">Tasting notes for cheese you'll pretend to remember.</div>
+</div>
+<div style="padding:26px 28px 0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">EMAIL</div><div style="background:#faf6ed;border:1px solid #ddd0ba;border-radius:8px;padding:14px 16px;font-size:14px">tyler@example.com</div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">PASSWORD</div><div style="background:#faf6ed;border:1px solid #ddd0ba;border-radius:8px;padding:14px 16px;font-size:14px;color:#75695a;letter-spacing:3px">••••••••••</div></div>
+<div style="font:500 12px Poppins,sans-serif;color:#8a5a17;text-align:right">Forgot password?</div>
+<div style="background:#a86e22;color:#fff;border-radius:8px;padding:15px;text-align:center;font:600 15px Poppins,sans-serif">Sign in</div>
+<div style="display:flex;align-items:center;gap:12px;margin:4px 0"><div style="flex:1;height:1px;background:#ddd0ba"></div><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#75695a">OR CONTINUE WITH</div><div style="flex:1;height:1px;background:#ddd0ba"></div></div>
+<div style="display:flex;gap:12px"><div style="flex:1;border:1px solid #ddd0ba;background:#faf6ed;border-radius:8px;padding:13px;text-align:center;font:500 14px Poppins,sans-serif;color:#4b4234">Google</div><div style="flex:1;border:1px solid #ddd0ba;background:#faf6ed;border-radius:8px;padding:13px;text-align:center;font:500 14px Poppins,sans-serif;color:#4b4234">Apple</div></div>
+</div>
+<div style="flex:1"></div>
+<div style="text-align:center;font:400 13px Poppins,sans-serif;color:#75695a;padding:0 28px">New here? <span style="color:#8a5a17;font-weight:600">Create an account</span></div>
+<div style="text-align:center;margin:16px 0 20px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#ab9d84">A TK FORGEWORKS PRODUCT</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1b Home"><div class="ph-l">HOME · SEARCH + CTA</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#2b2620" dark="{{ yes }}" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;background:#f0eadd;font-family:Poppins,sans-serif;color:#26201a">
+<div style="background:#2b2620;padding:8px 16px 18px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:12px;background:#3b342b;border-radius:28px;height:52px;padding:0 10px 0 16px"><span style="color:#d8ccb4;display:flex">{{ icMenu }}</span><span style="flex:1;font-size:14px;color:#a89a80">Search your tasting notes</span><span style="color:#d8ccb4;display:flex">{{ icSearch }}</span><div style="width:32px;height:32px;border-radius:50%;background:#eedbb6;color:#6d4a12;display:flex;align-items:center;justify-content:center;font:600 13px Poppins,sans-serif">T</div></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font:600 22px Poppins,sans-serif;color:#f3ead9">Your tastings</div><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1px;color:#a89a80">128 NOTES</div></div>
+<div style="display:flex;gap:8px;overflow:hidden"><div style="padding:7px 14px;border-radius:8px;background:#eedbb6;font:500 12px Poppins,sans-serif;color:#5c3d0d;white-space:nowrap">All</div><div style="padding:7px 14px;border:1px solid #4a4237;border-radius:8px;font:500 12px Poppins,sans-serif;color:#cbbfa8;white-space:nowrap">4★ and up</div><div style="padding:7px 14px;border:1px solid #4a4237;border-radius:8px;font:500 12px Poppins,sans-serif;color:#cbbfa8;white-space:nowrap">Blue</div><div style="padding:7px 14px;border:1px solid #4a4237;border-radius:8px;font:500 12px Poppins,sans-serif;color:#cbbfa8;white-space:nowrap">Alpine</div></div>
+</div>
+<div style="padding:14px 16px 0;display:flex;flex-direction:column;gap:14px">
+<div style="background:#faf6ed;border:1px solid #ddd0ba;border-radius:8px;overflow:hidden"><div style="height:4px;background:linear-gradient(90deg,#fbdf19,#f68f25,#ee3423)"></div><div style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+<div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">LATEST TASTING · AUG 12</div>
+<div style="font:600 21px 'Source Serif 4',serif">Rogue River Blue</div>
+<div style="font-size:12.5px;color:#75695a">Rogue Creamery — Central Point, Oregon</div>
+<div style="display:flex;align-items:center;gap:8px"><span style="color:#a86e22;font-size:16px;letter-spacing:2px">★★★★★</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#75695a">5.0</span></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#eadfc8;color:#5c5142;padding:4px 8px;border-radius:4px">CARAMEL</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#eadfc8;color:#5c5142;padding:4px 8px;border-radius:4px">EARTHY</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#eadfc8;color:#5c5142;padding:4px 8px;border-radius:4px">MOLDY/BLUE</span></div>
+<div style="font:italic 400 13px 'Source Serif 4',serif;color:#5c5142">"Wrapped in pear-brandy leaves. Tastes like winning an argument."</div>
+</div></div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:14px;align-items:center;padding:13px 4px;border-bottom:1px solid #e2d7c2"><div style="width:42px;height:42px;border-radius:50%;background:#2b2620;color:#eedbb6;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace;flex-shrink:0">CO</div><div style="flex:1;min-width:0"><div style="font:500 15px Poppins,sans-serif">Comté 24 mo</div><div style="font-size:11.5px;color:#75695a">Marcel Petite · Jura, France — Aug 3</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="color:#a86e22;font-size:12px;letter-spacing:1px">★★★★☆</span><span style="font:500 9px 'JetBrains Mono',monospace;color:#ab9d84">COW</span></div></div>
+<div style="display:flex;gap:14px;align-items:center;padding:13px 4px;border-bottom:1px solid #e2d7c2"><div style="width:42px;height:42px;border-radius:50%;background:#2b2620;color:#eedbb6;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace;flex-shrink:0">HF</div><div style="flex:1;min-width:0"><div style="font:500 15px Poppins,sans-serif">Humboldt Fog</div><div style="font-size:11.5px;color:#75695a">Cypress Grove · California — Jul 27</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="color:#a86e22;font-size:12px;letter-spacing:1px">★★★★☆</span><span style="font:500 9px 'JetBrains Mono',monospace;color:#ab9d84">GOAT</span></div></div>
+<div style="display:flex;gap:14px;align-items:center;padding:13px 4px;border-bottom:1px solid #e2d7c2"><div style="width:42px;height:42px;border-radius:50%;background:#2b2620;color:#eedbb6;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace;flex-shrink:0">ÉP</div><div style="flex:1;min-width:0"><div style="font:500 15px Poppins,sans-serif">Époisses</div><div style="font-size:11.5px;color:#75695a">Fromagerie Berthaut · Burgundy — Jul 19</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="color:#a86e22;font-size:12px;letter-spacing:1px">★★★☆☆</span><span style="font:500 9px 'JetBrains Mono',monospace;color:#ab9d84">COW</span></div></div>
+<div style="display:flex;gap:14px;align-items:center;padding:13px 4px;border-bottom:1px solid #e2d7c2"><div style="width:42px;height:42px;border-radius:50%;background:#2b2620;color:#eedbb6;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace;flex-shrink:0">MA</div><div style="flex:1;min-width:0"><div style="font:500 15px Poppins,sans-serif">Manchego Viejo</div><div style="font-size:11.5px;color:#75695a">La Mancha, Spain — Jul 11</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="color:#a86e22;font-size:12px;letter-spacing:1px">★★★★☆</span><span style="font:500 9px 'JetBrains Mono',monospace;color:#ab9d84">SHEEP</span></div></div>
+</div>
+</div>
+<div style="position:absolute;right:16px;bottom:20px;display:flex;align-items:center;gap:10px;padding:16px 20px;border-radius:16px;background:linear-gradient(135deg,#f9a825,#f68f25 45%,#ee3423);color:#fff;font:600 14px Poppins,sans-serif;box-shadow:0 6px 18px rgba(43,38,32,.4)">{{ icPlus }}New tasting notes</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1b Drawer"><div class="ph-l">FLYOUT MENU</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#2b2620" dark="{{ yes }}" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;position:relative;overflow:hidden;background:#f0eadd;font-family:Poppins,sans-serif">
+<div style="background:#2b2620;height:150px"></div>
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px;opacity:.9">
+<div style="height:180px;background:#faf6ed;border:1px solid #ddd0ba;border-radius:8px"></div>
+<div style="height:60px;background:#e9dfc9;border-radius:8px"></div>
+<div style="height:60px;background:#e9dfc9;border-radius:8px"></div>
+<div style="height:60px;background:#e9dfc9;border-radius:8px"></div>
+</div>
+<div style="position:absolute;inset:0;background:rgba(20,16,10,.5)"></div>
+<div style="position:absolute;top:0;bottom:0;left:0;width:300px;background:#2b2620;border-radius:0 16px 16px 0;display:flex;flex-direction:column;padding:20px 0 16px;box-shadow:8px 0 30px rgba(0,0,0,.4)">
+<div style="display:flex;align-items:center;gap:10px;padding:0 22px 16px"><div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#fbdf19,#f68f25 55%,#ee3423);display:flex;align-items:center;justify-content:center;color:#fff">{{ icWedge }}</div><div style="font:700 18px Poppins,sans-serif;color:#f3ead9">Cheesy Scribe</div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:12px 22px;border-top:1px solid #3d362d;border-bottom:1px solid #3d362d;margin-bottom:8px"><div style="width:42px;height:42px;border-radius:50%;background:#eedbb6;color:#6d4a12;display:flex;align-items:center;justify-content:center;font:600 15px Poppins,sans-serif">T</div><div><div style="font:600 14px Poppins,sans-serif;color:#f3ead9">Tyler</div><div style="font-size:11.5px;color:#a89a80">tyler@example.com</div></div></div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;background:rgba(238,219,182,.16);font:500 14px Poppins,sans-serif;color:#eedbb6"><span style="display:flex">{{ icNotes }}</span>My tasting notes</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#cbbfa8"><span style="display:flex;color:#a89a80">{{ icPlus }}</span>New tasting note</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#cbbfa8"><span style="display:flex;color:#a89a80">{{ icBook }}</span>Cheese library</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#cbbfa8"><span style="display:flex;color:#a89a80">{{ icChart }}</span>Stats &amp; insights</div>
+<div style="height:1px;background:#3d362d;margin:10px 22px"></div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#cbbfa8"><span style="display:flex;color:#a89a80">{{ icUser }}</span>Account</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#cbbfa8"><span style="display:flex;color:#a89a80">{{ icGear }}</span>Settings</div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#cbbfa8"><span style="display:flex;color:#a89a80">{{ icInfo }}</span>About Cheesy Scribe</div>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:14px;margin:2px 12px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#a89a80"><span style="display:flex">{{ icLogout }}</span>Sign out</div>
+<div style="padding:10px 22px 0;font:500 8.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#7a6f5d">A TK FORGEWORKS PRODUCT · V0.1.0</div>
+</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1b New note"><div class="ph-l">NEW TASTING NOTE · FULL JOURNAL (shown unrolled)</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#2b2620" dark="{{ yes }}" width="{{ dw }}" height="{{ dht }}" hint-size="428px,1476px">
+<div style="min-height:100%;display:flex;flex-direction:column;background:#f0eadd;font-family:Poppins,sans-serif;color:#26201a;box-sizing:border-box">
+<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:#2b2620"><span style="display:flex;color:#d8ccb4">{{ icClose }}</span><div style="flex:1;font:600 18px Poppins,sans-serif;color:#f3ead9">New tasting note</div><div style="font:600 14px Poppins,sans-serif;color:#f4b656">Save</div></div>
+<div style="padding:18px 20px 24px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">CHEESE NAME</div><div style="border-bottom:1.5px dotted #b3a482;padding:6px 2px;font:italic 400 14px 'Source Serif 4',serif;color:#ab9d84">Start with what the label says</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">CREAMERY</div><div style="border-bottom:1.5px dotted #b3a482;padding:6px 2px;font-size:14px">&nbsp;</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">ORIGIN</div><div style="border-bottom:1.5px dotted #b3a482;padding:6px 2px;font-size:14px">&nbsp;</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">DATE</div><div style="border-bottom:1.5px dotted #b3a482;padding:6px 2px;font-size:14px">Aug 15, 2026</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">RIND</div><div style="border-bottom:1.5px dotted #b3a482;padding:6px 2px;font-size:14px">&nbsp;</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">PRICE</div><div style="border-bottom:1.5px dotted #b3a482;padding:6px 2px;font-size:14px">&nbsp;</div></div>
+<div style="background:#faf6ed;border:1px solid #ddd0ba;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">MILK</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><div style="padding:7px 14px;border:1px solid #ddd0ba;border-radius:8px;font:500 12px Poppins,sans-serif;color:#4b4234">Buffalo</div><div style="padding:7px 14px;background:#2b2620;border-radius:8px;font:500 12px Poppins,sans-serif;color:#eedbb6">✓ Cow</div><div style="padding:7px 14px;border:1px solid #ddd0ba;border-radius:8px;font:500 12px Poppins,sans-serif;color:#4b4234">Goat</div><div style="padding:7px 14px;border:1px solid #ddd0ba;border-radius:8px;font:500 12px Poppins,sans-serif;color:#4b4234">Sheep</div><div style="padding:7px 14px;border:1px solid #ddd0ba;border-radius:8px;font:500 12px Poppins,sans-serif;color:#4b4234">Other</div></div>
+<div style="height:1px;border-top:1.5px dotted #ddd0ba"></div>
+<div style="display:flex;gap:8px"><div style="padding:7px 14px;background:#2b2620;border-radius:8px;font:500 12px Poppins,sans-serif;color:#eedbb6">✓ Grassfed</div><div style="padding:7px 14px;border:1px solid #ddd0ba;border-radius:8px;font:500 12px Poppins,sans-serif;color:#4b4234">Raw</div><div style="padding:7px 14px;border:1px solid #ddd0ba;border-radius:8px;font:500 12px Poppins,sans-serif;color:#4b4234">Other</div></div>
+</div>
+<div style="background:#faf6ed;border:1px solid #ddd0ba;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">RATING</div><div style="display:flex;align-items:center;gap:10px"><span style="color:#a86e22;font-size:30px;letter-spacing:6px">★★★★</span><span style="color:#d9cdb2;font-size:30px">★</span><span style="font:500 13px 'JetBrains Mono',monospace;color:#75695a;margin-left:6px">4.0</span></div></div>
+<div style="background:#faf6ed;border:1px solid #ddd0ba;border-radius:8px;padding:16px 16px 12px;display:flex;flex-direction:column;gap:16px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">TEXTURE METER</div>
+<div style="padding:0 6px"><div style="position:relative;height:4px;background:#eadfc8;border-radius:2px"><div style="position:absolute;left:0;top:0;bottom:0;width:44%;background:#a86e22;border-radius:2px"></div><div style="position:absolute;left:44%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:#2b2620;border:3px solid #faf6ed;box-shadow:0 1px 4px rgba(38,32,26,.35)"></div></div>
+<div style="display:flex;justify-content:space-between;margin-top:10px;font:500 7.5px 'JetBrains Mono',monospace;color:#75695a"><span>RUNNY</span><span>SOFT</span><span style="color:#5c3d0d;font-weight:600">SEMI-SOFT</span><span>SEMI-FIRM</span><span>FIRM</span><span>HARD</span></div></div>
+</div>
+<div style="background:#faf6ed;border:1px solid #ddd0ba;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">NOTES</div>
+<div style="border-bottom:1.5px dotted #b3a482;padding:4px 2px 8px;font:italic 400 13.5px 'Source Serif 4',serif;color:#ab9d84">What did it taste like? Be honest.</div>
+<div style="border-bottom:1.5px dotted #b3a482;height:26px"></div>
+<div style="border-bottom:1.5px dotted #b3a482;height:26px"></div>
+</div>
+<div style="background:#faf6ed;border:1px solid #ddd0ba;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;justify-content:space-between"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#75695a">FLAVOR WHEEL</div><div style="display:flex;border:1px solid #ddd0ba;border-radius:8px;overflow:hidden;font:500 11px Poppins,sans-serif"><span style="padding:5px 12px;color:#75695a">Wheel</span><span style="padding:5px 12px;background:#2b2620;color:#eedbb6">List</span></div></div><div style="font-size:10.5px;color:#ab9d84">Tap the pips to score each note 0–5 (list view shown)</div>
+<div style="display:flex;flex-direction:column;margin-top:4px">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">SALTY</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●●●</span><span style="color:#d9cdb2">○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">SWEET</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●●</span><span style="color:#d9cdb2">○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">SHARP/TANGY</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●</span><span style="color:#d9cdb2">○○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">LEMON</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#d9cdb2">○○○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">GRASSY</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#d9cdb2">○○○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">HERBAL</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●</span><span style="color:#d9cdb2">○○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">CARAMEL</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●●●●</span><span style="color:#d9cdb2">○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">NUTTY</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●●●</span><span style="color:#d9cdb2">○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">EARTHY</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●●</span><span style="color:#d9cdb2">○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">MOLDY/BLUE</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#d9cdb2">○○○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">STINKY</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#d9cdb2">○○○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">ROBUST</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●●●</span><span style="color:#d9cdb2">○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">BUTTERY/CREAMY</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●●●●</span><span style="color:#d9cdb2">○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">MILKY/LACTIC</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●●</span><span style="color:#d9cdb2">○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #ddd0ba"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">CRUMBLY</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#a86e22">●</span><span style="color:#d9cdb2">○○○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#5c5142">CRYSTALLINE</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#d9cdb2">○○○○○○</span></span></div>
+</div></div>
+<div style="background:#2b2620;color:#f3ead9;border-radius:8px;padding:15px;text-align:center;font:600 15px Poppins,sans-serif">Save to journal</div>
+</div>
+</div>
+</x-import>
+</div>
+
+</div></div>
+
+<div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>The other screens — shown in the <a class="dv-oid" href="#1a">1a</a> palette; they follow whichever direction wins</div>
+<div class="dv-card" style="padding:24px;display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+
+<div class="ph" data-screen-label="1c Note detail"><div class="ph-l">NOTE DETAIL</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#faf6ee" width="{{ dw }}" height="{{ dhd }}" hint-size="428px,1316px">
+<div style="min-height:100%;display:flex;flex-direction:column;background:#faf6ee;font-family:Poppins,sans-serif;color:#35291a">
+<div style="display:flex;align-items:center;gap:14px;padding:10px 16px"><span style="display:flex;color:#5f5138">{{ icBack }}</span><div style="flex:1"></div><span style="display:flex;color:#5f5138">{{ icPencil }}</span></div>
+<div style="padding:4px 24px 24px;display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">TASTED AUG 12, 2026 · $28/LB</div>
+<div style="font:600 27px 'Source Serif 4',serif;line-height:1.2">Rogue River Blue</div>
+<div style="font-size:13px;color:#8a7a5f">Rogue Creamery · Central Point, Oregon — leaf-wrapped rind</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px"><span style="color:#b3641b;font-size:22px;letter-spacing:3px">★★★★★</span><span style="font:500 12px 'JetBrains Mono',monospace;color:#8a7a5f">5.0</span></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f6e5c8;color:#93500f;padding:5px 9px;border-radius:4px">COW</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f6e5c8;color:#93500f;padding:5px 9px;border-radius:4px">RAW</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#6b5a3d;padding:5px 9px;border-radius:4px">SEMI-SOFT</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#6b5a3d;padding:5px 9px;border-radius:4px">$28/LB</span></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">NOTES</div>
+<div style="font:400 14.5px/1.7 'Source Serif 4',serif;color:#4a3d28">Autumn-only release, wrapped in pear-brandy-soaked grape leaves. Sweet caramel up front, then the blue shows up like it owns the place. Bought it to "compare against Stilton" — there is no comparison, and I knew that going in.</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">FLAVOR WHEEL</div>{{ wheelDetailA }}</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px 16px 12px;display:flex;flex-direction:column;gap:16px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">TEXTURE</div>
+<div style="padding:0 6px"><div style="position:relative;height:4px;background:#f2e8d5;border-radius:2px"><div style="position:absolute;left:0;top:0;bottom:0;width:44%;background:#b3641b;border-radius:2px"></div><div style="position:absolute;left:44%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:#b3641b;border:3px solid #fffdf8"></div></div>
+<div style="display:flex;justify-content:space-between;margin-top:10px;font:500 7.5px 'JetBrains Mono',monospace;color:#8a7a5f"><span>RUNNY</span><span>SOFT</span><span style="color:#93500f;font-weight:600">SEMI-SOFT</span><span>SEMI-FIRM</span><span>FIRM</span><span>HARD</span></div></div></div>
+</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1c Cheese library"><div class="ph-l">CHEESE LIBRARY</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#faf6ee" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;overflow:hidden;display:flex;flex-direction:column;background:#faf6ee;font-family:Poppins,sans-serif;color:#35291a">
+<div style="padding:8px 16px 0;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:12px;background:#f2e8d5;border-radius:28px;height:52px;padding:0 16px"><span style="color:#5f5138;display:flex">{{ icMenu }}</span><span style="flex:1;font-size:14px;color:#8a7a5f">Search the library</span><span style="color:#5f5138;display:flex">{{ icSearch }}</span></div>
+<div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font:600 22px Poppins,sans-serif">Cheese library</div><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1px;color:#8a7a5f">69 STYLES</div></div>
+<div style="font:italic 400 12.5px 'Source Serif 4',serif;color:#8a7a5f">Reference styles to taste against — the "what am I even eating" section.</div>
+</div>
+<div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px"><div style="font:600 15px Poppins,sans-serif">Alpine</div><div style="font:500 9.5px 'JetBrains Mono',monospace;color:#93500f">12 TASTED</div><div style="font:italic 400 11.5px 'Source Serif 4',serif;color:#8a7a5f">Comté, Gruyère, Appenzeller</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px"><div style="font:600 15px Poppins,sans-serif">Blue</div><div style="font:500 9.5px 'JetBrains Mono',monospace;color:#93500f">9 TASTED</div><div style="font:italic 400 11.5px 'Source Serif 4',serif;color:#8a7a5f">Stilton, Roquefort, Rogue River</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px"><div style="font:600 15px Poppins,sans-serif">Bloomy rind</div><div style="font:500 9.5px 'JetBrains Mono',monospace;color:#93500f">14 TASTED</div><div style="font:italic 400 11.5px 'Source Serif 4',serif;color:#8a7a5f">Brie, Camembert, Humboldt Fog</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px"><div style="font:600 15px Poppins,sans-serif">Washed rind</div><div style="font:500 9.5px 'JetBrains Mono',monospace;color:#93500f">7 TASTED</div><div style="font:italic 400 11.5px 'Source Serif 4',serif;color:#8a7a5f">Époisses, Taleggio, Limburger</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px"><div style="font:600 15px Poppins,sans-serif">Fresh</div><div style="font:500 9.5px 'JetBrains Mono',monospace;color:#93500f">11 TASTED</div><div style="font:italic 400 11.5px 'Source Serif 4',serif;color:#8a7a5f">Chèvre, Burrata, Ricotta</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:6px"><div style="font:600 15px Poppins,sans-serif">Hard aged</div><div style="font:500 9.5px 'JetBrains Mono',monospace;color:#93500f">16 TASTED</div><div style="font:italic 400 11.5px 'Source Serif 4',serif;color:#8a7a5f">Parmigiano, Manchego, Gouda</div></div>
+</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1c Stats"><div class="ph-l">STATS &amp; INSIGHTS</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#faf6ee" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;overflow:hidden;display:flex;flex-direction:column;background:#faf6ee;font-family:Poppins,sans-serif;color:#35291a">
+<div style="display:flex;align-items:center;gap:14px;padding:10px 16px"><span style="display:flex;color:#5f5138">{{ icMenu }}</span><div style="flex:1;font:600 18px Poppins,sans-serif">Stats &amp; insights</div></div>
+<div style="padding:8px 16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:18px 16px"><div style="font:600 34px Poppins,sans-serif;color:#93500f">128</div><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-top:4px">CHEESES TASTED</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:18px 16px"><div style="font:600 34px Poppins,sans-serif;color:#93500f">4.2</div><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-top:4px">AVERAGE RATING</div></div>
+</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">TOP FLAVORS</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:10px"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6b5a3d;width:82px">CARAMEL</span><div style="flex:1;height:8px;background:#f2e8d5;border-radius:4px"><div style="width:82%;height:100%;background:#b3641b;border-radius:4px"></div></div><span style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">32</span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6b5a3d;width:82px">NUTTY</span><div style="flex:1;height:8px;background:#f2e8d5;border-radius:4px"><div style="width:72%;height:100%;background:#b3641b;border-radius:4px"></div></div><span style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">28</span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6b5a3d;width:82px">EARTHY</span><div style="flex:1;height:8px;background:#f2e8d5;border-radius:4px"><div style="width:54%;height:100%;background:#b3641b;border-radius:4px"></div></div><span style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">21</span></div>
+<div style="display:flex;align-items:center;gap:10px"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6b5a3d;width:82px">GRASSY</span><div style="flex:1;height:8px;background:#f2e8d5;border-radius:4px"><div style="width:36%;height:100%;background:#b3641b;border-radius:4px"></div></div><span style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">14</span></div>
+</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">MILK BREAKDOWN</div>
+<div style="display:flex;height:14px;border-radius:7px;overflow:hidden"><div style="width:62%;background:#b3641b"></div><div style="width:22%;background:#dfa04b"></div><div style="width:11%;background:#f0cf95"></div><div style="width:5%;background:#f2e8d5"></div></div>
+<div style="display:flex;gap:14px;flex-wrap:wrap;font:500 9.5px 'JetBrains Mono',monospace;color:#6b5a3d"><span><span style="color:#b3641b">●</span> COW 62%</span><span><span style="color:#dfa04b">●</span> GOAT 22%</span><span><span style="color:#f0cf95">●</span> SHEEP 11%</span><span><span style="color:#d9cdb2">●</span> BUFFALO 5%</span></div>
+<div style="font:italic 400 12.5px 'Source Serif 4',serif;color:#8a7a5f">Verdict: you have a type, and it's cow.</div></div>
+</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1c Account"><div class="ph-l">ACCOUNT</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#faf6ee" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;overflow:hidden;display:flex;flex-direction:column;background:#faf6ee;font-family:Poppins,sans-serif;color:#35291a">
+<div style="display:flex;align-items:center;gap:14px;padding:10px 16px"><span style="display:flex;color:#5f5138">{{ icBack }}</span><div style="flex:1;font:600 18px Poppins,sans-serif">Account</div></div>
+<div style="padding:12px 20px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0 4px"><div style="width:72px;height:72px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center;font:600 26px Poppins,sans-serif">T</div><div style="font:600 17px Poppins,sans-serif">Tyler</div><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1px;color:#8a7a5f">MEMBER SINCE 2026 · 128 NOTES</div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">DISPLAY NAME</div><div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:13px 16px;font-size:14px">Tyler</div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">EMAIL</div><div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:13px 16px;font-size:14px">tyler@example.com</div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #efe4cf;opacity:.45"><div style="flex:1"><div style="font:500 14px Poppins,sans-serif;color:#8a7a5f">Change password</div><div style="font-size:11px;color:#b5a684">Managed by Google sign-in</div></div><span style="display:flex;color:#b5a684">{{ icChevR }}</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #efe4cf"><div style="flex:1;font:500 14px Poppins,sans-serif">Google</div><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#e8f2e5;color:#3d7a33;padding:4px 8px;border-radius:9999px">CONNECTED</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px"><div style="flex:1;font:500 14px Poppins,sans-serif">Apple</div><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#8a7a5f;padding:4px 8px;border-radius:9999px">NOT CONNECTED</span></div>
+</div>
+<div style="font:600 14px Poppins,sans-serif;color:#93500f;padding:4px 2px">Sign out</div>
+<div style="font:500 13px Poppins,sans-serif;color:#b3382b;padding:0 2px">Delete account</div>
+<div style="font:italic 400 11.5px 'Source Serif 4',serif;color:#b5a684;padding:0 2px">Your 128 notes go with it. Just saying.</div>
+</div>
+</div>
+</x-import>
+</div>
+
+<div class="ph" data-screen-label="1c Settings"><div class="ph-l">SETTINGS</div>
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" bg="#faf6ee" width="{{ dw }}" height="{{ dh }}" hint-size="428px,908px">
+<div style="height:100%;overflow:hidden;display:flex;flex-direction:column;background:#faf6ee;font-family:Poppins,sans-serif;color:#35291a">
+<div style="display:flex;align-items:center;gap:14px;padding:10px 16px"><span style="display:flex;color:#5f5138">{{ icBack }}</span><div style="flex:1;font:600 18px Poppins,sans-serif">Settings</div></div>
+<div style="padding:8px 20px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">APPEARANCE</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #efe4cf"><div style="flex:1;font:500 14px Poppins,sans-serif">Theme</div><div style="display:flex;border:1px solid #e6d9bf;border-radius:8px;overflow:hidden;font:500 11px Poppins,sans-serif"><span style="padding:6px 12px;background:#f6e5c8;color:#93500f">Light</span><span style="padding:6px 12px;color:#8a7a5f">Dark</span><span style="padding:6px 12px;color:#8a7a5f">System</span></div></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px"><div style="flex:1;font:500 14px Poppins,sans-serif">Units</div><div style="display:flex;border:1px solid #e6d9bf;border-radius:8px;overflow:hidden;font:500 11px Poppins,sans-serif"><span style="padding:6px 12px;background:#f6e5c8;color:#93500f">$/lb</span><span style="padding:6px 12px;color:#8a7a5f">€/kg</span></div></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">NOTIFICATIONS</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px"><div style="flex:1"><div style="font:500 14px Poppins,sans-serif">Weekly "go eat cheese" reminder</div><div style="font-size:11.5px;color:#8a7a5f">Sundays at 5 PM. You're welcome.</div></div><div style="width:44px;height:24px;border-radius:12px;background:#b3641b;position:relative;flex-shrink:0"><div style="position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fffdf8"></div></div></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">DATA</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #efe4cf"><div style="flex:1;font:500 14px Poppins,sans-serif">Export my notes (CSV)</div><span style="display:flex;color:#b5a684">{{ icChevR }}</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px"><div style="flex:1;font:500 14px Poppins,sans-serif">Back up to cloud</div><div style="width:44px;height:24px;border-radius:12px;background:#b3641b;position:relative;flex-shrink:0"><div style="position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fffdf8"></div></div></div>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">ABOUT</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #efe4cf"><div style="flex:1;font:500 14px Poppins,sans-serif">Version</div><span style="font:500 11px 'JetBrains Mono',monospace;color:#8a7a5f">0.1.0</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px"><div style="flex:1;font:500 14px Poppins,sans-serif">Open-source licenses</div><span style="display:flex;color:#b5a684">{{ icChevR }}</span></div>
+</div></div>
+</div>
+</div>
+</x-import>
+</div>
+
+</div></div>
+
+</div>
+<p class="dv-next">Try next: "go with <a class="dv-oid" href="#1a">1a</a>" · "mix — <a class="dv-oid" href="#1a">1a</a> surfaces with the <a class="dv-oid" href="#1b">1b</a> charcoal drawer" · "make the flavor wheel and stars interactive" · "rename the app"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  ic(kids, size) {
+    const e = React.createElement, s = size || 20;
+    return e('svg', { width: s, height: s, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', style: { flexShrink: 0, display: 'block' } },
+      kids.map((k, i) => e(k[0], Object.assign({ key: i }, k[1]))));
+  }
+  wheel(vals, C) {
+    const e = React.createElement;
+    const L = ['SALTY','SWEET','SHARP/TANGY','LEMON','GRASSY','HERBAL','CARAMEL','NUTTY','EARTHY','MOLDY/BLUE','STINKY','ROBUST','BUTTERY/CREAMY','MILKY/LACTIC','CRUMBLY','CRYSTALLINE'];
+    const cx = 150, cy = 150, R = 92, n = 16;
+    const pt = (i, r) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+    const kids = [];
+    for (let g = 1; g <= 5; g++) kids.push(e('polygon', { key: 'g' + g, points: Array.from({ length: n }, (_, i) => pt(i, R * g / 5).join(',')).join(' '), fill: 'none', stroke: C.grid, strokeWidth: g === 5 ? 1.2 : 0.6 }));
+    for (let i = 0; i < n; i++) { const p2 = pt(i, R); kids.push(e('line', { key: 's' + i, x1: cx, y1: cy, x2: p2[0], y2: p2[1], stroke: C.grid, strokeWidth: 0.6 })); }
+    if (vals) {
+      kids.push(e('polygon', { key: 'v', points: vals.map((v, i) => pt(i, R * v / 5).join(',')).join(' '), fill: C.fill, stroke: C.dot, strokeWidth: 1.5, strokeLinejoin: 'round' }));
+      vals.forEach((v, i) => { const p2 = pt(i, R * v / 5); kids.push(e('circle', { key: 'd' + i, cx: p2[0], cy: p2[1], r: 2.6, fill: C.dot })); });
+    }
+    L.forEach((t, i) => {
+      const p2 = pt(i, R + 12), c = Math.cos(-Math.PI / 2 + i * 2 * Math.PI / n);
+      const anchor = c > 0.25 ? 'start' : c < -0.25 ? 'end' : 'middle';
+      const lines = t.split('/');
+      kids.push(e('text', { key: 't' + i, x: p2[0], y: p2[1] + 3, textAnchor: anchor, fontSize: 8, fontFamily: '"JetBrains Mono",monospace', fontWeight: 500, fill: C.label, letterSpacing: 0.3 },
+        lines.length > 1 ? lines.map((ln, j) => e('tspan', { key: j, x: p2[0], dy: j === 0 ? 0 : 9 }, ln)) : t));
+    });
+    return e('svg', { viewBox: '-46 -16 392 336', style: { width: '100%', display: 'block' } }, kids);
+  }
+  renderVals() {
+    const p = d => ['path', { d }];
+    const A = { grid: '#d9cbaa', fill: 'rgba(179,100,27,.18)', dot: '#b3641b', label: '#6b5a3d' };
+    const B = { grid: '#cfc2a9', fill: 'rgba(168,110,34,.22)', dot: '#a86e22', label: '#5c5142' };
+    const rr = [4, 3, 2, 1, 1, 1, 4, 3, 4, 5, 2, 4, 3, 2, 3, 1];
+    return {
+      yes: true, dw: 412, dh: 892, dht: 1460, dhd: 1300,
+      wheelNewA: this.wheel(null, A), wheelNewB: this.wheel(null, B), wheelDetailA: this.wheel(rr, A),
+      icMenu: this.ic([p('M4 7h16'), p('M4 12h16'), p('M4 17h16')]),
+      icSearch: this.ic([['circle', { cx: 11, cy: 11, r: 7 }], p('M21 21l-4.2-4.2')]),
+      icPlus: this.ic([p('M12 5v14'), p('M5 12h14')]),
+      icBack: this.ic([p('M19 12H5'), p('M11 18l-6-6 6-6')]),
+      icClose: this.ic([p('M6 6l12 12'), p('M18 6L6 18')]),
+      icUser: this.ic([['circle', { cx: 12, cy: 8, r: 3.6 }], p('M5 20c1.4-3.4 3.9-5 7-5s5.6 1.6 7 5')]),
+      icBook: this.ic([p('M12 6.3C10 4.9 7.6 4.4 4 4.4v13.2c3.6 0 6 .5 8 1.9 2-1.4 4.4-1.9 8-1.9V4.4c-3.6 0-6 .5-8 1.9z'), p('M12 6.3v13.2')]),
+      icChart: this.ic([p('M5 20v-7'), p('M12 20V5'), p('M19 20v-9')]),
+      icGear: this.ic([p('M4 7h16'), p('M4 17h16'), ['circle', { cx: 9, cy: 7, r: 2.5, fill: 'currentColor', stroke: 'none' }], ['circle', { cx: 15, cy: 17, r: 2.5, fill: 'currentColor', stroke: 'none' }]]),
+      icInfo: this.ic([['circle', { cx: 12, cy: 12, r: 8.5 }], p('M12 11.3V16'), p('M12 8.2v.2')]),
+      icLogout: this.ic([p('M9 4H5v16h4'), p('M15 8l4 4-4 4'), p('M19 12H10')]),
+      icNotes: this.ic([p('M7 3h7l4 4v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z'), p('M14 3v4h4'), p('M9.5 12h5'), p('M9.5 15.5h5')]),
+      icChevR: this.ic([p('M9 6l6 6-6 6')]),
+      icPencil: this.ic([p('M4 20l1.2-4.2L16.6 4.4a2 2 0 013 3L8.2 18.8 4 20z')]),
+      icWedge: this.ic([p('M2.8 16.8v-4.6L21.2 6v10.8H2.8z'), ['circle', { cx: 8, cy: 13.6, r: 1.2 }], ['circle', { cx: 13.5, cy: 12, r: 1 }], ['circle', { cx: 17.6, cy: 13.8, r: 0.9 }]]),
+      icWedgeBig: this.ic([p('M2.8 16.8v-4.6L21.2 6v10.8H2.8z'), ['circle', { cx: 8, cy: 13.6, r: 1.2 }], ['circle', { cx: 13.5, cy: 12, r: 1 }], ['circle', { cx: 17.6, cy: 13.8, r: 0.9 }]], 30),
+    };
+  }
+}
+</script>
+</body>
+</html>

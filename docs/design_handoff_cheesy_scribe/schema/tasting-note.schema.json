@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tkforgeworks.com/schemas/cheesy-scribe/tasting-note.json",
+  "title": "TastingNote",
+  "type": "object",
+  "required": ["id", "cheeseName", "tastedAt"],
+  "properties": {
+    "id": { "type": "string", "description": "UUID" },
+    "cheeseName": { "type": "string", "minLength": 1 },
+    "tastedAt": { "type": "string", "format": "date-time" },
+    "creamery": { "type": "string" },
+    "origin": { "type": "string" },
+    "rind": { "enum": ["natural", "bloomy", "washed", "waxed", "leafWrapped", "rindless", "other"] },
+    "rindOther": { "type": "string", "description": "Free text when rind == other" },
+    "pricePerLb": { "type": "number", "minimum": 0 },
+    "milk": { "enum": ["cow", "goat", "sheep", "buffalo", "other"], "default": "cow" },
+    "milkOther": { "type": "string", "description": "Free text when milk == other" },
+    "isGrassfed": { "type": "boolean", "default": false },
+    "isRaw": { "type": "boolean", "default": false },
+    "rating": { "type": "integer", "minimum": 0, "maximum": 5 },
+    "texture": { "enum": ["runny", "soft", "semiSoft", "semiFirm", "firm", "hard"], "default": "semiSoft" },
+    "notes": { "type": "string" },
+    "flavors": {
+      "type": "object",
+      "description": "Flavor wheel scores; absent spoke = 0",
+      "propertyNames": {
+        "enum": ["salty", "sweet", "sharpTangy", "lemon", "grassy", "herbal", "caramel", "nutty", "earthy", "moldyBlue", "stinky", "robust", "butteryCreamy", "milkyLactic", "crumbly", "crystalline"]
+      },
+      "additionalProperties": { "type": "integer", "minimum": 0, "maximum": 5 }
+    },
+    "cheeseStyleId": { "type": "string", "description": "FK -> CheeseStyle.id" },
+    "photoUrl": { "type": "string", "format": "uri" }
+  }
+}
