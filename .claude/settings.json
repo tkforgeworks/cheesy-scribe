@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
     "PreToolUse": [
       {
@@ -6,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "input=$(cat); echo \"$input\" | grep -q 'git commit' && echo 'CLAUDE.md CHECK REQUIRED: Before committing, review .claude/CLAUDE.md. Update it if any architectural decisions, documents, conventions, or project status have changed in this session.' || true"
+            "command": "input=$(cat); echo \"$input\" | grep -q 'git commit' && echo 'CLAUDE.md CHECK REQUIRED: Before committing, review .claude/CLAUDE.md. Update it if any architectural decisions, documents, conventions, phase plan, or project status have changed in this session.' || true"
           }
         ]
       }
