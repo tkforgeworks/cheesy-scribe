@@ -16,3 +16,37 @@ npm-debug.log*
 
 # Claude Code local settings (machine-specific permissions)
 .claude/settings.local.json
+
+# IDE project files
+*.iml
+*.ipr
+*.iws
+*.swp
+
+# Flutter / Dart / Pub
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+migrate_working_dir/
+**/doc/api/
+
+# Symbolication / obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android build outputs and local machine config
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/local.properties
+
+# Release signing — keystore and key.properties live in 1Password, never in git
+/android/key.properties
+*.jks
+*.keystore
+
+# Release artifacts built by scripts/release/*
+/release/

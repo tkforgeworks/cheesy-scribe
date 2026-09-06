@@ -14,7 +14,15 @@ HTML mockups). Keep this file in sync as decisions land.
 
 Flutter 3.47.2 / Material 3, **Android only** (no desktop, iOS or web
 targets). Dart package `cheesy_scribe`, application id
-`com.tkforgeworks.cheesy_scribe`. Not scaffolded yet (CHEESE-3 epic).
+`com.tkforgeworks.cheesy_scribe`. Scaffolded 2026-09-06 (CHEESE-14): Android
+platform only, `lib/main.dart` is a bare `ScribeApp` until the theme
+(CHEESE-17) and shell (CHEESE-19) land. Portrait-only via the manifest and
+`SystemChrome`.
+
+Local toolchain (Tim's machine): Flutter 3.47.2 at `~/develop/flutter`, on
+PATH only through the shell rc — agent shells must
+`export PATH="$HOME/develop/flutter/bin:$PATH"` first. Android SDK 37 in
+`~/Android/Sdk`, JDK 21, `Pixel_10_Pro` AVD.
 
 | Task | Command |
 |---|---|
@@ -27,9 +35,9 @@ targets). Dart package `cheesy_scribe`, application id
 CI is `ci-flutter.yml`, releases `release-flutter.yml` with
 `build-windows: false`, version bumps via
 `scripts/release/bump-version.{ps1,sh}`. `dart format` does not honour
-`analysis_options.yaml` excludes, so the `.dart` files under
-`docs/design_handoff_cheesy_scribe/lib/` are renamed `.dart.txt` (or deleted
-once adopted into `lib/`) before CI lands.
+`analysis_options.yaml` excludes, so the handoff's reference Dart files are
+`docs/design_handoff_cheesy_scribe/lib/*.dart.txt`. Delete them once adopted
+into `lib/` (CHEESE-17, CHEESE-20).
 
 ## Repo & process conventions (org standard)
 
@@ -112,5 +120,6 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   rulesets applied (CHEESE-2). Design handoff decomposed (CHEESE-1): plan in
   `docs/CHEESE-1-decomposition.md`, epics CHEESE-3..12 with tasks in Jira.
   No CI, no app code.
-- Next: CHEESE-3 Foundation, starting with the local Flutter toolchain and
-  the Android-only scaffold.
+- 2026-09-06: toolchain verified (CHEESE-13), Android-only Flutter scaffold
+  (CHEESE-14). Next: CHEESE-15 org template files, CHEESE-16 CI + required
+  check.
