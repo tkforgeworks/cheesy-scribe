@@ -30,7 +30,13 @@ placeholder home until the shell (CHEESE-19) lands. Tests: `test/support.dart`
 Local toolchain (Tim's machine): Flutter 3.47.2 at `~/develop/flutter`, on
 PATH only through the shell rc — agent shells must
 `export PATH="$HOME/develop/flutter/bin:$PATH"` first. Android SDK 37 in
-`~/Android/Sdk`, JDK 21, `Pixel_10_Pro` AVD.
+`~/Android/Sdk`, JDK 21. AVDs `Pixel_10_Pro`, `Pixel_8`, `Pixel_7a` are set
+to software GPU (hardware GL segfaults on this box). From an agent shell,
+launch detached with `nohup ~/Android/Sdk/emulator/emulator -avd Pixel_10_Pro
+-gpu swiftshader_indirect -no-boot-anim -no-audio &` and poll
+`adb shell getprop sys.boot_completed`; `flutter emulators --launch` never
+returns. Emulation is slow on this hardware — prefer widget-test PNG renders
+for routine visual checks and the emulator for confirmation.
 
 | Task | Command |
 |---|---|
