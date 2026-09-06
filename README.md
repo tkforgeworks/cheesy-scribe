@@ -4,7 +4,25 @@ An app based on the tasting note book from [33Books](https://www.33books.com), s
 
 ## Status
 
-Greenfield — design and architecture are still being investigated. No application code yet.
+Pre-release. Flutter / Material 3, **Android only**, local-first (notes stay on the device). The plan and
+ticket map are in [`docs/CHEESE-1-decomposition.md`](docs/CHEESE-1-decomposition.md); the design handoff is
+in [`docs/design_handoff_cheesy_scribe/`](docs/design_handoff_cheesy_scribe/).
+
+## Development
+
+Flutter 3.47.2 (stable), Android SDK, JDK 17+. The application id is `com.tkforgeworks.cheesy_scribe`.
+
+```sh
+flutter pub get
+flutter run                                          # on a connected device or a running emulator
+dart format --output=none --set-exit-if-changed .    # the three checks CI runs, from the repo root
+flutter analyze
+flutter test
+```
+
+CI consumes the org's reusable [`ci-flutter.yml`](https://github.com/tkforgeworks/.github/blob/main/.github/workflows/ci-flutter.yml);
+the check reports as `ci / ci`. Note that `dart format` checks every `.dart` file in the repo, which is why the
+handoff's reference Dart files carry a `.txt` suffix.
 
 ## Contributing / branch policy
 
