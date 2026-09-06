@@ -3,24 +3,33 @@
 ## What this is
 
 Cheese-tasting notes app modeled on the 33Books tasting notebook: track,
-record, and look back at cheeses tasted. Greenfield: **no app code yet.** A
-design handoff bundle lives in `docs/design_handoff_cheesy_scribe/`
-(`DESIGN_SPEC.md`, Flutter theme + Dart models, JSON schemas, hi-fi HTML
-mockups). It targets Flutter / Material 3, but that is a recommendation, not
-a locked decision — see "Architecture decisions". Keep this file in sync as
-decisions land.
+record, and look back at cheeses tasted. **No app code yet**; the plan is
+`docs/CHEESE-1-decomposition.md` (inventory of the design handoff, decisions,
+architecture, and the ticket list mirrored in Jira epics CHEESE-3..12). The
+design handoff itself lives in `docs/design_handoff_cheesy_scribe/`
+(`DESIGN_SPEC.md`, `lib/theme.dart`, `lib/models.dart`, JSON schemas, hi-fi
+HTML mockups). Keep this file in sync as decisions land.
 
 ## Stack & commands
 
-Undecided. When the stack is chosen, fill in the org table (install / lint /
-typecheck / test / build) from `tkforgeworks/.github/templates/CLAUDE.md`.
+Flutter 3.47.2 / Material 3, **Android only** (no desktop, iOS or web
+targets). Dart package `cheesy_scribe`, application id
+`com.tkforgeworks.cheesy_scribe`. Not scaffolded yet (CHEESE-3 epic).
 
-- If Flutter: CI is `ci-flutter.yml`, releases `release-flutter.yml`, version
-  bumps via `scripts/release/bump-version.{ps1,sh}`. Note `dart format` does
-  not honour `analysis_options.yaml` excludes, so the `.dart` files under
-  `docs/design_handoff_cheesy_scribe/lib/` must be formatted or moved before
-  the format step will pass.
-- If Electron: electron-builder, never Forge (user's global standard).
+| Task | Command |
+|---|---|
+| Install | `flutter pub get` |
+| Format | `dart format --output=none --set-exit-if-changed .` |
+| Analyze | `flutter analyze` |
+| Test | `flutter test` |
+| Build | `flutter build apk --release` (via `scripts/release/build-android.sh` once vendored) |
+
+CI is `ci-flutter.yml`, releases `release-flutter.yml` with
+`build-windows: false`, version bumps via
+`scripts/release/bump-version.{ps1,sh}`. `dart format` does not honour
+`analysis_options.yaml` excludes, so the `.dart` files under
+`docs/design_handoff_cheesy_scribe/lib/` are renamed `.dart.txt` (or deleted
+once adopted into `lib/`) before CI lands.
 
 ## Repo & process conventions (org standard)
 
@@ -71,12 +80,37 @@ typecheck / test / build) from `tkforgeworks/.github/templates/CLAUDE.md`.
 
 ## Architecture decisions (locked)
 
-- None yet. The design handoff recommends Flutter / Material 3; the decision
-  is made when CHEESE-1 (decompose the design handoff) produces the work
-  items. Record it here with the reason once made.
+Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md` §3.
+
+- **Flutter / Material 3, Android only, signed APK** on GitHub Releases; Play
+  Store readiness is a separate epic (CHEESE-10). Because the app is
+  mobile-only by intent and the handoff is Flutter-shaped.
+- **Local-first v0.1.0: no login, no backend.** Notes in SQLite (`drift`) on
+  the device; app opens on `/notes`. Auth, cloud backup, delete-account are
+  deferred (CHEESE-11) because the handoff names no backend and identity adds
+  a project's worth of scope.
+- **State: `flutter_riverpod` 3 without codegen; routing `go_router` with a
+  `ShellRoute` for the four top-level destinations.** lazy-sleeper-app
+  precedent.
+- **Models: the handoff's plain classes**, amended: nullable `verdict` (one-line
+  quote for the featured card), `price` + `priceUnit` replacing `pricePerLb`
+  (no offline currency conversion), `attributeOther`, rating 0 = unrated,
+  `UserProfile` reduced to a local display name. No freezed.
+- **STYLE picker on the note form** sets `cheeseStyleId`; the library's
+  "N TASTED", style-detail notes and Home style chips depend on it.
+- **Cheese library is a bundled JSON asset** (~25–35 styles drafted by Claude,
+  reviewed by Tim). Read-only reference data, no DB table.
+- **Fonts bundled** (Poppins static weights; Source Serif 4 and JetBrains Mono
+  variable, `FontVariation('wght', …)`); icons via the `heroicons` package.
+- **Weekly reminder deferred** (CHEESE-12); Settings row shown disabled.
+- **Portrait-only phone UI**; English only.
+- Tests are behaviour-level widget tests with an in-memory drift DB.
 
 ## Current status
 
 - 2026-09-05: `v0.1.0/main` cut. LICENSE + NOTICE merged in. Both org
-  rulesets applied (CHEESE-2). No CI, no app code.
-- Open: CHEESE-1 — decompose the design handoff into tickets.
+  rulesets applied (CHEESE-2). Design handoff decomposed (CHEESE-1): plan in
+  `docs/CHEESE-1-decomposition.md`, epics CHEESE-3..12 with tasks in Jira.
+  No CI, no app code.
+- Next: CHEESE-3 Foundation, starting with the local Flutter toolchain and
+  the Android-only scaffold.
