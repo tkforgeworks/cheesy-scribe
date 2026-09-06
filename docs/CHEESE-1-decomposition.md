@@ -184,7 +184,7 @@ per note, 16 flavor columns, ISO dates, `share_plus`.
 | Persistence | `drift` (SQLite) with a `notes` table, `flavors` as 16 integer columns, `recent_searches`, `settings` | Type-safe SQL for search/filter/sort and stats; migrations from day one |
 | Models | Adopt handoff plain classes; drift row ↔ model mappers | Avoids freezed/json_serializable codegen for a small model |
 | Library data | Bundled `assets/data/cheese_styles.json` loaded at startup | Read-only reference data; no DB table needed |
-| Fonts | Bundle Poppins (static weights), Source Serif 4 and JetBrains Mono (variable; `FontVariation('wght', …)`) | Precedent; offline; startup |
+| Fonts | Bundle all three as **static instances** (Poppins 400–700, Source Serif 4 400/600 + italics, JetBrains Mono 400/500) | Offline; startup; `FontWeight` selects the face directly, no `FontVariation` plumbing (changed from the variable-font plan during CHEESE-17) |
 | Icons | `heroicons` package | Matches TKFW; MIT |
 | Charts | Hand-painted (`CustomPainter`, `Container` bars) | Spec is simple bars; no chart package |
 | Wheel | `CustomPainter` + `GestureDetector` hit-testing spoke×ring; 250 ms polygon animation | Spec |

@@ -14,10 +14,18 @@ HTML mockups). Keep this file in sync as decisions land.
 
 Flutter 3.47.2 / Material 3, **Android only** (no desktop, iOS or web
 targets). Dart package `cheesy_scribe`, application id
-`com.tkforgeworks.cheesy_scribe`. Scaffolded 2026-09-06 (CHEESE-14): Android
-platform only, `lib/main.dart` is a bare `ScribeApp` until the theme
-(CHEESE-17) and shell (CHEESE-19) land. Portrait-only via the manifest and
-`SystemChrome`.
+`com.tkforgeworks.cheesy_scribe`. Android platform only; portrait-only via the
+manifest and `SystemChrome`.
+
+Layout so far: `lib/app/theme/scribe_theme.dart` (tokens, `ScribeColors`
+extension, `ScribeTheme.light()/dark()`, `ScribeTheme.ui/serif/mono` style
+helpers, `context.colors/text/scribe` shorthands) and `lib/app/widgets/`
+(the shared atoms from DESIGN_SPEC §5 — `MonoLabel`, `TagCapsule`,
+`StatusCapsule`, `StarRating`, `JournalField`, `BoxedField`, `ForgeFab`,
+`ForgeLogoBadge`/`WedgeGlyph`, `SkeletonRow`, `ErrorCard`, `EmptyState`,
+`showConfirmSheet`; import the `widgets.dart` barrel). `lib/main.dart` is a
+placeholder home until the shell (CHEESE-19) lands. Tests: `test/support.dart`
+`wrap()` gives a themed MaterialApp.
 
 Local toolchain (Tim's machine): Flutter 3.47.2 at `~/develop/flutter`, on
 PATH only through the shell rc — agent shells must
@@ -110,8 +118,11 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   "N TASTED", style-detail notes and Home style chips depend on it.
 - **Cheese library is a bundled JSON asset** (~25–35 styles drafted by Claude,
   reviewed by Tim). Read-only reference data, no DB table.
-- **Fonts bundled** (Poppins static weights; Source Serif 4 and JetBrains Mono
-  variable, `FontVariation('wght', …)`); icons via the `heroicons` package.
+- **Fonts bundled as static instances** (`assets/fonts/`, OFL, licences in
+  `LICENSES.md` there): Poppins 400/500/600/700, Source Serif 4 400/600 +
+  italics, JetBrains Mono 400/500. Static rather than variable so
+  `FontWeight` selects the face directly (lazy-sleeper-app went variable +
+  `FontVariation`; this repo does not). Icons via the `heroicons` package.
 - **Weekly reminder deferred** (CHEESE-12); Settings row shown disabled.
 - **Portrait-only phone UI**; English only.
 - Tests are behaviour-level widget tests with an in-memory drift DB.
@@ -124,4 +135,5 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   No CI, no app code.
 - 2026-09-06: toolchain verified (CHEESE-13), Android-only Flutter scaffold
   (CHEESE-14), org template files (CHEESE-15), CI + required `ci / ci` check
-  on `main` (CHEESE-16). Next: CHEESE-17 theme/fonts/atoms, CHEESE-19 shell.
+  on `main` (CHEESE-16), theme + bundled fonts + shared atoms (CHEESE-17).
+  Next: CHEESE-19 shell/routing, then the data layer (CHEESE-20..23).
