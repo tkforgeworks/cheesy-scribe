@@ -1,0 +1,30 @@
+# Consumes the org standard Flutter CI (tkforgeworks/.github): flutter pub get,
+# dart format --set-exit-if-changed, flutter analyze, flutter test. Platform
+# builds belong to the release workflow, not here.
+#
+# Trigger envelope per docs/ci-standards.md for the version-branch flow: topic
+# branches PR into a release branch (vX.Y.Z/main), and the release branch is
+# merged into main by a release PR. Pushes to any branch but main get feedback
+# while iterating; PRs into main or a release branch get the merge-gate check.
+# The check is named "ci / ci" (caller job / reusable job) and is required by
+# the main ruleset.
+name: ci
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+    branches: [main, 'v*/main']
+
+concurrency:
+  group: ci-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: tkforgeworks/.github/.github/workflows/ci-flutter.yml@main
+    with:
+      flutter-version: '3.47.2'

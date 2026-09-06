@@ -33,7 +33,7 @@ This repo follows the TK ForgeWorks branching model ([`docs/branching-and-releas
 - Topic branches are named `v0.1.0/CHEESE-N-short-topic` and PR into the release branch, never into `main`.
 - Commit subjects are the changelog: `CHEESE-N: Imperative summary`, with `CHEESE-N: Fix ...` for bug fixes.
 
-Both branches are protected by repository rulesets per [`docs/branch-protection-ruleset.md`](https://github.com/tkforgeworks/.github/blob/main/docs/branch-protection-ruleset.md): `main` is PR-only with no force-push, no deletion, and no bypass; `v*/main` blocks force-push and deletion. A required CI status check will be added to the `main` ruleset once CI exists and has reported on a PR.
+Both branches are protected by repository rulesets per [`docs/branch-protection-ruleset.md`](https://github.com/tkforgeworks/.github/blob/main/docs/branch-protection-ruleset.md): `main` is PR-only with no force-push, no deletion, and no bypass; `v*/main` blocks force-push and deletion. `main` also requires the `ci / ci` check to pass with the branch up to date.
 
 Work is tracked in Jira project [CHEESE](https://tkforgeworks.atlassian.net/browse/CHEESE).
 

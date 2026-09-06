@@ -52,22 +52,24 @@ into `lib/` (CHEESE-17, CHEESE-20).
 - **Two repository rulesets** (`tkforgeworks/.github/docs/branch-protection-ruleset.md`):
   - `main` (ruleset id 20916528): PR-only (0 approvals, self-merge allowed),
     no force-push or deletion, **no bypass actors** (not even admins).
-    **No `required_status_checks` rule yet** — CI does not exist. When CI is
-    added: let the check report on at least one PR first, then `PUT` (not
-    `PATCH`, which 404s) the ruleset with the full body plus the
-    `required_status_checks` rule, context = the CI job name as it appears in
-    the Actions run (a nested reusable workflow yields e.g. `ci / ci`).
+    **Required check `ci / ci`** (strict: branch must be up to date with
+    `main`), added 2026-09-06 (CHEESE-16) after the check first reported on
+    PR #6. To change it, `PUT` (not `PATCH`, which 404s) the ruleset with the
+    full body; the context must match the job name as shown in the Actions
+    run.
   - `release-branches` (ruleset id 22367582, applied 2026-09-05): matches
     `refs/heads/v*/main`; deletion + non-fast-forward only. Deliberately no
     PR rule and no required check, because the release bump scripts push
     directly to the release branch.
   - Rulesets are edited with `gh api`; verify with
     `gh api repos/tkforgeworks/cheesy-scribe/rules/branches/<branch>`.
-- CI: consume the shared reusable workflow from `tkforgeworks/.github`
-  (`ci-flutter.yml` / `ci-electron.yml` / ...) with the canonical trigger
-  envelope from `docs/ci-standards.md` — `pull_request.branches` must include
-  `main` **and** `'v*/main'`. Don't hand-roll steps that belong in the shared
-  workflow.
+- CI: `.github/workflows/ci.yml` consumes
+  `tkforgeworks/.github/.github/workflows/ci-flutter.yml@main`
+  (`flutter-version: '3.47.2'`) with the canonical envelope — `push` on every
+  branch but `main`, `pull_request` into `main` and `'v*/main'`. Contract from
+  the repo root: `dart format --output=none --set-exit-if-changed .`,
+  `flutter analyze`, `flutter test`. Don't hand-roll steps that belong in the
+  shared workflow.
 - **Commit subjects are the changelog.** `CHEESE-N: Imperative summary`; bug
   fixes `CHEESE-N: Fix ...`. Release notes are generated from subjects
   (`release-notes.yml`, `ticket-prefix: CHEESE`).
@@ -121,5 +123,5 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   `docs/CHEESE-1-decomposition.md`, epics CHEESE-3..12 with tasks in Jira.
   No CI, no app code.
 - 2026-09-06: toolchain verified (CHEESE-13), Android-only Flutter scaffold
-  (CHEESE-14). Next: CHEESE-15 org template files, CHEESE-16 CI + required
-  check.
+  (CHEESE-14), org template files (CHEESE-15), CI + required `ci / ci` check
+  on `main` (CHEESE-16). Next: CHEESE-17 theme/fonts/atoms, CHEESE-19 shell.
