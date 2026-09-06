@@ -5,8 +5,8 @@ Direction: **1a — cream & rind amber** (light, primary target) with a derived 
 Target: **Flutter, Material 3** (non-strict — journal styling wins where they conflict).
 
 Companion files:
-- `lib/theme.dart` — paste-ready `ThemeData` (light + dark), `ColorScheme`, text styles, `ScribeColors` theme extension
-- `lib/models.dart` + `schema/*.json` — data model
+- `lib/theme.dart.txt` — paste-ready `ThemeData` (light + dark), `ColorScheme`, text styles, `ScribeColors` theme extension
+- `lib/models.dart.txt` + `schema/*.json` — data model
 - `spec-sheet.html` — visual reference of every component with measurements
 - `design/Cheese Notes App.dc.html` — the original hi-fi mockups (design reference, not production code)
 

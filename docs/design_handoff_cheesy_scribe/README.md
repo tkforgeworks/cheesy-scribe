@@ -24,12 +24,15 @@ pixel-faithfully using the provided `ThemeData`; where stock Material 3
 defaults conflict with the spec (e.g. chip radius, label placement), the spec
 wins — `theme.dart` already encodes most of these deviations.
 
+> The two Dart reference files carry a `.txt` suffix so the org CI's
+> repo-wide `dart format` check skips them; strip it to use them.
+
 ## Contents
 | Path | What it is |
 |---|---|
 | `DESIGN_SPEC.md` | Master spec: brand rules, tokens, type scale, component → M3 widget mapping, screen-by-screen layout, navigation map, empty/loading/error states, motion |
-| `lib/theme.dart` | Paste-ready `ThemeData` light + dark, `ColorScheme`s, `TextTheme`, `ScribeColors` ThemeExtension, forge-gradient constants |
-| `lib/models.dart` | Dart data model: `TastingNote`, `CheeseStyle`, `UserProfile`, `AppSettings`, `TastingStats` (derived), enums incl. the 16 `FlavorNote` spokes |
+| `lib/theme.dart.txt` | Paste-ready `ThemeData` light + dark, `ColorScheme`s, `TextTheme`, `ScribeColors` ThemeExtension, forge-gradient constants |
+| `lib/models.dart.txt` | Dart data model: `TastingNote`, `CheeseStyle`, `UserProfile`, `AppSettings`, `TastingStats` (derived), enums incl. the 16 `FlavorNote` spokes |
 | `schema/*.schema.json` | JSON Schema for notes and styles (API/storage contract) |
 | `design/Cheese Notes App.dc.html` | Hi-fi mockups, all screens (open in a browser) |
 | `design/spec-sheet.html` | Component spec sheet with measurements (open in a browser) |

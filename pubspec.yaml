@@ -1,0 +1,23 @@
+name: cheesy_scribe
+description: "Cheese tasting notes you'll pretend to remember. A TK ForgeWorks product."
+publish_to: 'none'
+
+# X.Y.Z[-rc.N]+BUILD. The release branch name (vX.Y.Z/main) is the source of
+# X.Y.Z; scripts/release/bump-version.{sh,ps1} rewrites this line. BUILD is the
+# Android versionCode and must go up on every APK that reaches a device.
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
