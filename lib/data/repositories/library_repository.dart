@@ -15,10 +15,20 @@ class LibraryRepository {
 
   final AssetBundle _bundle;
   final String assetPath;
-  Future<List<CheeseStyle>>? _cache;
+  List<CheeseStyle>? _styles;
+  Future<List<CheeseStyle>>? _loading;
 
-  /// Every style in file order (the curated display order).
-  Future<List<CheeseStyle>> load() => _cache ??= _load();
+  /// Every style in file order (the curated display order). Once loaded,
+  /// answers from memory with a future created in the caller's zone (so
+  /// widget tests on the fake clock resolve it too).
+  Future<List<CheeseStyle>> load() {
+    final loaded = _styles;
+    if (loaded != null) return Future.value(loaded);
+    return _loading ??= _load().then((s) => _styles = s);
+  }
+
+  /// The styles if [load] has completed, else null.
+  List<CheeseStyle>? get loadedStyles => _styles;
 
   Future<List<CheeseStyle>> _load() async {
     final raw = await _bundle.loadString(assetPath);

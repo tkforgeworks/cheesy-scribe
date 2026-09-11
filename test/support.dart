@@ -2,6 +2,7 @@ import 'package:cheesy_scribe/app/theme/scribe_theme.dart';
 import 'package:cheesy_scribe/data/db/app_database.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/providers.dart';
+import 'package:cheesy_scribe/data/repositories/library_repository.dart';
 import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
 import 'package:cheesy_scribe/main.dart';
 import 'package:drift/native.dart';
@@ -26,8 +27,10 @@ AppDatabase openTestDatabase() {
 }
 
 /// Boots the real app on an in-memory database with mocked package info.
-/// [settings] is saved before the first frame. Returns the database so
-/// tests can seed or inspect it.
+/// [settings] is saved before the first frame. The bundled cheese library
+/// is pre-loaded on the real event loop (asset I/O never completes on the
+/// fake clock) so style pickers and counts resolve under `pumpAndSettle`.
+/// Returns the database so tests can seed or inspect it.
 Future<AppDatabase> pumpApp(
   WidgetTester tester, {
   String at = '/notes',
@@ -35,7 +38,11 @@ Future<AppDatabase> pumpApp(
   AppSettings? settings,
 }) async {
   final database = db ?? openTestDatabase();
-  if (settings != null) await SettingsRepository(database).save(settings);
+  final library = LibraryRepository();
+  await tester.runAsync(() async {
+    if (settings != null) await SettingsRepository(database).save(settings);
+    await library.load();
+  });
   PackageInfo.setMockInitialValues(
     appName: 'Cheesy Scribe',
     packageName: 'com.tkforgeworks.cheesy_scribe',
@@ -45,7 +52,10 @@ Future<AppDatabase> pumpApp(
   );
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [appDatabaseProvider.overrideWithValue(database)],
+      overrides: [
+        appDatabaseProvider.overrideWithValue(database),
+        libraryRepositoryProvider.overrideWithValue(library),
+      ],
       child: ScribeApp(initialLocation: at),
     ),
   );
@@ -72,3 +82,10 @@ void testApp(
     }
   });
 }
+
+/// Runs a database call from inside a widget test. Drift's futures and
+/// stream cancellations must not run on flutter_test's fake clock: a
+/// stream read with `.first` on the fake zone leaves `db.close()` waiting
+/// forever at teardown. `runAsync` executes [op] on the real event loop.
+Future<T> onDb<T>(WidgetTester tester, Future<T> Function() op) async =>
+    (await tester.runAsync(op)) as T;
