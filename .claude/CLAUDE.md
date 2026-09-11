@@ -143,7 +143,15 @@ launch detached with `nohup ~/Android/Sdk/emulator/emulator -avd Pixel_10_Pro
 -gpu swiftshader_indirect -no-boot-anim -no-audio &` and poll
 `adb shell getprop sys.boot_completed`; `flutter emulators --launch` never
 returns. Emulation is slow on this hardware — prefer widget-test PNG renders
-for routine visual checks and the emulator for confirmation.
+for routine visual checks and the emulator for confirmation. **Never run
+a Gradle build and the emulator at the same time** (15 GB box; both get
+OOM-killed): build, `pkill -f "[G]radleDaemon"`, then launch. Release
+APKs are debug-signed until the CHEESE-38 keystore exists, so
+`flutter build apk --release` (~100 s, ~63 MB) is installable; copies
+live in `~/cheesy-scribe-builds/`. Drive the emulator with
+`adb shell input tap/text/swipe` (Pixel_8: 1080×2400 @ 420 dpi) and
+`adb exec-out screencap -p`. Bracket `pkill -f` patterns
+(`"[e]mulator -avd"`) or the shell kills itself.
 
 | Task | Command |
 |---|---|
