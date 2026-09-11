@@ -33,6 +33,7 @@ flutter:
 
   assets:
     - assets/fonts/licenses/
+    - assets/data/
 
   # Fonts are bundled (see assets/fonts/LICENSES.md): static instances so
   # FontWeight selects the face directly; no google_fonts runtime fetch.

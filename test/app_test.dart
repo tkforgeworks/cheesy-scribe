@@ -47,6 +47,7 @@ void main() {
 
     await tapDrawerItem(tester, 'Cheese library');
     expect(find.text('Search the library'), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^\d+ STYLES$')), findsOneWidget);
     await openDrawer(tester);
     expect(pillSelected(tester, 'Cheese library'), isTrue);
     expect(pillSelected(tester, 'My tasting notes'), isFalse);
