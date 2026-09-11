@@ -1,14 +1,9 @@
 import 'package:cheesy_scribe/app/shell/scribe_drawer.dart';
-import 'package:cheesy_scribe/main.dart';
+import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
-Future<void> pumpApp(WidgetTester tester, {String at = '/notes'}) async {
-  await tester.pumpWidget(ProviderScope(child: ScribeApp(initialLocation: at)));
-  await tester.pumpAndSettle();
-}
+import 'support.dart';
 
 Future<void> openDrawer(WidgetTester tester) async {
   await tester.tap(find.byTooltip('Open menu'));
@@ -25,24 +20,14 @@ bool pillSelected(WidgetTester tester, String label) =>
     tester.widget<DrawerPill>(find.widgetWithText(DrawerPill, label)).selected;
 
 void main() {
-  setUp(() {
-    PackageInfo.setMockInitialValues(
-      appName: 'Cheesy Scribe',
-      packageName: 'com.tkforgeworks.cheesy_scribe',
-      version: '0.1.0',
-      buildNumber: '1',
-      buildSignature: '',
-    );
-  });
-
-  testWidgets('boots on /notes with the search bar and FAB', (tester) async {
+  testApp('boots on /notes with the search bar and FAB', (tester) async {
     await pumpApp(tester);
     expect(find.text('Search your tastings'), findsOneWidget);
     expect(find.text('New tasting notes'), findsOneWidget);
     expect(find.byType(Drawer), findsNothing);
   });
 
-  testWidgets('drawer shows header, account row and version footer', (
+  testApp('drawer shows header, account row and version footer', (
     tester,
   ) async {
     await pumpApp(tester);
@@ -57,7 +42,7 @@ void main() {
     expect(find.text('Sign out'), findsNothing);
   });
 
-  testWidgets('every drawer item reaches its screen', (tester) async {
+  testApp('every drawer item reaches its screen', (tester) async {
     await pumpApp(tester);
 
     await tapDrawerItem(tester, 'Cheese library');
@@ -96,9 +81,7 @@ void main() {
     expect(find.text('Search your tastings'), findsOneWidget);
   });
 
-  testWidgets('menu icon opens the drawer on Stats and Settings', (
-    tester,
-  ) async {
+  testApp('menu icon opens the drawer on Stats and Settings', (tester) async {
     await pumpApp(tester, at: '/stats');
     await openDrawer(tester);
     expect(pillSelected(tester, 'Stats & insights'), isTrue);
@@ -108,7 +91,7 @@ void main() {
     expect(pillSelected(tester, 'Settings'), isTrue);
   });
 
-  testWidgets('note detail links to edit; FAB opens the form', (tester) async {
+  testApp('note detail links to edit; FAB opens the form', (tester) async {
     await pumpApp(tester, at: '/notes/42');
     expect(find.widgetWithText(AppBar, 'Tasting note'), findsOneWidget);
     await tester.tap(find.byTooltip('Edit'));
@@ -125,11 +108,28 @@ void main() {
     expect(find.widgetWithText(AppBar, 'New tasting note'), findsOneWidget);
   });
 
-  testWidgets('style detail opens over the library', (tester) async {
+  testApp('style detail opens over the library', (tester) async {
     await pumpApp(tester, at: '/library/cheddar');
     expect(find.widgetWithText(AppBar, 'Cheese style'), findsOneWidget);
     await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
     expect(find.text('Search the library'), findsOneWidget);
+  });
+
+  testApp('drawer shows the saved display name; theme follows settings', (
+    tester,
+  ) async {
+    await pumpApp(
+      tester,
+      settings: const AppSettings(
+        displayName: 'Tim',
+        themeMode: ThemeMode.dark,
+      ),
+    );
+    await openDrawer(tester);
+    expect(find.text('Tim'), findsOneWidget);
+    expect(find.text('Your notebook'), findsNothing);
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(app.themeMode, ThemeMode.dark);
   });
 }

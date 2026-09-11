@@ -1,0 +1,34 @@
+import 'package:drift_flutter/drift_flutter.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'db/app_database.dart';
+import 'models/models.dart';
+import 'repositories/notes_repository.dart';
+import 'repositories/recent_searches_repository.dart';
+import 'repositories/settings_repository.dart';
+
+/// The on-device SQLite database (`cheesy_scribe.sqlite` in the app's
+/// support directory via drift_flutter). Tests override this with
+/// `AppDatabase(NativeDatabase.memory())` — see `test/support.dart`.
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase(driftDatabase(name: 'cheesy_scribe'));
+  ref.onDispose(db.close);
+  return db;
+});
+
+final notesRepositoryProvider = Provider<NotesRepository>(
+  (ref) => NotesRepository(ref.watch(appDatabaseProvider)),
+);
+
+final settingsRepositoryProvider = Provider<SettingsRepository>(
+  (ref) => SettingsRepository(ref.watch(appDatabaseProvider)),
+);
+
+final recentSearchesRepositoryProvider = Provider<RecentSearchesRepository>(
+  (ref) => RecentSearchesRepository(ref.watch(appDatabaseProvider)),
+);
+
+/// Live settings; `AppSettings()` defaults until the first row exists.
+final appSettingsProvider = StreamProvider<AppSettings>(
+  (ref) => ref.watch(settingsRepositoryProvider).watch(),
+);
