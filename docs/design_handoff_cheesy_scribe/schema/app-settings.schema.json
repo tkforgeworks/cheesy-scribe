@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tkforgeworks.com/schemas/cheesy-scribe/app-settings.json",
+  "title": "AppSettings",
+  "description": "Local preferences. Replaces the handoff's UserProfile + AppSettings for local-first v0.1.0 (CHEESE-20).",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "displayName": { "type": "string", "description": "Drawer account row and avatar initial; absent = unset" },
+    "themeMode": { "enum": ["system", "light", "dark"], "default": "system" },
+    "units": { "enum": ["usdPerLb", "eurPerKg"], "default": "usdPerLb", "description": "Default price unit for new notes" }
+  }
+}
