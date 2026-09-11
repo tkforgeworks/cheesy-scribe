@@ -92,4 +92,15 @@ extension PriceUnitLabel on PriceUnit {
     PriceUnit.usdPerLb => r'$',
     PriceUnit.eurPerKg => '€',
   };
+
+  /// Weight part of the label ("LB", "KG").
+  String get perUnit => label.split('/').last;
+
+  /// "$28/LB", "€12.50/KG" — whole numbers drop the decimals.
+  String format(double price) {
+    final n = price == price.roundToDouble()
+        ? price.toStringAsFixed(0)
+        : price.toStringAsFixed(2);
+    return '$symbol$n/$perUnit';
+  }
 }

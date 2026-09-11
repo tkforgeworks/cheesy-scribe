@@ -165,35 +165,6 @@ class SettingsPlaceholderScreen extends StatelessWidget {
 
 // ---- Full-screen routes (root navigator) ----
 
-/// `/notes/:id` — CHEESE-28. Back + pencil (to edit).
-class NoteDetailPlaceholderScreen extends StatelessWidget {
-  const NoteDetailPlaceholderScreen({super.key, required this.noteId});
-
-  final String noteId;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _backAppBar(
-        context,
-        'Tasting note',
-        actions: [
-          IconButton(
-            tooltip: 'Edit',
-            onPressed: () => context.push('/notes/$noteId/edit'),
-            icon: HeroIcon(
-              HeroIcons.pencil,
-              size: 22,
-              color: context.colors.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-      body: const PlaceholderBody(title: 'Tasting note', ticket: 'CHEESE-28'),
-    );
-  }
-}
-
 /// `/library/:styleId` — CHEESE-29.
 class StyleDetailPlaceholderScreen extends StatelessWidget {
   const StyleDetailPlaceholderScreen({super.key, required this.styleId});

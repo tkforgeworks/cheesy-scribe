@@ -29,6 +29,11 @@ final recentSearchesRepositoryProvider = Provider<RecentSearchesRepository>(
   (ref) => RecentSearchesRepository(ref.watch(appDatabaseProvider)),
 );
 
+/// One note, live; emits null once it is deleted.
+final noteProvider = StreamProvider.family<TastingNote?, String>(
+  (ref, id) => ref.watch(notesRepositoryProvider).watchNote(id),
+);
+
 /// Live settings; `AppSettings()` defaults until the first row exists.
 final appSettingsProvider = StreamProvider<AppSettings>(
   (ref) => ref.watch(settingsRepositoryProvider).watch(),
