@@ -42,6 +42,26 @@ Layout so far:
   maintained, and `test/data/models_test.dart` validates emitted JSON
   against them with `json_schema`. `tastedAt` is a local-midnight date
   (`YYYY-MM-DD` in JSON); `createdAt` is UTC date-time.
+- `lib/data/db/app_database.dart` — drift schema v1: `notes` (16 `fl_*`
+  flavor int columns, ISO text dates, enums by name, a normalised
+  `search_text` haystack), `recent_searches`, `settings` (key/value).
+  `app_database.g.dart` is generated and committed: after any table change
+  run `dart run build_runner build --delete-conflicting-outputs` **then
+  `dart format .`** (the generator's output is not format-clean and CI
+  checks it). Schema bumps: raise `schemaVersion`, add a `case` to
+  `_upgradeTo`; never edit a released case. `search_text.dart` holds
+  `normalizeForSearch` (lower-case, diacritics folded, `[a-z0-9 ]` only),
+  applied to both the stored haystack and the typed query.
+- `lib/data/repositories/` — `NotesRepository` (`NotesQuery` = search +
+  minRating + styleId + paging; `watchPage/watchCount/watchNote/
+  watchNewest/watchAll/watchStyleCounts/watchTopStyleIds`, `save` is an
+  upsert, `newId()`), `SettingsRepository` (`watch/load/save/update`),
+  `RecentSearchesRepository` (cap 10). Domain types in, domain types out;
+  drift row classes (`NoteRow` etc.) never leave `lib/data`.
+- `lib/data/providers.dart` — `appDatabaseProvider` (drift_flutter
+  `driftDatabase(name: 'cheesy_scribe')`; tests override it), the three
+  repository providers, `appSettingsProvider` (StreamProvider). The shell's
+  `displayNameProvider` and `ScribeApp`'s `themeMode` read from it.
 - `lib/app/theme/scribe_theme.dart` — tokens, `ScribeColors` extension,
   `ScribeTheme.light()/dark()`, `ScribeTheme.ui/serif/mono` helpers,
   `context.colors/text/scribe` shorthands, component themes (incl. drawer).
@@ -49,9 +69,14 @@ Layout so far:
   `StatusCapsule`, `StarRating`, `JournalField`, `BoxedField`, `ForgeFab`,
   `ForgeLogoBadge`/`WedgeGlyph`, `SkeletonRow`, `ErrorCard`, `EmptyState`,
   `showConfirmSheet`); import the `widgets.dart` barrel.
-- Tests: `test/support.dart` `wrap()` gives a themed MaterialApp;
-  `test/app_test.dart` boots the real app (wrap in `ProviderScope`, seed
-  `PackageInfo.setMockInitialValues`) and walks every drawer item.
+- Tests: `test/support.dart` — `wrap()` (themed MaterialApp for atoms),
+  `openTestDatabase()` (in-memory drift, closed on teardown), `pumpApp()`
+  (real app on an in-memory DB, optional seeded `AppSettings`, mocked
+  package info) and **`testApp()`**, which must replace `testWidgets` for
+  any test that calls `pumpApp`: it unmounts the tree and pumps 1 ms so
+  drift's stream-cancel timer fires before flutter_test's pending-timer
+  check (otherwise the test fails and `db.close()` hangs the runner).
+  Repository tests use plain `test()` against `openTestDatabase()`.
 
 Local toolchain (Tim's machine): Flutter 3.47.2 at `~/develop/flutter`, on
 PATH only through the shell rc — agent shells must
@@ -160,6 +185,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - **Weekly reminder deferred** (CHEESE-12); Settings row shown disabled.
 - **Portrait-only phone UI**; English only.
 - Tests are behaviour-level widget tests with an in-memory drift DB.
+- **Riverpod 3 does not export `Override`**, so helpers cannot take a
+  `List<Override>`; seed state through the DB instead (`pumpApp(settings:)`).
 
 ## Current status
 
@@ -173,6 +200,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - 2026-09-11: app shell — go_router ShellRoute + drawer + placeholder
   screens, riverpod and package_info_plus added (CHEESE-19). CHEESE-18
   brand assets still open. Domain models + maintained JSON schemas
-  (CHEESE-20). Next: CHEESE-21 drift DB/repositories/providers, then the
-  note form (27) and detail (28) toward the goal of entering and viewing a
-  note end to end on the emulator or a device APK.
+  (CHEESE-20). Drift DB + repositories + providers, settings wired into
+  the shell (CHEESE-21). PRs #8/#9/#10 stacked, awaiting review. Next:
+  minimal library dataset (22), note form (27), detail (28), home rows
+  (24), then an APK — the goal is entering and viewing a note end to end
+  on the emulator or a device APK.
