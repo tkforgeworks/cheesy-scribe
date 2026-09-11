@@ -71,6 +71,16 @@ Layout so far:
   `cheeseStylesProvider` / `cheeseStyleProvider(id)` (FutureProviders).
   The shell's `displayNameProvider` and `ScribeApp`'s `themeMode` read
   from settings.
+- `lib/features/notes/note_form_screen.dart` — `NoteFormScreen({noteId})`
+  for `/notes/new` and `/notes/:id/edit` (CHEESE-27): controllers per text
+  field, picker fields (date, rind, style) use display-only controllers,
+  `_build()` assembles a `TastingNote` from state and the dirty check is
+  `_build() != _initial` (model equality). Save → upsert; new notes
+  `pushReplacement` to `/notes/:id`, edits `pop`. `PopScope` + close X
+  share the discard sheet. `note_dates.dart` `formatTastingDate` ("Aug 12,
+  2026"; English only, no intl). `widgets/pickers.dart`: `showRindPicker`,
+  `showStylePicker` (searchable) returning `PickResult` (cleared vs value
+  vs dismissed).
 - `lib/features/notes/widgets/` — `FlavorWheel` (+ `FlavorWheelGeometry`:
   spec-sheet SVG maths scaled to width; `hitTest` → (spoke, ring), ring 0 =
   clear; polygon animates 250 ms; `onChanged == null` = read-only),
@@ -94,6 +104,15 @@ Layout so far:
   drift's stream-cancel timer fires before flutter_test's pending-timer
   check (otherwise the test fails and `db.close()` hangs the runner).
   Repository tests use plain `test()` against `openTestDatabase()`.
+  **Inside a widget-test body, every direct DB call goes through
+  `onDb(tester, () => …)`** (`tester.runAsync`): a drift stream read such
+  as `.first` on the fake clock leaves state that makes `db.close()` hang
+  at teardown (symptom: the test "did not complete" and the per-test
+  timeout never fires because `pumpAndSettle`/the binding spin). `pumpApp`
+  pre-loads the cheese library on the real loop and overrides
+  `libraryRepositoryProvider`; `LibraryRepository.load()` answers from
+  memory once loaded so providers resolve under `pumpAndSettle`. Form tests
+  set a tall viewport (`tallScreen`) so the whole `ListView` is built.
 
 Local toolchain (Tim's machine): Flutter 3.47.2 at `~/develop/flutter`, on
 PATH only through the shell rc — agent shells must
@@ -219,7 +238,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   brand assets still open. Domain models + maintained JSON schemas
   (CHEESE-20). Drift DB + repositories + providers, settings wired into
   the shell (CHEESE-21). Bundled cheese library + loader (CHEESE-22).
-  Flavor wheel / list / entry card (CHEESE-26). PRs #8–#12 stacked,
-  awaiting review. Next: note form (27), detail (28), home rows (24),
-  then an APK — the goal is entering and viewing a note end to end on
-  the emulator or a device APK.
+  Flavor wheel / list / entry card (CHEESE-26). Note form, new + edit
+  (CHEESE-27). PRs #8–#13 stacked, awaiting review. Next: detail (28),
+  home rows (24), then an APK — the goal is entering and viewing a note
+  end to end on the emulator or a device APK.

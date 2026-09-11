@@ -165,35 +165,6 @@ class SettingsPlaceholderScreen extends StatelessWidget {
 
 // ---- Full-screen routes (root navigator) ----
 
-/// `/notes/new` and `/notes/:id/edit` — CHEESE-27. Slide-up dialog with
-/// close X and a Save action that stays disabled until the form exists.
-class NoteFormPlaceholderScreen extends StatelessWidget {
-  const NoteFormPlaceholderScreen({super.key, this.noteId});
-
-  /// Null for a new note; the note being edited otherwise.
-  final String? noteId;
-
-  @override
-  Widget build(BuildContext context) {
-    final editing = noteId != null;
-    return Scaffold(
-      appBar: _backAppBar(
-        context,
-        editing ? 'Edit tasting note' : 'New tasting note',
-        close: true,
-        actions: const [
-          TextButton(onPressed: null, child: Text('Save')),
-          SizedBox(width: 8),
-        ],
-      ),
-      body: PlaceholderBody(
-        title: editing ? 'Edit tasting note' : 'New tasting note',
-        ticket: 'CHEESE-27',
-      ),
-    );
-  }
-}
-
 /// `/notes/:id` — CHEESE-28. Back + pencil (to edit).
 class NoteDetailPlaceholderScreen extends StatelessWidget {
   const NoteDetailPlaceholderScreen({super.key, required this.noteId});

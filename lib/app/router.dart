@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/notes/note_form_screen.dart';
 import 'shell/placeholder_screens.dart';
 import 'shell/scribe_shell.dart';
 
@@ -29,7 +30,7 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
                 path: 'new',
                 parentNavigatorKey: rootKey,
                 pageBuilder: (context, state) =>
-                    slideUpPage(state, const NoteFormPlaceholderScreen()),
+                    slideUpPage(state, const NoteFormScreen()),
               ),
               GoRoute(
                 path: ':id',
@@ -43,9 +44,7 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
                     parentNavigatorKey: rootKey,
                     pageBuilder: (context, state) => slideUpPage(
                       state,
-                      NoteFormPlaceholderScreen(
-                        noteId: state.pathParameters['id'],
-                      ),
+                      NoteFormScreen(noteId: state.pathParameters['id']),
                     ),
                   ),
                 ],
