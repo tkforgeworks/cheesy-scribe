@@ -71,6 +71,16 @@ Layout so far:
   `cheeseStylesProvider` / `cheeseStyleProvider(id)` (FutureProviders).
   The shell's `displayNameProvider` and `ScribeApp`'s `themeMode` read
   from settings.
+- `lib/features/notes/notes_home_screen.dart` — `NotesHomeScreen` for
+  `/notes` (CHEESE-24): pinned search-bar header, "Your tastings" + mono
+  count, chips (All · 4★ and up · top style ids from `topStyleIdsProvider`
+  named via the library), `FeaturedNoteCard` (newest note, hidden while a
+  filter is active, and excluded from the rows), `NoteRow`s with dividers,
+  paging by growing `NotesQuery.limit`, long-press sheet Edit / Delete →
+  confirm sheet, FAB slides/fades out on scroll-down. Providers:
+  `notesPageProvider(query)`, `notesCountProvider(query)`,
+  `newestNoteProvider`, `topStyleIdsProvider`. Search view is CHEESE-25
+  (the bar's `onTap` is still unwired).
 - `lib/features/notes/note_form_screen.dart` — `NoteFormScreen({noteId})`
   for `/notes/new` and `/notes/:id/edit` (CHEESE-27): controllers per text
   field, picker fields (date, rind, style) use display-only controllers,
@@ -249,7 +259,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (CHEESE-20). Drift DB + repositories + providers, settings wired into
   the shell (CHEESE-21). Bundled cheese library + loader (CHEESE-22).
   Flavor wheel / list / entry card (CHEESE-26). Note form, new + edit
-  (CHEESE-27). Note detail (CHEESE-28). PRs #8–#14 stacked, awaiting
-  review. Next: home list rows (24) so saved notes can be reopened, then
-  an APK — the goal is entering and viewing a note end to end on the
-  emulator or a device APK.
+  (CHEESE-27). Note detail (CHEESE-28). Home list (CHEESE-24). PRs
+  #8–#15 stacked, awaiting review; the app now goes list → new note →
+  detail → edit end to end. Next: build a debug APK / run on the emulator
+  to confirm the goal on a device, then CHEESE-25 search, 29 library, 30
+  stats, 31 settings, 33 about, 34 account, 18 brand assets.

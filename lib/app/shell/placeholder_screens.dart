@@ -67,36 +67,6 @@ AppBar _backAppBar(
 
 // ---- Shell destinations ----
 
-/// `/notes` — CHEESE-24 replaces this with the home list.
-class NotesPlaceholderScreen extends StatelessWidget {
-  const NotesPlaceholderScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: ScribeSearchBar(hint: 'Search your tastings'),
-            ),
-            const Expanded(
-              child: PlaceholderBody(
-                title: 'Your tastings',
-                ticket: 'CHEESE-24',
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: ForgeFab(
-        onPressed: () => context.push('/notes/new'),
-      ),
-    );
-  }
-}
-
 /// `/library` — CHEESE-29 replaces this with the style grid. Already
 /// reads the bundled library for the "N STYLES" count.
 class LibraryPlaceholderScreen extends ConsumerWidget {

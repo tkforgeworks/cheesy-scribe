@@ -53,3 +53,23 @@ final cheeseStylesProvider = FutureProvider<List<CheeseStyle>>(
 final cheeseStyleProvider = FutureProvider.family<CheeseStyle?, String>(
   (ref, id) => ref.watch(libraryRepositoryProvider).byId(id),
 );
+
+/// One page of notes for the home list / search (query = filters + paging).
+final notesPageProvider = StreamProvider.family<List<TastingNote>, NotesQuery>(
+  (ref, query) => ref.watch(notesRepositoryProvider).watchPage(query),
+);
+
+/// Total notes matching a query's filters (paging ignored).
+final notesCountProvider = StreamProvider.family<int, NotesQuery>(
+  (ref, query) => ref.watch(notesRepositoryProvider).watchCount(query),
+);
+
+/// The featured card's note.
+final newestNoteProvider = StreamProvider<TastingNote?>(
+  (ref) => ref.watch(notesRepositoryProvider).watchNewest(),
+);
+
+/// Style ids by note count, for the Home filter chips.
+final topStyleIdsProvider = StreamProvider<List<String>>(
+  (ref) => ref.watch(notesRepositoryProvider).watchTopStyleIds(),
+);

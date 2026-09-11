@@ -1,6 +1,7 @@
 import 'package:cheesy_scribe/app/shell/scribe_drawer.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
+import 'package:cheesy_scribe/app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,7 +25,7 @@ void main() {
   testApp('boots on /notes with the search bar and FAB', (tester) async {
     await pumpApp(tester);
     expect(find.text('Search your tastings'), findsOneWidget);
-    expect(find.text('New tasting notes'), findsOneWidget);
+    expect(find.byType(ForgeFab), findsOneWidget);
     expect(find.byType(Drawer), findsNothing);
   });
 
@@ -117,7 +118,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Search your tastings'), findsOneWidget);
 
-    await tester.tap(find.text('New tasting notes'));
+    await tester.tap(find.byType(ForgeFab));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'New tasting note'), findsOneWidget);
   });

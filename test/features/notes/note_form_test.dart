@@ -120,7 +120,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Search your tastings'), findsOneWidget);
 
-    await tester.tap(find.text('New tasting notes'));
+    await tester.tap(find.byType(ForgeFab));
     await tester.pumpAndSettle();
     await tester.enterText(field('Cheese name'), 'Stilton');
     await tester.tap(find.byTooltip('Close'));
