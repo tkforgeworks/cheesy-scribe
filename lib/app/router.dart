@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/notes/note_detail_screen.dart';
 import '../features/notes/note_form_screen.dart';
+import '../features/notes/notes_home_screen.dart';
 import 'shell/placeholder_screens.dart';
 import 'shell/scribe_shell.dart';
 
@@ -24,7 +25,7 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
           GoRoute(
             path: '/notes',
             pageBuilder: (context, state) =>
-                _shellPage(state, const NotesPlaceholderScreen()),
+                _shellPage(state, const NotesHomeScreen()),
             routes: [
               // Before ':id' so "new" is never read as a note id.
               GoRoute(
