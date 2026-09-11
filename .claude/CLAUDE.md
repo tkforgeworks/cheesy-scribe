@@ -58,10 +58,19 @@ Layout so far:
   upsert, `newId()`), `SettingsRepository` (`watch/load/save/update`),
   `RecentSearchesRepository` (cap 10). Domain types in, domain types out;
   drift row classes (`NoteRow` etc.) never leave `lib/data`.
+- `lib/data/repositories/library_repository.dart` + `assets/data/
+  cheese_styles.json` — the bundled read-only library (27 styles, curated
+  file order, ids are stable slugs: never rename one after release; add
+  new styles at the end). `LibraryRepository.load()` caches; static
+  `search()` folds diacritics. The six mocked styles keep the mockup's
+  example strings (asserted in `test/data/library_test.dart`, which also
+  schema-validates every entry). Tim owns the prose; edit in place.
 - `lib/data/providers.dart` — `appDatabaseProvider` (drift_flutter
-  `driftDatabase(name: 'cheesy_scribe')`; tests override it), the three
-  repository providers, `appSettingsProvider` (StreamProvider). The shell's
-  `displayNameProvider` and `ScribeApp`'s `themeMode` read from it.
+  `driftDatabase(name: 'cheesy_scribe')`; tests override it), the
+  repository providers, `appSettingsProvider` (StreamProvider),
+  `cheeseStylesProvider` / `cheeseStyleProvider(id)` (FutureProviders).
+  The shell's `displayNameProvider` and `ScribeApp`'s `themeMode` read
+  from settings.
 - `lib/app/theme/scribe_theme.dart` — tokens, `ScribeColors` extension,
   `ScribeTheme.light()/dark()`, `ScribeTheme.ui/serif/mono` helpers,
   `context.colors/text/scribe` shorthands, component themes (incl. drawer).
@@ -201,7 +210,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   screens, riverpod and package_info_plus added (CHEESE-19). CHEESE-18
   brand assets still open. Domain models + maintained JSON schemas
   (CHEESE-20). Drift DB + repositories + providers, settings wired into
-  the shell (CHEESE-21). PRs #8/#9/#10 stacked, awaiting review. Next:
-  minimal library dataset (22), note form (27), detail (28), home rows
-  (24), then an APK — the goal is entering and viewing a note end to end
-  on the emulator or a device APK.
+  the shell (CHEESE-21). Bundled cheese library + loader (CHEESE-22).
+  PRs #8/#9/#10/#11 stacked, awaiting review. Next: note form (27, with
+  the flavor entry card from 26), detail (28), home rows (24), then an
+  APK — the goal is entering and viewing a note end to end on the
+  emulator or a device APK.

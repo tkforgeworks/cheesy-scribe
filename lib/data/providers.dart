@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'db/app_database.dart';
 import 'models/models.dart';
+import 'repositories/library_repository.dart';
 import 'repositories/notes_repository.dart';
 import 'repositories/recent_searches_repository.dart';
 import 'repositories/settings_repository.dart';
@@ -31,4 +32,19 @@ final recentSearchesRepositoryProvider = Provider<RecentSearchesRepository>(
 /// Live settings; `AppSettings()` defaults until the first row exists.
 final appSettingsProvider = StreamProvider<AppSettings>(
   (ref) => ref.watch(settingsRepositoryProvider).watch(),
+);
+
+final libraryRepositoryProvider = Provider<LibraryRepository>(
+  (ref) => LibraryRepository(),
+);
+
+/// The bundled cheese library, in curated order.
+final cheeseStylesProvider = FutureProvider<List<CheeseStyle>>(
+  (ref) => ref.watch(libraryRepositoryProvider).load(),
+);
+
+/// One style by id; null when the id is unknown (a note may outlive a
+/// renamed style only if we break the "ids are stable" rule — don't).
+final cheeseStyleProvider = FutureProvider.family<CheeseStyle?, String>(
+  (ref, id) => ref.watch(libraryRepositoryProvider).byId(id),
 );

@@ -9,6 +9,7 @@ import 'package:heroicons/heroicons.dart';
 
 import '../theme/scribe_theme.dart';
 import '../widgets/widgets.dart';
+import '../../data/providers.dart';
 import 'scribe_search_bar.dart';
 import 'scribe_shell.dart';
 import 'shell_providers.dart';
@@ -96,21 +97,31 @@ class NotesPlaceholderScreen extends StatelessWidget {
   }
 }
 
-/// `/library` — CHEESE-29 replaces this with the style grid.
-class LibraryPlaceholderScreen extends StatelessWidget {
+/// `/library` — CHEESE-29 replaces this with the style grid. Already
+/// reads the bundled library for the "N STYLES" count.
+class LibraryPlaceholderScreen extends ConsumerWidget {
   const LibraryPlaceholderScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final count = ref.watch(cheeseStylesProvider).asData?.value.length;
+    return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            const Padding(
               padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: ScribeSearchBar(hint: 'Search the library'),
             ),
-            Expanded(
+            if (count != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: MonoLabel('$count styles', emphasis: true),
+                ),
+              ),
+            const Expanded(
               child: PlaceholderBody(
                 title: 'Cheese library',
                 ticket: 'CHEESE-29',
