@@ -1,5 +1,6 @@
 import 'package:cheesy_scribe/app/shell/scribe_drawer.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
+import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -93,7 +94,19 @@ void main() {
   });
 
   testApp('note detail links to edit; FAB opens the form', (tester) async {
-    await pumpApp(tester, at: '/notes/42');
+    final db = openTestDatabase();
+    await onDb(
+      tester,
+      () => NotesRepository(db).save(
+        TastingNote(
+          id: '42',
+          cheeseName: 'Comté',
+          tastedAt: DateTime(2026, 8, 1),
+          createdAt: DateTime.utc(2026, 8, 1),
+        ),
+      ),
+    );
+    await pumpApp(tester, at: '/notes/42', db: db);
     expect(find.widgetWithText(AppBar, 'Tasting note'), findsOneWidget);
     await tester.tap(find.byTooltip('Edit'));
     await tester.pumpAndSettle();

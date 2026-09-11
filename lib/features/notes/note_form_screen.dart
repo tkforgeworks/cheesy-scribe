@@ -10,6 +10,7 @@ import '../../data/providers.dart';
 import 'note_dates.dart';
 import 'widgets/flavor_entry_card.dart';
 import 'widgets/pickers.dart';
+import 'widgets/texture_meter.dart';
 
 /// `/notes/new` and `/notes/:id/edit` (DESIGN_SPEC §6, CHEESE-27): the
 /// slide-up journal page. Save is enabled once the cheese has a name; the
@@ -443,7 +444,7 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
         _gap,
         _FormCard(
           label: 'Texture meter',
-          child: _TextureMeter(
+          child: TextureMeter(
             value: _texture,
             onChanged: (t) => setState(() => _texture = t),
           ),
@@ -665,43 +666,6 @@ class _AttributeRowsState extends State<_AttributeRows> {
             controller: widget.attributeOther,
           ),
         ],
-      ],
-    );
-  }
-}
-
-/// Six-stop slider with mono labels; the active label is emphasised.
-class _TextureMeter extends StatelessWidget {
-  const _TextureMeter({required this.value, required this.onChanged});
-
-  final TextureLevel value;
-  final ValueChanged<TextureLevel> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Slider(
-          value: value.index.toDouble(),
-          min: 0,
-          max: (TextureLevel.values.length - 1).toDouble(),
-          divisions: TextureLevel.values.length - 1,
-          label: value.label,
-          onChanged: (v) => onChanged(TextureLevel.values[v.round()]),
-        ),
-        Row(
-          children: [
-            for (final t in TextureLevel.values)
-              Expanded(
-                child: MonoLabel(
-                  t.label,
-                  size: 8.5,
-                  emphasis: t == value,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-          ],
-        ),
       ],
     );
   }

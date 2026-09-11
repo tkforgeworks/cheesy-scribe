@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/notes/note_detail_screen.dart';
 import '../features/notes/note_form_screen.dart';
 import 'shell/placeholder_screens.dart';
 import 'shell/scribe_shell.dart';
@@ -35,9 +36,8 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
               GoRoute(
                 path: ':id',
                 parentNavigatorKey: rootKey,
-                builder: (context, state) => NoteDetailPlaceholderScreen(
-                  noteId: state.pathParameters['id']!,
-                ),
+                builder: (context, state) =>
+                    NoteDetailScreen(noteId: state.pathParameters['id']!),
                 routes: [
                   GoRoute(
                     path: 'edit',

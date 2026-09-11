@@ -81,6 +81,16 @@ Layout so far:
   2026"; English only, no intl). `widgets/pickers.dart`: `showRindPicker`,
   `showStylePicker` (searchable) returning `PickResult` (cleared vs value
   vs dismissed).
+- `lib/features/notes/note_detail_screen.dart` — `NoteDetailScreen`
+  (CHEESE-28) streams `noteProvider(id)`; pops itself when the note is
+  deleted underneath it (`ref.listen`: had data → `AsyncData(null)`);
+  unknown id shows the "This note is gone" empty state with no pencil.
+  Sections hide when empty (stars if unrated, NOTES, wheel). Shows the
+  verdict as an italic line under the maker line (not in the mockup; the
+  field otherwise never surfaces outside the featured card).
+- `lib/features/notes/widgets/texture_meter.dart` — `TextureMeter`
+  (Slider when `onChanged` is set, painted track + thumb when read-only)
+  shared by form and detail. `PriceUnit.format(28)` → `$28/LB`.
 - `lib/features/notes/widgets/` — `FlavorWheel` (+ `FlavorWheelGeometry`:
   spec-sheet SVG maths scaled to width; `hitTest` → (spoke, ring), ring 0 =
   clear; polygon animates 250 ms; `onChanged == null` = read-only),
@@ -239,6 +249,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (CHEESE-20). Drift DB + repositories + providers, settings wired into
   the shell (CHEESE-21). Bundled cheese library + loader (CHEESE-22).
   Flavor wheel / list / entry card (CHEESE-26). Note form, new + edit
-  (CHEESE-27). PRs #8–#13 stacked, awaiting review. Next: detail (28),
-  home rows (24), then an APK — the goal is entering and viewing a note
-  end to end on the emulator or a device APK.
+  (CHEESE-27). Note detail (CHEESE-28). PRs #8–#14 stacked, awaiting
+  review. Next: home list rows (24) so saved notes can be reopened, then
+  an APK — the goal is entering and viewing a note end to end on the
+  emulator or a device APK.
