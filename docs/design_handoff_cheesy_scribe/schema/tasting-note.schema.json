@@ -2,33 +2,39 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://tkforgeworks.com/schemas/cheesy-scribe/tasting-note.json",
   "title": "TastingNote",
+  "description": "One tasting. Amended from the design handoff per CHEESE-1 §3 B1–B8 (CHEESE-20).",
   "type": "object",
-  "required": ["id", "cheeseName", "tastedAt"],
+  "required": ["id", "cheeseName", "tastedAt", "createdAt"],
+  "additionalProperties": false,
   "properties": {
     "id": { "type": "string", "description": "UUID" },
     "cheeseName": { "type": "string", "minLength": 1 },
-    "tastedAt": { "type": "string", "format": "date-time" },
+    "tastedAt": { "type": "string", "format": "date", "description": "Calendar date of the tasting (local), YYYY-MM-DD" },
+    "createdAt": { "type": "string", "format": "date-time", "description": "First save, UTC; tiebreak for notes tasted the same day" },
     "creamery": { "type": "string" },
     "origin": { "type": "string" },
     "rind": { "enum": ["natural", "bloomy", "washed", "waxed", "leafWrapped", "rindless", "other"] },
     "rindOther": { "type": "string", "description": "Free text when rind == other" },
-    "pricePerLb": { "type": "number", "minimum": 0 },
+    "price": { "type": "number", "minimum": 0, "description": "In priceUnit; absent when not recorded" },
+    "priceUnit": { "enum": ["usdPerLb", "eurPerKg"], "default": "usdPerLb", "description": "Taken from settings at entry; never converted" },
     "milk": { "enum": ["cow", "goat", "sheep", "buffalo", "other"], "default": "cow" },
     "milkOther": { "type": "string", "description": "Free text when milk == other" },
     "isGrassfed": { "type": "boolean", "default": false },
     "isRaw": { "type": "boolean", "default": false },
-    "rating": { "type": "integer", "minimum": 0, "maximum": 5 },
+    "attributeOther": { "type": "string", "description": "Free text for the Other chip on the Grassfed / Raw / Other row" },
+    "rating": { "type": "integer", "minimum": 0, "maximum": 5, "default": 0, "description": "Whole stars; 0 = unrated (hidden, excluded from averages)" },
     "texture": { "enum": ["runny", "soft", "semiSoft", "semiFirm", "firm", "hard"], "default": "semiSoft" },
     "notes": { "type": "string" },
+    "verdict": { "type": "string", "description": "One-line quote for the featured card; falls back to the first sentence of notes" },
     "flavors": {
       "type": "object",
-      "description": "Flavor wheel scores; absent spoke = 0",
+      "description": "Flavor wheel scores 1–5; absent spoke = 0",
       "propertyNames": {
         "enum": ["salty", "sweet", "sharpTangy", "lemon", "grassy", "herbal", "caramel", "nutty", "earthy", "moldyBlue", "stinky", "robust", "butteryCreamy", "milkyLactic", "crumbly", "crystalline"]
       },
-      "additionalProperties": { "type": "integer", "minimum": 0, "maximum": 5 }
+      "additionalProperties": { "type": "integer", "minimum": 1, "maximum": 5 }
     },
-    "cheeseStyleId": { "type": "string", "description": "FK -> CheeseStyle.id" },
-    "photoUrl": { "type": "string", "format": "uri" }
+    "cheeseStyleId": { "type": "string", "description": "FK -> CheeseStyle.id, set by the STYLE picker" },
+    "photoUrl": { "type": "string", "format": "uri", "description": "Modelled, no UI in v0.1.0" }
   }
 }

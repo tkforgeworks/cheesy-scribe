@@ -2,14 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://tkforgeworks.com/schemas/cheesy-scribe/cheese-style.json",
   "title": "CheeseStyle",
+  "description": "A reference style in the bundled cheese library (assets/data/cheese_styles.json).",
   "type": "object",
-  "required": ["id", "name"],
+  "required": ["id", "name", "examples"],
+  "additionalProperties": false,
   "properties": {
-    "id": { "type": "string" },
-    "name": { "type": "string", "examples": ["Alpine", "Blue", "Bloomy rind", "Washed rind", "Fresh", "Hard aged"] },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Stable slug; never renamed after release" },
+    "name": { "type": "string", "minLength": 1, "examples": ["Alpine", "Blue", "Bloomy rind", "Washed rind", "Fresh", "Hard aged"] },
     "examples": { "type": "string", "description": "Comma list shown on library cards, e.g. \"Comté, Gruyère, Appenzeller\"" },
     "description": { "type": "string" },
-    "typicalMilk": { "type": "array", "items": { "enum": ["cow", "goat", "sheep", "buffalo", "other"] } },
+    "typicalMilk": { "type": "array", "minItems": 1, "items": { "enum": ["cow", "goat", "sheep", "buffalo", "other"] } },
     "typicalTexture": { "enum": ["runny", "soft", "semiSoft", "semiFirm", "firm", "hard"] }
   }
 }

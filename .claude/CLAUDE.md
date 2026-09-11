@@ -17,15 +17,41 @@ targets). Dart package `cheesy_scribe`, application id
 `com.tkforgeworks.cheesy_scribe`. Android platform only; portrait-only via the
 manifest and `SystemChrome`.
 
-Layout so far: `lib/app/theme/scribe_theme.dart` (tokens, `ScribeColors`
-extension, `ScribeTheme.light()/dark()`, `ScribeTheme.ui/serif/mono` style
-helpers, `context.colors/text/scribe` shorthands) and `lib/app/widgets/`
-(the shared atoms from DESIGN_SPEC §5 — `MonoLabel`, `TagCapsule`,
-`StatusCapsule`, `StarRating`, `JournalField`, `BoxedField`, `ForgeFab`,
-`ForgeLogoBadge`/`WedgeGlyph`, `SkeletonRow`, `ErrorCard`, `EmptyState`,
-`showConfirmSheet`; import the `widgets.dart` barrel). `lib/main.dart` is a
-placeholder home until the shell (CHEESE-19) lands. Tests: `test/support.dart`
-`wrap()` gives a themed MaterialApp.
+Layout so far:
+
+- `lib/main.dart` — `ProviderScope` + `ScribeApp` (`MaterialApp.router`;
+  creates the router once in its State; `initialLocation` param for tests).
+- `lib/app/router.dart` — `createScribeRouter()`: `ShellRoute` for `/notes`
+  (initial), `/library`, `/stats`, `/settings` (`NoTransitionPage`), plus
+  root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
+  fullscreen dialog), `/notes/:id`, `/library/:styleId`, `/account`,
+  `/about`. No `/login`. `new` is declared before `:id`.
+- `lib/app/shell/` — `ScribeShell` (Scaffold owning the drawer; screens are
+  their own Scaffolds and call `ScribeShell.openDrawer(context)`, not
+  `Scaffold.of`), `ScribeDrawer` (`DrawerDestination`/`DrawerPill`; no Sign
+  out — local-first), `ScribeSearchBar` (menu icon + avatar), providers
+  `appVersionProvider` (package_info_plus) and `displayNameProvider` (null
+  until CHEESE-21/34), and `placeholder_screens.dart` — one class per route,
+  each naming the ticket that replaces it; delete them as tickets land.
+- `lib/data/models/` — `TastingNote`, `CheeseStyle`, `AppSettings`,
+  `TastingStats`, enums (`MilkType`, `TextureLevel`, `RindType`,
+  `FlavorNote`, `PriceUnit`, each with a `label`); import the `models.dart`
+  barrel. Plain immutable classes with `==`, `copyWith` (sentinel-based, so
+  `copyWith(price: null)` clears) and JSON matching
+  `docs/design_handoff_cheesy_scribe/schema/*.schema.json` — the schemas are
+  maintained, and `test/data/models_test.dart` validates emitted JSON
+  against them with `json_schema`. `tastedAt` is a local-midnight date
+  (`YYYY-MM-DD` in JSON); `createdAt` is UTC date-time.
+- `lib/app/theme/scribe_theme.dart` — tokens, `ScribeColors` extension,
+  `ScribeTheme.light()/dark()`, `ScribeTheme.ui/serif/mono` helpers,
+  `context.colors/text/scribe` shorthands, component themes (incl. drawer).
+- `lib/app/widgets/` — the DESIGN_SPEC §5 atoms (`MonoLabel`, `TagCapsule`,
+  `StatusCapsule`, `StarRating`, `JournalField`, `BoxedField`, `ForgeFab`,
+  `ForgeLogoBadge`/`WedgeGlyph`, `SkeletonRow`, `ErrorCard`, `EmptyState`,
+  `showConfirmSheet`); import the `widgets.dart` barrel.
+- Tests: `test/support.dart` `wrap()` gives a themed MaterialApp;
+  `test/app_test.dart` boots the real app (wrap in `ProviderScope`, seed
+  `PackageInfo.setMockInitialValues`) and walks every drawer item.
 
 Local toolchain (Tim's machine): Flutter 3.47.2 at `~/develop/flutter`, on
 PATH only through the shell rc — agent shells must
@@ -49,9 +75,10 @@ for routine visual checks and the emulator for confirmation.
 CI is `ci-flutter.yml`, releases `release-flutter.yml` with
 `build-windows: false`, version bumps via
 `scripts/release/bump-version.{ps1,sh}`. `dart format` does not honour
-`analysis_options.yaml` excludes, so the handoff's reference Dart files are
-`docs/design_handoff_cheesy_scribe/lib/*.dart.txt`. Delete them once adopted
-into `lib/` (CHEESE-17, CHEESE-20).
+`analysis_options.yaml` excludes, so the handoff's remaining reference Dart
+file is `docs/design_handoff_cheesy_scribe/lib/theme.dart.txt` (models.dart
+was adopted and deleted in CHEESE-20; theme.dart.txt can go once nothing
+else refers to it).
 
 ## Repo & process conventions (org standard)
 
@@ -119,7 +146,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - **Models: the handoff's plain classes**, amended: nullable `verdict` (one-line
   quote for the featured card), `price` + `priceUnit` replacing `pricePerLb`
   (no offline currency conversion), `attributeOther`, rating 0 = unrated,
-  `UserProfile` reduced to a local display name. No freezed.
+  `tastedAt` date-only + `createdAt` tiebreak, `UserProfile` dropped in
+  favour of `AppSettings.displayName` (CHEESE-20, 2026-09-11). No freezed.
 - **STYLE picker on the note form** sets `cheeseStyleId`; the library's
   "N TASTED", style-detail notes and Home style chips depend on it.
 - **Cheese library is a bundled JSON asset** (~25–35 styles drafted by Claude,
@@ -144,4 +172,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   on `main` (CHEESE-16), theme + bundled fonts + shared atoms (CHEESE-17).
 - 2026-09-11: app shell — go_router ShellRoute + drawer + placeholder
   screens, riverpod and package_info_plus added (CHEESE-19). CHEESE-18
-  brand assets still open. Next: the data layer (CHEESE-20..23).
+  brand assets still open. Domain models + maintained JSON schemas
+  (CHEESE-20). Next: CHEESE-21 drift DB/repositories/providers, then the
+  note form (27) and detail (28) toward the goal of entering and viewing a
+  note end to end on the emulator or a device APK.
