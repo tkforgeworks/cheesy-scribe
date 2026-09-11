@@ -466,10 +466,16 @@ abstract final class ScribeTheme {
         thickness: 1,
         space: 1,
       ),
+      // Drawer: 300 wide, right radius 16, scrim from the scheme; one of the
+      // three places a shadow is allowed (§1 rule 5).
       drawerTheme: DrawerThemeData(
         backgroundColor: isDark
             ? ScribeTokens.charcoalCard
             : c.surfaceContainerLowest,
+        scrimColor: c.scrim,
+        elevation: 8,
+        shadowColor: c.shadow,
+        surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.horizontal(right: Radius.circular(16)),
         ),

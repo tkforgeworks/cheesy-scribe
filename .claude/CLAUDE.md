@@ -142,4 +142,6 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - 2026-09-06: toolchain verified (CHEESE-13), Android-only Flutter scaffold
   (CHEESE-14), org template files (CHEESE-15), CI + required `ci / ci` check
   on `main` (CHEESE-16), theme + bundled fonts + shared atoms (CHEESE-17).
-  Next: CHEESE-19 shell/routing, then the data layer (CHEESE-20..23).
+- 2026-09-11: app shell — go_router ShellRoute + drawer + placeholder
+  screens, riverpod and package_info_plus added (CHEESE-19). CHEESE-18
+  brand assets still open. Next: the data layer (CHEESE-20..23).
