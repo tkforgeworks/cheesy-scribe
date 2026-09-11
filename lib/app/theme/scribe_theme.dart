@@ -84,6 +84,7 @@ class ScribeColors extends ThemeExtension<ScribeColors> {
     required this.textGhost,
     required this.starActive,
     required this.starInactive,
+    required this.wheelGrid,
     required this.successFg,
     required this.successBg,
     required this.errorTint,
@@ -97,6 +98,9 @@ class ScribeColors extends ThemeExtension<ScribeColors> {
   final Color textGhost;
   final Color starActive;
   final Color starInactive;
+
+  /// Flavor wheel rings and spokes (spec sheet 04).
+  final Color wheelGrid;
 
   /// CONNECTED status capsule pair (spec sheet 03) — status only, never text.
   final Color successFg;
@@ -116,6 +120,7 @@ class ScribeColors extends ThemeExtension<ScribeColors> {
     textGhost: ScribeTokens.inkGhost,
     starActive: ScribeTokens.rindAmber,
     starInactive: Color(0xFFE0D2B4),
+    wheelGrid: Color(0xFFD9CBAA),
     successFg: Color(0xFF3D7A33),
     successBg: Color(0xFFE8F2E5),
     errorTint: Color(0xFFFBEDEA),
@@ -131,6 +136,7 @@ class ScribeColors extends ThemeExtension<ScribeColors> {
     textGhost: ScribeTokens.parchGhost,
     starActive: ScribeTokens.butterAmber,
     starInactive: Color(0xFF4A4237),
+    wheelGrid: Color(0xFF4A4237),
     successFg: Color(0xFF9CCB8F),
     successBg: Color(0xFF2B3D28),
     errorTint: Color(0xFF3A2320),
@@ -149,6 +155,7 @@ class ScribeColors extends ThemeExtension<ScribeColors> {
     Color? textGhost,
     Color? starActive,
     Color? starInactive,
+    Color? wheelGrid,
     Color? successFg,
     Color? successBg,
     Color? errorTint,
@@ -161,6 +168,7 @@ class ScribeColors extends ThemeExtension<ScribeColors> {
     textGhost: textGhost ?? this.textGhost,
     starActive: starActive ?? this.starActive,
     starInactive: starInactive ?? this.starInactive,
+    wheelGrid: wheelGrid ?? this.wheelGrid,
     successFg: successFg ?? this.successFg,
     successBg: successBg ?? this.successBg,
     errorTint: errorTint ?? this.errorTint,
@@ -178,6 +186,7 @@ class ScribeColors extends ThemeExtension<ScribeColors> {
       textGhost: Color.lerp(textGhost, other.textGhost, t)!,
       starActive: Color.lerp(starActive, other.starActive, t)!,
       starInactive: Color.lerp(starInactive, other.starInactive, t)!,
+      wheelGrid: Color.lerp(wheelGrid, other.wheelGrid, t)!,
       successFg: Color.lerp(successFg, other.successFg, t)!,
       successBg: Color.lerp(successBg, other.successBg, t)!,
       errorTint: Color.lerp(errorTint, other.errorTint, t)!,
@@ -405,6 +414,35 @@ abstract final class ScribeTheme {
               ? ScribeTokens.butterAmber
               : ScribeTokens.rindDeep,
           textStyle: text.labelLarge?.copyWith(fontSize: 13),
+        ),
+      ),
+      // Segmented toggle (Wheel/List, Settings units): compact, radius 8,
+      // selected = primaryContainer + emphasis text (DESIGN_SPEC §5).
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          minimumSize: const WidgetStatePropertyAll(Size(0, 30)),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 12),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: cardRadius),
+          ),
+          side: WidgetStatePropertyAll(BorderSide(color: c.outline)),
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected)
+                ? c.primaryContainer
+                : Colors.transparent,
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected)
+                ? c.onPrimaryContainer
+                : c.onSurfaceVariant,
+          ),
+          textStyle: WidgetStatePropertyAll(
+            ui(size: 12, weight: FontWeight.w500),
+          ),
         ),
       ),
       // Filter chips: radius 8 (not stock full), selected = primaryContainer
