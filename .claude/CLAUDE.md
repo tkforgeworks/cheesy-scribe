@@ -71,9 +71,17 @@ Layout so far:
   `cheeseStylesProvider` / `cheeseStyleProvider(id)` (FutureProviders).
   The shell's `displayNameProvider` and `ScribeApp`'s `themeMode` read
   from settings.
-- `lib/app/theme/scribe_theme.dart` — tokens, `ScribeColors` extension,
-  `ScribeTheme.light()/dark()`, `ScribeTheme.ui/serif/mono` helpers,
-  `context.colors/text/scribe` shorthands, component themes (incl. drawer).
+- `lib/features/notes/widgets/` — `FlavorWheel` (+ `FlavorWheelGeometry`:
+  spec-sheet SVG maths scaled to width; `hitTest` → (spoke, ring), ring 0 =
+  clear; polygon animates 250 ms; `onChanged == null` = read-only),
+  `FlavorList` (5 pips per row, `FlavorList.pipKey(flavor, n)` for tests),
+  `FlavorEntryCard` (Wheel/List toggle, helper line; read-only card when
+  `onChanged` is null). Both modes edit one `Map<FlavorNote,int>`; zeros
+  are removed from the map, never stored.
+- `lib/app/theme/scribe_theme.dart` — tokens, `ScribeColors` extension
+  (incl. `wheelGrid`), `ScribeTheme.light()/dark()`,
+  `ScribeTheme.ui/serif/mono` helpers, `context.colors/text/scribe`
+  shorthands, component themes (drawer, segmented button, chips, …).
 - `lib/app/widgets/` — the DESIGN_SPEC §5 atoms (`MonoLabel`, `TagCapsule`,
   `StatusCapsule`, `StarRating`, `JournalField`, `BoxedField`, `ForgeFab`,
   `ForgeLogoBadge`/`WedgeGlyph`, `SkeletonRow`, `ErrorCard`, `EmptyState`,
@@ -211,7 +219,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   brand assets still open. Domain models + maintained JSON schemas
   (CHEESE-20). Drift DB + repositories + providers, settings wired into
   the shell (CHEESE-21). Bundled cheese library + loader (CHEESE-22).
-  PRs #8/#9/#10/#11 stacked, awaiting review. Next: note form (27, with
-  the flavor entry card from 26), detail (28), home rows (24), then an
-  APK — the goal is entering and viewing a note end to end on the
-  emulator or a device APK.
+  Flavor wheel / list / entry card (CHEESE-26). PRs #8–#12 stacked,
+  awaiting review. Next: note form (27), detail (28), home rows (24),
+  then an APK — the goal is entering and viewing a note end to end on
+  the emulator or a device APK.
