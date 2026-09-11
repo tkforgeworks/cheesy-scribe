@@ -205,6 +205,21 @@ void main() {
     expect(find.widgetWithText(AppBar, 'Edit tasting note'), findsOneWidget);
   });
 
+  testApp('a single note is featured with a quiet line, not an empty state', (
+    tester,
+  ) async {
+    final db = openTestDatabase();
+    await onDb(tester, () => NotesRepository(db).save(seed.first));
+    await pumpApp(tester, db: db);
+    expect(find.byType(FeaturedNoteCard), findsOneWidget);
+    expect(find.byType(NoteRow), findsNothing);
+    expect(find.text('Nothing matches'), findsNothing);
+    expect(
+      find.text('One tasting so far. The journal has room.'),
+      findsOneWidget,
+    );
+  });
+
   test('NoteRow.initials', () {
     expect(NoteRow.initials('Comté 24 mo'), 'CO');
     expect(NoteRow.initials('Époisses'), 'ÉP');

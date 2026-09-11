@@ -245,16 +245,33 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
         ),
       ];
     }
-    if (rows.isEmpty) {
+    if (rows.isEmpty && _filtered) {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: EmptyState(
-            icon: const WedgeGlyph(size: 28),
+          child: const EmptyState(
+            icon: WedgeGlyph(size: 28),
             title: 'Nothing matches',
-            aside: _filtered
-                ? 'Loosen the filters, or go taste something that fits.'
-                : 'One tasting so far — it is up there, being featured.',
+            aside: 'Loosen the filters, or go taste something that fits.',
+          ),
+        ),
+      ];
+    }
+    if (rows.isEmpty) {
+      // Exactly one note, and it is the featured card above.
+      return [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'One tasting so far. The journal has room.',
+              textAlign: TextAlign.center,
+              style: ScribeTheme.serif(
+                size: 13,
+                italic: true,
+                color: context.scribe.textTertiary,
+              ),
+            ),
           ),
         ),
       ];
