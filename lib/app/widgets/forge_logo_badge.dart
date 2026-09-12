@@ -78,9 +78,15 @@ class _WedgePainter extends CustomPainter {
       ..lineTo(21.2 * k, 16.8 * k)
       ..close();
     canvas.drawPath(wedge, paint);
-    canvas.drawCircle(Offset(8 * k, 13.6 * k), 1.2 * k, paint);
-    canvas.drawCircle(Offset(13.5 * k, 12 * k), 1.0 * k, paint);
-    canvas.drawCircle(Offset(17.6 * k, 13.8 * k), 0.9 * k, paint);
+    // The SVG strokes the holes as circles whose radius is under the stroke
+    // width, so they read as solid dots; at launcher-icon scale that stroke
+    // would leave a pinhole, so paint them as filled discs of the same
+    // outer radius.
+    final dot = Paint()..color = color;
+    final grow = strokeWidth / 2;
+    canvas.drawCircle(Offset(8 * k, 13.6 * k), (1.2 + grow) * k, dot);
+    canvas.drawCircle(Offset(13.5 * k, 12 * k), (1.0 + grow) * k, dot);
+    canvas.drawCircle(Offset(17.6 * k, 13.8 * k), (0.9 + grow) * k, dot);
   }
 
   @override

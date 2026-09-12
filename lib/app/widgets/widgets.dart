@@ -7,6 +7,7 @@ export 'empty_state.dart';
 export 'error_card.dart';
 export 'forge_fab.dart';
 export 'forge_logo_badge.dart';
+export 'forgeworks_mark.dart';
 export 'journal_field.dart';
 export 'mono_label.dart';
 export 'skeleton_row.dart';
