@@ -5,7 +5,7 @@ publish_to: 'none'
 # X.Y.Z[-rc.N]+BUILD. The release branch name (vX.Y.Z/main) is the source of
 # X.Y.Z; scripts/release/bump-version.{sh,ps1} rewrites this line. BUILD is the
 # Android versionCode and must go up on every APK that reaches a device.
-version: 0.1.0-rc.2+3
+version: 0.1.0-rc.3+4
 
 environment:
   sdk: ^3.13.2
