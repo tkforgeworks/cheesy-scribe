@@ -4,12 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
-import '../../app/shell/scribe_search_bar.dart';
 import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/notes_repository.dart';
+import 'notes_search.dart';
 import 'widgets/featured_note_card.dart';
 import 'widgets/note_row.dart';
 
@@ -388,7 +388,7 @@ class _SearchBarHeader extends SliverPersistentHeaderDelegate {
     color: context.colors.surface,
     child: Padding(
       padding: EdgeInsets.fromLTRB(16, topPadding + 8, 16, 6),
-      child: const ScribeSearchBar(hint: 'Search your tastings'),
+      child: const NotesSearchAnchor(),
     ),
   );
 
