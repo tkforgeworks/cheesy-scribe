@@ -50,13 +50,17 @@ Future<AppDatabase> pumpApp(
     buildNumber: '1',
     buildSignature: '',
   );
+  // Fresh keys so a second pumpApp in the same test is a real restart
+  // (otherwise the old State, and its router, would be reused).
+  final restart = UniqueKey();
   await tester.pumpWidget(
     ProviderScope(
+      key: restart,
       overrides: [
         appDatabaseProvider.overrideWithValue(database),
         libraryRepositoryProvider.overrideWithValue(library),
       ],
-      child: ScribeApp(initialLocation: at),
+      child: ScribeApp(key: ValueKey(restart), initialLocation: at),
     ),
   );
   await tester.pumpAndSettle();
