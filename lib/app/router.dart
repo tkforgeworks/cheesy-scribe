@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/library/library_screen.dart';
+import '../features/library/style_detail_screen.dart';
 import '../features/notes/note_detail_screen.dart';
 import '../features/notes/note_form_screen.dart';
 import '../features/notes/notes_home_screen.dart';
@@ -31,8 +33,12 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
               GoRoute(
                 path: 'new',
                 parentNavigatorKey: rootKey,
-                pageBuilder: (context, state) =>
-                    slideUpPage(state, const NoteFormScreen()),
+                pageBuilder: (context, state) => slideUpPage(
+                  state,
+                  NoteFormScreen(
+                    initialStyleId: state.uri.queryParameters['style'],
+                  ),
+                ),
               ),
               GoRoute(
                 path: ':id',
@@ -55,12 +61,12 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
           GoRoute(
             path: '/library',
             pageBuilder: (context, state) =>
-                _shellPage(state, const LibraryPlaceholderScreen()),
+                _shellPage(state, const LibraryScreen()),
             routes: [
               GoRoute(
                 path: ':styleId',
                 parentNavigatorKey: rootKey,
-                builder: (context, state) => StyleDetailPlaceholderScreen(
+                builder: (context, state) => StyleDetailScreen(
                   styleId: state.pathParameters['styleId']!,
                 ),
               ),

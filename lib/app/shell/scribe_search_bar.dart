@@ -12,12 +12,22 @@ import 'shell_providers.dart';
 /// 28, `surfaceContainer` fill, leading menu icon opens the shell drawer,
 /// trailing 32 px avatar with the local display name's initial.
 class ScribeSearchBar extends ConsumerWidget {
-  const ScribeSearchBar({super.key, required this.hint, this.onTap});
+  const ScribeSearchBar({
+    super.key,
+    required this.hint,
+    this.onTap,
+    this.controller,
+    this.onChanged,
+  });
 
   final String hint;
 
-  /// Tapping the bar itself; the search view (CHEESE-25) hooks in here.
+  /// Tapping the bar itself (Home opens its full-screen search view).
   final VoidCallback? onTap;
+
+  /// For inline filtering (Library): type straight into the bar.
+  final TextEditingController? controller;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,6 +43,8 @@ class ScribeSearchBar extends ConsumerWidget {
         ScribeTheme.ui(size: 14, color: context.scribe.textTertiary),
       ),
       onTap: onTap,
+      controller: controller,
+      onChanged: onChanged,
       leading: IconButton(
         tooltip: 'Open menu',
         onPressed: () => ScribeShell.openDrawer(context),

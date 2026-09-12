@@ -79,8 +79,13 @@ Layout so far:
   paging by growing `NotesQuery.limit`, long-press sheet Edit / Delete →
   confirm sheet, FAB slides/fades out on scroll-down. Providers:
   `notesPageProvider(query)`, `notesCountProvider(query)`,
-  `newestNoteProvider`, `topStyleIdsProvider`. Search view is CHEESE-25
-  (the bar's `onTap` is still unwired).
+  `newestNoteProvider`, `topStyleIdsProvider`. The header's bar is
+  `NotesSearchAnchor` (`notes_search.dart`, CHEESE-25): a full-screen
+  `SearchAnchor` view; blank query shows recent searches
+  (`recentSearchesProvider`, remove per row), typing lists `NoteRow`
+  results for `NotesQuery(search:)`, result tap / submit records the
+  term, "0 RESULTS" state has a Clear search button. The search haystack
+  includes flavor labels scored ≥ 3 only.
 - `lib/features/notes/note_form_screen.dart` — `NoteFormScreen({noteId})`
   for `/notes/new` and `/notes/:id/edit` (CHEESE-27): controllers per text
   field, picker fields (date, rind, style) use display-only controllers,
@@ -267,8 +272,14 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (CHEESE-20). Drift DB + repositories + providers, settings wired into
   the shell (CHEESE-21). Bundled cheese library + loader (CHEESE-22).
   Flavor wheel / list / entry card (CHEESE-26). Note form, new + edit
-  (CHEESE-27). Note detail (CHEESE-28). Home list (CHEESE-24). PRs
-  #8–#15 stacked, awaiting review; the app now goes list → new note →
-  detail → edit end to end. Next: build a debug APK / run on the emulator
-  to confirm the goal on a device, then CHEESE-25 search, 29 library, 30
-  stats, 31 settings, 33 about, 34 account, 18 brand assets.
+  (CHEESE-27). Note detail (CHEESE-28). Home list (CHEESE-24). All of
+  #8–#16 merged into `v0.1.0/main` the same day and the tickets closed;
+  the end-to-end goal (enter a note, view it) was confirmed on the
+  Pixel_8 emulator and on Tim's Pixel 10 Pro Fold via a debug-signed
+  release APK. Stacked-PR lesson: retarget dependents with the REST API
+  (`gh api -X PATCH …/pulls/N -f base=…`) before deleting a merged base
+  branch, or GitHub closes them; `gh pr edit --base` is broken by a
+  GraphQL deprecation. Search view (CHEESE-25, merged) and library grid +
+  style detail (CHEESE-29). Next: 30 stats (+23 fixtures), 31 settings,
+  33 about, 34 account, 18 brand assets, 32 CSV, then 38 release pipeline
+  (needs Tim's keystore) → 39 rc.1.

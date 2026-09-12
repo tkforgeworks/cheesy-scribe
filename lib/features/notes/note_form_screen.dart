@@ -17,10 +17,13 @@ import 'widgets/texture_meter.dart';
 /// X / back asks before discarding edits; edit mode prefills everything
 /// and saves in place.
 class NoteFormScreen extends ConsumerStatefulWidget {
-  const NoteFormScreen({super.key, this.noteId});
+  const NoteFormScreen({super.key, this.noteId, this.initialStyleId});
 
   /// Null for a new note.
   final String? noteId;
+
+  /// Style to preselect on a new note (the library's "New tasting note").
+  final String? initialStyleId;
 
   bool get isEditing => noteId != null;
 
@@ -111,6 +114,14 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
       _id = repo.newId();
       _createdAt = DateTime.now().toUtc();
       _priceUnit = settings.units;
+      if (widget.initialStyleId != null) {
+        final style = await ref
+            .read(libraryRepositoryProvider)
+            .byId(widget.initialStyleId!);
+        if (!mounted) return;
+        _cheeseStyleId = style?.id;
+        _styleText.text = style?.name ?? '';
+      }
     }
     _dateText.text = formatTastingDate(_tastedAt);
     _rindText.text = _rind?.label ?? '';
