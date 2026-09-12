@@ -28,6 +28,7 @@ dev_dependencies:
   json_schema: ^5.2.2
   drift_dev: ^2.35.0
   build_runner: ^2.16.1
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -67,3 +68,14 @@ flutter:
           weight: 400
         - asset: assets/fonts/JetBrainsMono-Medium.ttf
           weight: 500
+
+# Launcher icon (CHEESE-18). Sources are rendered from the app's own brand
+# widgets: see assets/brand/README.md for the regenerate recipe.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/brand/launcher/icon-legacy.png
+  min_sdk_android: 24
+  adaptive_icon_background: "#FAF6EE"
+  adaptive_icon_foreground: assets/brand/launcher/icon-foreground.png
+  adaptive_icon_monochrome: assets/brand/launcher/icon-monochrome.png

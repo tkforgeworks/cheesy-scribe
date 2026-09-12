@@ -9,8 +9,8 @@ import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
 
 /// `/about` (DESIGN_SPEC §6 About, CHEESE-33): badge, name, version, one
-/// paragraph in the TKFW voice, the maker line, links and the privacy
-/// line. The hammer/anvil mark arrives with the brand assets (CHEESE-18).
+/// paragraph in the TKFW voice, the maker line with the TK ForgeWorks mark
+/// (tinted, since this app has no purple), links and the privacy line.
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
@@ -67,8 +67,7 @@ class AboutScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // The TKFW hammer/anvil mark goes here (CHEESE-18).
-              const WedgeGlyph(size: 16),
+              ForgeWorksMark(size: 18, color: x.textTertiary),
               const SizedBox(width: 8),
               MonoLabel(
                 'A TK ForgeWorks product',

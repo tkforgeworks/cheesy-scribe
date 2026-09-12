@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="403.85 197.66 287 287" role="img" aria-label="TK ForgeWorks">
+  <title>TK ForgeWorks</title>
+  <defs>
+    <linearGradient id="anvil" x1="547.6" y1="335.65" x2="547.6" y2="459.58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9632f3"/>
+      <stop offset=".52" stop-color="#8532d6"/>
+      <stop offset="1" stop-color="#601bbc"/>
+    </linearGradient>
+    <linearGradient id="hammer" x1="1014.45" y1="933.89" x2="1296.13" y2="933.89" gradientTransform="translate(98.89 -1095.41) rotate(33.78)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fbdf19"/>
+      <stop offset=".52" stop-color="#f68f25"/>
+      <stop offset="1" stop-color="#ee3423"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#anvil)" d="M634.33,462.12l-68.6-14.04-89.96,13.98v-11.72l47.69-34.38-9.98-21.23-35.4-17.53-63.19-18.14v-14.25h62.55v-1.45h202.87l-34.84,31.39-40.69,26.91-12.3,14.18,31.5,19.99,10.35,13.57v12.72Z"/>
+  <path fill="url(#hammer)" d="M445.01,317.62l-14.25-6.55-1-2.31,4.7-21.23-3.69-10.36,2.47-14.37.12-.23,9.82-15.32,10.89-16.11,6.7-10.73,13.36.84,7.01,4.63,8.48,8.61,3.65,28.42,17.12,7.68,28.92,10.4,41.26,7.99,37.73,9.98,33.2,7.56,22.9,5.81,3.58,6.12-4.31,17.32-5.88,5.09-10.53-.15-23.56-6.61-46.06-13.35-43.39-11.71-36.29-9.04-17.1-.58-6.94-1.65-2.98-1.6-5.98,9.36-2.65,14.61-4.18,2.66-23.1-5.17Z"/>
+</svg>

@@ -78,9 +78,9 @@ Layout so far:
   search-bar avatar read the same `displayNameProvider`.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
   CHEESE-33): badge, name, version, `AboutScreen.blurb` (TKFW voice; Tim
-  owns the copy), maker line (hammer/anvil mark pending CHEESE-18),
-  tkforgeworks.com via `url_launcher` (manifest has the https `<queries>`
-  entry), licenses page, `privacyLine` (links to the policy page later).
+  owns the copy), maker line (`ForgeWorksMark`, tinted `textTertiary`),
+  tkforgeworks.com via `url_launcher`, licenses page, `privacyLine`
+  (links to the policy page later).
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
   (`/settings`, CHEESE-31): `SettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
@@ -151,8 +151,21 @@ Layout so far:
   shorthands, component themes (drawer, segmented button, chips, …).
 - `lib/app/widgets/` — the DESIGN_SPEC §5 atoms (`MonoLabel`, `TagCapsule`,
   `StatusCapsule`, `StarRating`, `JournalField`, `BoxedField`, `ForgeFab`,
-  `ForgeLogoBadge`/`WedgeGlyph`, `SkeletonRow`, `ErrorCard`, `EmptyState`,
+  `ForgeLogoBadge`/`WedgeGlyph`, `ForgeWorksMark` (the TKFW hammer/anvil,
+  About only, tinted), `SkeletonRow`, `ErrorCard`, `EmptyState`,
   `showConfirmSheet`); import the `widgets.dart` barrel.
+- `assets/brand/` (CHEESE-18; all rights reserved via `NOTICE`, not
+  bundled): `wedge.svg`, `tkforgeworks-mark.svg` (verbatim from the parent
+  design system), `launcher/*.png` (512² adaptive foreground / monochrome /
+  legacy sources) and a README with the regenerate recipe: `flutter test
+  tool/brand/render_launcher_sources_test.dart` renders the PNGs from the
+  app's own painters (note flutter_launcher_icons adds a 16 % inset, so the
+  66 dp safe zone is 90 % of the source canvas), then `dart run
+  flutter_launcher_icons` (config in `pubspec.yaml`; background `#FAF6EE`)
+  rewrites `android/app/src/main/res/mipmap-*`, `drawable-*dpi/
+  ic_launcher_*`, `mipmap-anydpi-v26/ic_launcher.xml` and `values/
+  colors.xml`. Launch (splash) background is cream / charcoal at night
+  (`drawable-v21` + `drawable-night-v21/launch_background.xml`).
 - Tests: `test/support.dart` — `wrap()` (themed MaterialApp for atoms),
   `openTestDatabase()` (in-memory drift, closed on teardown), `pumpApp()`
   (real app on an in-memory DB, optional seeded `AppSettings`, mocked
@@ -299,8 +312,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (CHEESE-14), org template files (CHEESE-15), CI + required `ci / ci` check
   on `main` (CHEESE-16), theme + bundled fonts + shared atoms (CHEESE-17).
 - 2026-09-11: app shell — go_router ShellRoute + drawer + placeholder
-  screens, riverpod and package_info_plus added (CHEESE-19). CHEESE-18
-  brand assets still open. Domain models + maintained JSON schemas
+  screens, riverpod and package_info_plus added (CHEESE-19). Domain models + maintained JSON schemas
   (CHEESE-20). Drift DB + repositories + providers, settings wired into
   the shell (CHEESE-21). Bundled cheese library + loader (CHEESE-22).
   Flavor wheel / list / entry card (CHEESE-26). Note form, new + edit
@@ -314,5 +326,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   GraphQL deprecation. Search view (CHEESE-25, merged) and library grid +
   style detail (CHEESE-29, merged). Stats + fixtures
   (CHEESE-30 + 23). Settings (31), About (33), Account (34) — all merged;
-  every route is real now. Next: 18 brand assets, 32 CSV export, then 38
-  release pipeline (needs Tim's keystore) → 39 rc.1 → 40 close-out.
+  every route is real now. Brand assets (CHEESE-18): wedge + TKFW mark
+  SVGs, adaptive launcher icon, About mark, cream launch background. Next:
+  32 CSV export, then 38 release pipeline (needs Tim's keystore) → 39 rc.1
+  → 40 close-out.
