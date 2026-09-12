@@ -209,11 +209,22 @@ live in `~/cheesy-scribe-builds/`. Drive the emulator with
 | Format | `dart format --output=none --set-exit-if-changed .` |
 | Analyze | `flutter analyze` |
 | Test | `flutter test` |
-| Build | `flutter build apk --release` (via `scripts/release/build-android.sh` once vendored) |
+| Build | `scripts/release/build-android.sh` (→ `release/cheesy-scribe-<v>-android.apk`; `ANDROID_SIGNING=debug` for a debug-signed dry run) |
 
-CI is `ci-flutter.yml`, releases `release-flutter.yml` with
-`build-windows: false`, version bumps via
-`scripts/release/bump-version.{ps1,sh}`. `dart format` does not honour
+CI is `ci-flutter.yml`. Releases: `.github/workflows/release.yml` calls the
+org `release-flutter.yml` (`build-windows: false`, `java-version: '21'`,
+`ticket-prefix: CHEESE`) on every push to `main` / `v*/main`; it self-gates
+on the pubspec version (RC on the release branch → prerelease; stable on
+`main` → release; else no-op) and creates the tag when it publishes. Bumps
+only via `scripts/release/bump-version.sh <rc|final>` (vendored from the
+org, unchanged). `scripts/release/new-android-keystore.sh` makes the
+upload keystore + `key.properties` once (both gitignored, 1Password). **Dry-
+run mode (CHEESE-38, 2026-09-12):** no keystore yet, so `release.yml` passes
+`android-signing: optional` (an input added to the org workflow for this);
+CI builds the debug-signed fallback and `build-android.sh` names it
+`-debugsigned`. When Tim sets `ANDROID_KEYSTORE_BASE64` /
+`ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS`, delete that line. Repo
+variable `JIRA_BASE_URL` is set for release-notes linking. `dart format` does not honour
 `analysis_options.yaml` excludes, so the handoff's remaining reference Dart
 file is `docs/design_handoff_cheesy_scribe/lib/theme.dart.txt` (models.dart
 was adopted and deleted in CHEESE-20; theme.dart.txt can go once nothing
@@ -257,9 +268,9 @@ else refers to it).
   (`https://tkforgeworks.atlassian.net/browse/CHEESE`). Move a ticket to
   *In Progress* when its branch opens. **Never close a ticket unless asked** —
   comment "Actions taken" + commit hash and leave it for the human to verify.
-- Releases: **never hand-edit the version or push tags.** No release pipeline
-  is wired up yet; adopt `release-flutter.yml` or `release-electron.yml` from
-  the org repo when the stack is chosen.
+- Releases: **never hand-edit the version or push tags.** The pipeline is
+  the org `release-flutter.yml` (see "Stack & commands"); RCs are cut with
+  `scripts/release/bump-version.sh rc` on the release branch.
 - License: **Apache-2.0** (`LICENSE` is the verbatim Apache text — never edit
   it). Image assets (`.svg`/`.png`/etc.) are **all rights reserved** via
   `NOTICE`. Manifest `license` field (if the toolchain has one) must say
@@ -327,6 +338,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   style detail (CHEESE-29, merged). Stats + fixtures
   (CHEESE-30 + 23). Settings (31), About (33), Account (34) — all merged;
   every route is real now. Brand assets (CHEESE-18): wedge + TKFW mark
-  SVGs, adaptive launcher icon, About mark, cream launch background. Next:
-  32 CSV export, then 38 release pipeline (needs Tim's keystore) → 39 rc.1
-  → 40 close-out.
+  SVGs, adaptive launcher icon, About mark, cream launch background.
+- 2026-09-12: CSV export (CHEESE-32) deferred out of v0.1.0 by Tim. Release
+  pipeline wired (CHEESE-38) in keystore-less dry-run mode; org
+  `release-flutter.yml` gained the `android-signing` input for it (org PR
+  #10). Next: 39 rc.1 (a pipeline test run, debug-signed) → 40 close-out.

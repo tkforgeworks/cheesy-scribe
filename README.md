@@ -37,6 +37,48 @@ Both branches are protected by repository rulesets per [`docs/branch-protection-
 
 Work is tracked in Jira project [CHEESE](https://tkforgeworks.atlassian.net/browse/CHEESE).
 
+## Releasing
+
+The org's tagless Flutter pipeline ([`release-flutter.yml`](https://github.com/tkforgeworks/.github/blob/main/.github/workflows/release-flutter.yml),
+called by [`.github/workflows/release.yml`](.github/workflows/release.yml)). Every push to `main` or a `v*/main` branch runs
+it and it decides for itself:
+
+| `pubspec.yaml` version | on branch | result |
+|---|---|---|
+| `X.Y.Z-rc.N+B` | `vX.Y.Z/main` | prerelease `vX.Y.Z-rc.N` |
+| `X.Y.Z+B` | `main` (via the release PR) | release `vX.Y.Z` |
+| anything else, or the tag exists | — | no-op |
+
+Version bumps are ordinary commits made by the bump helper (bash and PowerShell do the same thing):
+
+```sh
+scripts/release/bump-version.sh rc      # on v0.1.0/main: 0.1.0-rc.1+2, commit, push → CI publishes the prerelease
+scripts/release/bump-version.sh final   # 0.1.0+3, commit, push, opens the release PR into main → merge cuts v0.1.0
+```
+
+The base version comes from the release-branch name; `+BUILD` (the Android `versionCode`) goes up on every bump.
+The tag is created server-side when CI publishes, so nothing needs to bypass branch protection. Never hand-edit the
+version or push tags. CI's jobs: check-release (the table above) → release notes (org `release-notes.yml`, one line
+per `CHEESE-N:` commit subject, linked through the `JIRA_BASE_URL` repo variable) + `ci-flutter.yml` as the quality
+gate → APK on `ubuntu-latest` → draft release, upload, publish.
+
+The build script CI runs is the one you run locally; the artifact lands in `release/` (gitignored):
+
+```sh
+scripts/release/build-android.sh    # flutter build apk --release → release/cheesy-scribe-<v>-android.apk
+```
+
+- **Signing**: the APK is signed with the upload keystore named in `android/key.properties`. Both files are gitignored
+  and live in 1Password; `scripts/release/new-android-keystore.sh` creates a fresh pair the first time (never
+  regenerate one that has shipped — Android ties updates to the key). CI gets them from the repo secrets
+  `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD` and `ANDROID_KEY_ALIAS`. Without `key.properties`,
+  `flutter run --release` falls back to the debug key and the build script refuses.
+- **Until the keystore exists** the pipeline runs in dry-run mode: `release.yml` passes `android-signing: optional`,
+  and the published APK is debug-signed and named `…-android-debugsigned.apk`. It installs fine for testing but is
+  not a distributable release. Once the secrets are set, remove that line.
+- **Version**: `pubspec.yaml` `version: X.Y.Z[-rc.N]+BUILD`. `X.Y.Z[-rc.N]` names the tag and release; `+BUILD` is
+  the Android `versionCode` and must go up on every APK that reaches a device — the bump helper does that.
+
 ## License
 
 Apache-2.0 — see [`LICENSE`](LICENSE). Image assets (logos, icons,

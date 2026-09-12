@@ -1,0 +1,40 @@
+# Consumes the org standard tagless Flutter release pipeline
+# (tkforgeworks/.github release-flutter.yml). Android only: no Windows build.
+#
+# How a release happens (docs/branching-and-release.md in the org repo):
+#   scripts/release/bump-version.sh rc     on v0.1.0/main → prerelease vX.Y.Z-rc.N
+#   scripts/release/bump-version.sh final  on v0.1.0/main → release PR; merging
+#                                          into main cuts the stable vX.Y.Z
+# The bump is an ordinary commit; this workflow self-gates on whether the
+# version's tag exists and creates the tag when it publishes the GitHub
+# release. Never hand-edit the version or push tags.
+#
+# Signing: release-flutter.yml writes android/key.properties from the
+# ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS repo
+# secrets. Until the upload keystore exists (CHEESE-38 follow-up), the
+# `android-signing: optional` line below lets the pipeline dry-run with a
+# debug-signed APK, which build-android.sh labels "-debugsigned". Remove that
+# line once the secrets are set so a missing keystore fails loudly again.
+name: Release
+
+on:
+  push:
+    branches: [main, 'v*/main']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    uses: tkforgeworks/.github/.github/workflows/release-flutter.yml@main
+    with:
+      ticket-prefix: CHEESE
+      flutter-version: '3.47.2'
+      java-version: '21'
+      build-windows: false
+      android-signing: optional
+    secrets: inherit

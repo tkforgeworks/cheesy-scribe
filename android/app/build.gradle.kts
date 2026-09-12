@@ -8,10 +8,11 @@ plugins {
 }
 
 // Release signing: android/key.properties names the upload keystore (both are
-// gitignored; see scripts/release/ and the README "Releasing" section once
-// CHEESE-38 lands). Without it the release build type falls back to the debug
-// key so `flutter run --release` works on a fresh clone; the release script
-// refuses to ship a debug-signed APK.
+// gitignored; see scripts/release/ and the README "Releasing" section).
+// Without it the release build type falls back to the debug key so
+// `flutter run --release` works on a fresh clone; scripts/release/
+// build-android.sh refuses to ship a debug-signed APK unless told it is a
+// pipeline dry run (ANDROID_SIGNING=debug).
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
