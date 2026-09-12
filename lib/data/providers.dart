@@ -78,3 +78,8 @@ final topStyleIdsProvider = StreamProvider<List<String>>(
 final recentSearchesProvider = StreamProvider<List<String>>(
   (ref) => ref.watch(recentSearchesRepositoryProvider).watch(),
 );
+
+/// `cheeseStyleId` -> number of notes linked to it ("12 TASTED").
+final styleCountsProvider = StreamProvider<Map<String, int>>(
+  (ref) => ref.watch(notesRepositoryProvider).watchStyleCounts(),
+);
