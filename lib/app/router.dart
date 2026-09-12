@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/about/about_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/style_detail_screen.dart';
 import '../features/notes/note_detail_screen.dart';
@@ -90,10 +91,7 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
         path: '/account',
         builder: (context, state) => const AccountPlaceholderScreen(),
       ),
-      GoRoute(
-        path: '/about',
-        builder: (context, state) => const AboutPlaceholderScreen(),
-      ),
+      GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
     ],
   );
 }
