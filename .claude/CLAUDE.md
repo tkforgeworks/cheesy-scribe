@@ -71,6 +71,11 @@ Layout so far:
   `cheeseStylesProvider` / `cheeseStyleProvider(id)` (FutureProviders).
   The shell's `displayNameProvider` and `ScribeApp`'s `themeMode` read
   from settings.
+- `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
+  CHEESE-33): badge, name, version, `AboutScreen.blurb` (TKFW voice; Tim
+  owns the copy), maker line (hammer/anvil mark pending CHEESE-18),
+  tkforgeworks.com via `url_launcher` (manifest has the https `<queries>`
+  entry), licenses page, `privacyLine` (links to the policy page later).
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
   (`/settings`, CHEESE-31): `SettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;

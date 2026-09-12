@@ -3,13 +3,11 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
 import '../theme/scribe_theme.dart';
 import '../widgets/widgets.dart';
-import 'shell_providers.dart';
 
 /// Centered "arrives with CHEESE-N" body shared by the placeholders.
 class PlaceholderBody extends StatelessWidget {
@@ -59,47 +57,6 @@ class AccountPlaceholderScreen extends StatelessWidget {
     return Scaffold(
       appBar: _backAppBar(context, 'Account'),
       body: const PlaceholderBody(title: 'Account', ticket: 'CHEESE-34'),
-    );
-  }
-}
-
-/// `/about` — CHEESE-33. Already shows the badge, name and version.
-class AboutPlaceholderScreen extends ConsumerWidget {
-  const AboutPlaceholderScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final version = ref.watch(appVersionProvider).asData?.value;
-    return Scaffold(
-      appBar: _backAppBar(context, 'About Cheesy Scribe'),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const ForgeLogoBadge(size: 64),
-            const SizedBox(height: 16),
-            Text(
-              'Cheesy Scribe',
-              style: ScribeTheme.ui(
-                size: 30,
-                weight: FontWeight.w700,
-                color: context.colors.onSurface,
-              ),
-            ),
-            const SizedBox(height: 6),
-            MonoLabel(version == null ? 'Version —' : 'Version $version'),
-            const SizedBox(height: 18),
-            Text(
-              'The rest arrives with CHEESE-33.',
-              style: ScribeTheme.serif(
-                size: 13.5,
-                italic: true,
-                color: context.scribe.textTertiary,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
