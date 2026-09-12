@@ -72,4 +72,47 @@ class TastingStats {
         final byCount = b.value.compareTo(a.value);
         return byCount != 0 ? byCount : a.key.index.compareTo(b.key.index);
       });
+
+  /// Charts need material: fewer than three notes shows tiles only
+  /// (DESIGN_SPEC §8).
+  bool get hasEnoughForCharts => totalNotes >= minNotesForCharts;
+
+  static const minNotesForCharts = 3;
+
+  /// Milks by share, largest first (ties in enum order).
+  List<MapEntry<MilkType, double>> get milkShares =>
+      milkBreakdown.entries.toList()..sort((a, b) {
+        final byShare = b.value.compareTo(a.value);
+        return byShare != 0 ? byShare : a.key.index.compareTo(b.key.index);
+      });
+
+  /// The milk with a strict majority of the vote, or null when tied or
+  /// when there is nothing to judge yet.
+  MilkType? get dominantMilk {
+    if (!hasEnoughForCharts) {
+      return null;
+    }
+    final shares = milkShares;
+    if (shares.isEmpty) {
+      return null;
+    }
+    if (shares.length > 1 && shares[1].value == shares[0].value) {
+      return null;
+    }
+    return shares.first.key;
+  }
+
+  /// The italic line under the milk breakdown, TKFW voice.
+  String get verdictLine {
+    if (!hasEnoughForCharts) return 'Verdict: too early to call. Keep tasting.';
+    final milk = dominantMilk;
+    if (milk == null) {
+      return 'Verdict: no favourite yet. Admirably open-minded.';
+    }
+    final name = switch (milk) {
+      MilkType.other => 'something unusual',
+      _ => milk.label.toLowerCase(),
+    };
+    return "Verdict: you have a type, and it's $name.";
+  }
 }

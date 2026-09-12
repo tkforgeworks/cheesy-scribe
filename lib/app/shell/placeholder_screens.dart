@@ -65,22 +65,6 @@ AppBar _backAppBar(
 
 // ---- Shell destinations ----
 
-/// `/stats` — CHEESE-30.
-class StatsPlaceholderScreen extends StatelessWidget {
-  const StatsPlaceholderScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _menuAppBar(context, 'Stats & insights'),
-      body: const PlaceholderBody(
-        title: 'Stats & insights',
-        ticket: 'CHEESE-30',
-      ),
-    );
-  }
-}
-
 /// `/settings` — CHEESE-31.
 class SettingsPlaceholderScreen extends StatelessWidget {
   const SettingsPlaceholderScreen({super.key});
