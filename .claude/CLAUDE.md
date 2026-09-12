@@ -221,8 +221,9 @@ org, unchanged). `scripts/release/new-android-keystore.sh` makes the
 upload keystore + `key.properties` once (both gitignored, 1Password). **Signing
 is live (2026-09-12):** Tim created the keystore with the script and set
 `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS`;
-`v0.1.0-rc.3` is the first keystore-signed release. rc.1 and rc.2 were
-keystore-less dry runs via `android-signing: optional` (an input added to
+`v0.1.0-rc.2` and rc.3 are keystore-signed (rc.2 still carried the
+`optional` line, which is moot once the secrets exist). rc.1 was a
+keystore-less dry run via `android-signing: optional` (an input added to
 the org workflow for that): CI builds the debug-signed fallback, named
 `-debugsigned`, with a **per-runner throwaway debug key**, so such an APK
 never installs over another build (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`).
@@ -348,6 +349,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   #10). `v0.1.0-rc.1` cut the same night (CHEESE-39, `60e8fab`, run
   34674193787): tag created server-side, notes generated with Jira links,
   debug-signed APK published and verified on the Pixel_8 emulator. Tim then
-  made the keystore, set the secrets and cut rc.2 (still debug-signed, the
-  `optional` line was not yet committed) and rc.3 (keystore-signed). Next:
+  made the keystore, set the secrets and cut rc.2 and rc.3 (both
+  keystore-signed; rc.3 also dropped the `optional` line). rc.3 was
+  installed on his phone after one uninstall. Next:
   Tim's device pass on rc.3 → CHEESE-40 close-out.

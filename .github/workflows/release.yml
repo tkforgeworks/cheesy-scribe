@@ -13,8 +13,8 @@
 # ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS repo
 # secrets (set 2026-09-12; keystore + key.properties live in 1Password). If
 # they are ever missing the build fails on purpose. For a keystore-less dry
-# run add `android-signing: optional` under `with:` (rc.1 and rc.2 were cut
-# that way, debug-signed).
+# run add `android-signing: optional` under `with:` (rc.1 was cut that way,
+# debug-signed).
 name: Release
 
 on:

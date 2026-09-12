@@ -74,9 +74,9 @@ scripts/release/build-android.sh    # flutter build apk --release → release/ch
   `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD` and `ANDROID_KEY_ALIAS`. Without `key.properties`,
   `flutter run --release` falls back to the debug key and the build script refuses.
 - **Dry runs**: before the keystore existed, `release.yml` passed `android-signing: optional` and CI shipped the
-  Flutter debug-signed fallback, named `…-android-debugsigned.apk` (`v0.1.0-rc.1` and `rc.2`). Such an APK carries the
-  runner's throwaway debug key, so it never installs over another build — uninstall first. From `rc.3` on every
-  release is keystore-signed and updates in place.
+  Flutter debug-signed fallback, named `…-android-debugsigned.apk` (`v0.1.0-rc.1`). Such an APK carries the runner's
+  throwaway debug key, so it never installs over another build — uninstall first. From `rc.2` on every release is
+  keystore-signed and updates in place.
 - **Version**: `pubspec.yaml` `version: X.Y.Z[-rc.N]+BUILD`. `X.Y.Z[-rc.N]` names the tag and release; `+BUILD` is
   the Android `versionCode` and must go up on every APK that reaches a device — the bump helper does that.
 
