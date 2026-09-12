@@ -222,8 +222,12 @@ upload keystore + `key.properties` once (both gitignored, 1Password). **Dry-
 run mode (CHEESE-38, 2026-09-12):** no keystore yet, so `release.yml` passes
 `android-signing: optional` (an input added to the org workflow for this);
 CI builds the debug-signed fallback and `build-android.sh` names it
-`-debugsigned`. When Tim sets `ANDROID_KEYSTORE_BASE64` /
-`ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS`, delete that line. Repo
+`-debugsigned`. **Each CI runner has its own throwaway debug key**, so a
+dry-run APK never installs over a local build or an earlier RC
+(`INSTALL_FAILED_UPDATE_INCOMPATIBLE`): uninstall first (wipes the
+journal), or verify on the emulator. When Tim sets
+`ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` /
+`ANDROID_KEY_ALIAS`, delete that line. Repo
 variable `JIRA_BASE_URL` is set for release-notes linking. `dart format` does not honour
 `analysis_options.yaml` excludes, so the handoff's remaining reference Dart
 file is `docs/design_handoff_cheesy_scribe/lib/theme.dart.txt` (models.dart
@@ -342,4 +346,9 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - 2026-09-12: CSV export (CHEESE-32) deferred out of v0.1.0 by Tim. Release
   pipeline wired (CHEESE-38) in keystore-less dry-run mode; org
   `release-flutter.yml` gained the `android-signing` input for it (org PR
-  #10). Next: 39 rc.1 (a pipeline test run, debug-signed) → 40 close-out.
+  #10). `v0.1.0-rc.1` cut the same night (CHEESE-39, `60e8fab`, run
+  34674193787): tag created server-side, notes generated with Jira links,
+  `cheesy-scribe-0.1.0-rc.1-android-debugsigned.apk` published; verified
+  on the Pixel_8 emulator (phone install blocked by the debug-key
+  mismatch above). Next: keystore + secrets (Tim) → rc.2 signed → 40
+  close-out.
