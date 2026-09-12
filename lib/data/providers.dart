@@ -83,3 +83,8 @@ final recentSearchesProvider = StreamProvider<List<String>>(
 final styleCountsProvider = StreamProvider<Map<String, int>>(
   (ref) => ref.watch(notesRepositoryProvider).watchStyleCounts(),
 );
+
+/// Every note, newest first — stats and export derive from this.
+final allNotesProvider = StreamProvider<List<TastingNote>>(
+  (ref) => ref.watch(notesRepositoryProvider).watchAll(),
+);

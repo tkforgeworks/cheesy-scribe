@@ -6,6 +6,7 @@ import '../features/library/style_detail_screen.dart';
 import '../features/notes/note_detail_screen.dart';
 import '../features/notes/note_form_screen.dart';
 import '../features/notes/notes_home_screen.dart';
+import '../features/stats/stats_screen.dart';
 import 'shell/placeholder_screens.dart';
 import 'shell/scribe_shell.dart';
 
@@ -75,7 +76,7 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
           GoRoute(
             path: '/stats',
             pageBuilder: (context, state) =>
-                _shellPage(state, const StatsPlaceholderScreen()),
+                _shellPage(state, const StatsScreen()),
           ),
           GoRoute(
             path: '/settings',

@@ -71,6 +71,23 @@ Layout so far:
   `cheeseStylesProvider` / `cheeseStyleProvider(id)` (FutureProviders).
   The shell's `displayNameProvider` and `ScribeApp`'s `themeMode` read
   from settings.
+- `lib/features/library/` — `LibraryScreen` (`/library`, CHEESE-29):
+  `ScribeSearchBar` with a controller filters the 2-col `StyleCard` grid
+  inline via `LibraryRepository.search`; counts from `styleCountsProvider`.
+  `StyleDetailScreen` (`/library/:styleId`): description, TYPICAL PROFILE
+  (milk capsules + read-only `TextureMeter`), the user's notes for that
+  style (`notesPageProvider(NotesQuery(styleId:))`), untasted state with a
+  "New tasting note" CTA → `/notes/new?style=<id>` (the form's
+  `initialStyleId`; preselection is not "dirty").
+- `lib/features/stats/stats_screen.dart` — `StatsScreen` (`/stats`,
+  CHEESE-30) derives `TastingStats.fromNotes(allNotesProvider)`: two
+  `StatTile`s, `TopFlavorsCard` (≤ 6 bars, counts = notes scoring ≥ 3),
+  `MilkBreakdownCard` (stacked bar in `lightSeries`/`darkSeries`, legend
+  with rounded percents, `verdictLine`). Under 3 notes both charts give
+  way to `StatsScreen.needMaterial`. Model rules (CHEESE-23) live on
+  `TastingStats`: `hasEnoughForCharts`, `milkShares`, `dominantMilk`
+  (strict lead, else null), `verdictLine`; `test/fixtures/
+  stats_128_notes.json` reproduces the mockup's 128 / 4.2 / 62-22-11-5.
 - `lib/features/notes/notes_home_screen.dart` — `NotesHomeScreen` for
   `/notes` (CHEESE-24): pinned search-bar header, "Your tastings" + mono
   count, chips (All · 4★ and up · top style ids from `topStyleIdsProvider`
@@ -280,6 +297,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (`gh api -X PATCH …/pulls/N -f base=…`) before deleting a merged base
   branch, or GitHub closes them; `gh pr edit --base` is broken by a
   GraphQL deprecation. Search view (CHEESE-25, merged) and library grid +
-  style detail (CHEESE-29). Next: 30 stats (+23 fixtures), 31 settings,
-  33 about, 34 account, 18 brand assets, 32 CSV, then 38 release pipeline
-  (needs Tim's keystore) → 39 rc.1.
+  style detail (CHEESE-29, merged). Stats screen + stats fixtures
+  (CHEESE-30 + 23). Next: 31 settings, 33 about, 34 account, 18 brand
+  assets, 32 CSV, then 38 release pipeline (needs Tim's keystore) → 39
+  rc.1.
