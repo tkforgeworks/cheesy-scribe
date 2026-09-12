@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/about/about_screen.dart';
+import '../features/account/account_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/style_detail_screen.dart';
 import '../features/notes/note_detail_screen.dart';
@@ -9,7 +10,6 @@ import '../features/notes/note_form_screen.dart';
 import '../features/notes/notes_home_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/stats/stats_screen.dart';
-import 'shell/placeholder_screens.dart';
 import 'shell/scribe_shell.dart';
 
 /// Builds the app router (DESIGN_SPEC §7, minus `/login`: local-first).
@@ -89,7 +89,7 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
       ),
       GoRoute(
         path: '/account',
-        builder: (context, state) => const AccountPlaceholderScreen(),
+        builder: (context, state) => const AccountScreen(),
       ),
       GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
     ],
