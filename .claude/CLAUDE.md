@@ -71,6 +71,11 @@ Layout so far:
   `cheeseStylesProvider` / `cheeseStyleProvider(id)` (FutureProviders).
   The shell's `displayNameProvider` and `ScribeApp`'s `themeMode` read
   from settings.
+- `lib/features/settings/settings_screen.dart` — `SettingsScreen`
+  (`/settings`, CHEESE-31): `SettingsGroup` cards (APPEARANCE theme +
+  units segmented rows persisting via `SettingsRepository.update`;
+  NOTIFICATIONS reminder and DATA export rows disabled at 45 % until
+  CHEESE-12 / 32; ABOUT version, `showLicensePage`, link to `/about`).
 - `lib/features/library/` — `LibraryScreen` (`/library`, CHEESE-29):
   `ScribeSearchBar` with a controller filters the 2-col `StyleCard` grid
   inline via `LibraryRepository.search`; counts from `styleCountsProvider`.

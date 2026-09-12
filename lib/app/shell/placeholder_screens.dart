@@ -9,7 +9,6 @@ import 'package:heroicons/heroicons.dart';
 
 import '../theme/scribe_theme.dart';
 import '../widgets/widgets.dart';
-import 'scribe_shell.dart';
 import 'shell_providers.dart';
 
 /// Centered "arrives with CHEESE-N" body shared by the placeholders.
@@ -28,20 +27,6 @@ class PlaceholderBody extends StatelessWidget {
     );
   }
 }
-
-/// App bar for the two top-level screens without a search bar.
-AppBar _menuAppBar(BuildContext context, String title) => AppBar(
-  leading: IconButton(
-    tooltip: 'Open menu',
-    onPressed: () => ScribeShell.openDrawer(context),
-    icon: HeroIcon(
-      HeroIcons.bars3,
-      size: 24,
-      color: context.colors.onSurfaceVariant,
-    ),
-  ),
-  title: Text(title),
-);
 
 /// App bar for full-screen routes: back arrow (or close X for dialogs).
 AppBar _backAppBar(
@@ -64,21 +49,6 @@ AppBar _backAppBar(
 );
 
 // ---- Shell destinations ----
-
-/// `/settings` — CHEESE-31.
-class SettingsPlaceholderScreen extends StatelessWidget {
-  const SettingsPlaceholderScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _menuAppBar(context, 'Settings'),
-      body: const PlaceholderBody(title: 'Settings', ticket: 'CHEESE-31'),
-    );
-  }
-}
-
-// ---- Full-screen routes (root navigator) ----
 
 /// `/account` — CHEESE-34 (local profile).
 class AccountPlaceholderScreen extends StatelessWidget {
