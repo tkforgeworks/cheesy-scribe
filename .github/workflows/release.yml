@@ -11,10 +11,10 @@
 #
 # Signing: release-flutter.yml writes android/key.properties from the
 # ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS repo
-# secrets. Until the upload keystore exists (CHEESE-38 follow-up), the
-# `android-signing: optional` line below lets the pipeline dry-run with a
-# debug-signed APK, which build-android.sh labels "-debugsigned". Remove that
-# line once the secrets are set so a missing keystore fails loudly again.
+# secrets (set 2026-09-12; keystore + key.properties live in 1Password). If
+# they are ever missing the build fails on purpose. For a keystore-less dry
+# run add `android-signing: optional` under `with:` (rc.1 was cut that way,
+# debug-signed).
 name: Release
 
 on:

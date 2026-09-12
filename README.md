@@ -73,11 +73,10 @@ scripts/release/build-android.sh    # flutter build apk --release → release/ch
   regenerate one that has shipped — Android ties updates to the key). CI gets them from the repo secrets
   `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD` and `ANDROID_KEY_ALIAS`. Without `key.properties`,
   `flutter run --release` falls back to the debug key and the build script refuses.
-- **Until the keystore exists** the pipeline runs in dry-run mode: `release.yml` passes `android-signing: optional`,
-  and the published APK is debug-signed and named `…-android-debugsigned.apk`. It is not a distributable release,
-  and because each CI runner generates its own debug key, it will not install *over* any other build (local or an
-  earlier RC) — uninstall first, which wipes the journal. `v0.1.0-rc.1` was cut this way as a pipeline test. Once the
-  secrets are set, remove that line; every RC after that updates in place.
+- **Dry runs**: before the keystore existed, `release.yml` passed `android-signing: optional` and CI shipped the
+  Flutter debug-signed fallback, named `…-android-debugsigned.apk` (`v0.1.0-rc.1`). Such an APK carries the runner's
+  throwaway debug key, so it never installs over another build — uninstall first. From `rc.2` on every release is
+  keystore-signed and updates in place.
 - **Version**: `pubspec.yaml` `version: X.Y.Z[-rc.N]+BUILD`. `X.Y.Z[-rc.N]` names the tag and release; `+BUILD` is
   the Android `versionCode` and must go up on every APK that reaches a device — the bump helper does that.
 
