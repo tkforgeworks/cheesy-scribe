@@ -33,8 +33,9 @@ String searchTextFor(TastingNote n) => normalizeForSearch(
     n.rindOther,
     n.milkOther,
     n.attributeOther,
+    // Flavor labels count once they are a real note, not a whisper (≥ 3).
     for (final e in n.flavors.entries)
-      if (e.value > 0) e.key.label,
+      if (e.value >= 3) e.key.label,
   ].whereType<String>().join(' '),
 );
 

@@ -73,3 +73,8 @@ final newestNoteProvider = StreamProvider<TastingNote?>(
 final topStyleIdsProvider = StreamProvider<List<String>>(
   (ref) => ref.watch(notesRepositoryProvider).watchTopStyleIds(),
 );
+
+/// Recent search terms, most recent first (cap 10).
+final recentSearchesProvider = StreamProvider<List<String>>(
+  (ref) => ref.watch(recentSearchesRepositoryProvider).watch(),
+);
