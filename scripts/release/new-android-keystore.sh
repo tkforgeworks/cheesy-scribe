@@ -12,6 +12,7 @@
 #
 # Usage: scripts/release/new-android-keystore.sh [alias]   (default: upload)
 set -euo pipefail
+trap 'echo "new-android-keystore.sh: failed at line $LINENO (exit $?)" >&2' ERR
 
 alias="${1:-upload}"
 dname="CN=Cheesy Scribe, O=TK ForgeWorks"
@@ -29,7 +30,11 @@ if [[ -e "$props" ]]; then
 fi
 command -v keytool >/dev/null || { echo "keytool not on PATH (install a JDK)." >&2; exit 1; }
 
-password="$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)"
+# Read a fixed amount of entropy first: a `tr </dev/urandom | head` pipeline
+# dies of SIGPIPE under pipefail and used to exit this script silently.
+raw="$(head -c 256 /dev/urandom | base64 | LC_ALL=C tr -dc 'A-Za-z0-9')"
+password="${raw:0:32}"
+(( ${#password} == 32 )) || { echo "Password generation failed" >&2; exit 1; }
 
 keytool -genkeypair -v -keystore "$keystore" -storetype PKCS12 -keyalg RSA -keysize 2048 \
   -validity 10000 -alias "$alias" -dname "$dname" -storepass "$password" -keypass "$password"
