@@ -8,6 +8,7 @@
   "properties": {
     "displayName": { "type": "string", "description": "Drawer account row and avatar initial; absent = unset" },
     "themeMode": { "enum": ["system", "light", "dark"], "default": "system" },
-    "units": { "enum": ["usdPerLb", "eurPerKg"], "default": "usdPerLb", "description": "Default price unit for new notes" }
+    "units": { "enum": ["usdPerLb", "eurPerKg"], "default": "usdPerLb", "description": "Default price unit for new notes" },
+    "memberSince": { "type": "string", "format": "date", "description": "First day the app was opened (local); Account's MEMBER SINCE fallback" }
   }
 }

@@ -30,9 +30,8 @@ Layout so far:
   their own Scaffolds and call `ScribeShell.openDrawer(context)`, not
   `Scaffold.of`), `ScribeDrawer` (`DrawerDestination`/`DrawerPill`; no Sign
   out — local-first), `ScribeSearchBar` (menu icon + avatar), providers
-  `appVersionProvider` (package_info_plus) and `displayNameProvider` (null
-  until CHEESE-21/34), and `placeholder_screens.dart` — one class per route,
-  each naming the ticket that replaces it; delete them as tickets land.
+  `appVersionProvider` (package_info_plus) and `displayNameProvider`
+  (derived from settings). No placeholder screens remain.
 - `lib/data/models/` — `TastingNote`, `CheeseStyle`, `AppSettings`,
   `TastingStats`, enums (`MilkType`, `TextureLevel`, `RindType`,
   `FlavorNote`, `PriceUnit`, each with a `label`); import the `models.dart`
@@ -71,6 +70,12 @@ Layout so far:
   `cheeseStylesProvider` / `cheeseStyleProvider(id)` (FutureProviders).
   The shell's `displayNameProvider` and `ScribeApp`'s `themeMode` read
   from settings.
+- `lib/features/account/account_screen.dart` — `AccountScreen`
+  (`/account`, CHEESE-34): local profile — 72 px initial avatar, name
+  (default "You"), mono `MEMBER SINCE <year> · N NOTES` (year = earliest
+  note, else `AppSettings.memberSince`, which the screen stamps on first
+  visit), DISPLAY NAME `BoxedField` saved on blur / Done. The drawer and
+  search-bar avatar read the same `displayNameProvider`.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
   CHEESE-33): badge, name, version, `AboutScreen.blurb` (TKFW voice; Tim
   owns the copy), maker line (hammer/anvil mark pending CHEESE-18),
@@ -307,7 +312,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (`gh api -X PATCH …/pulls/N -f base=…`) before deleting a merged base
   branch, or GitHub closes them; `gh pr edit --base` is broken by a
   GraphQL deprecation. Search view (CHEESE-25, merged) and library grid +
-  style detail (CHEESE-29, merged). Stats screen + stats fixtures
-  (CHEESE-30 + 23). Next: 31 settings, 33 about, 34 account, 18 brand
-  assets, 32 CSV, then 38 release pipeline (needs Tim's keystore) → 39
-  rc.1.
+  style detail (CHEESE-29, merged). Stats + fixtures
+  (CHEESE-30 + 23). Settings (31), About (33), Account (34) — all merged;
+  every route is real now. Next: 18 brand assets, 32 CSV export, then 38
+  release pipeline (needs Tim's keystore) → 39 rc.1 → 40 close-out.
