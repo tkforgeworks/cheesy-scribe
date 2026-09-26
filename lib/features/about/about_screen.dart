@@ -123,11 +123,7 @@ class AboutScreen extends ConsumerWidget {
                     size: 18,
                     color: x.textTertiary,
                   ),
-                  onTap: () => showLicensePage(
-                    context: context,
-                    applicationName: 'Cheesy Scribe',
-                    applicationVersion: version,
-                  ),
+                  onTap: () => context.push('/licenses'),
                 ),
               ],
             ),

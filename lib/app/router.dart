@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/about/about_screen.dart';
+import '../features/about/licenses_screen.dart';
 import '../features/account/account_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/style_detail_screen.dart';
@@ -92,6 +93,10 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
         builder: (context, state) => const AccountScreen(),
       ),
       GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
+      GoRoute(
+        path: '/licenses',
+        builder: (context, state) => const LicensesScreen(),
+      ),
     ],
   );
 }

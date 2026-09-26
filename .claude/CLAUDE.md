@@ -81,7 +81,17 @@ Layout so far:
   owns the copy), maker line (`ForgeWorksMark`, tinted `textTertiary`),
   tkforgeworks.com and the privacy policy (`privacyUri`,
   `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`,
-  licenses page, `privacyLine`.
+  a link to `/licenses`, `privacyLine`.
+- `lib/features/about/licenses_screen.dart` — `LicensesScreen`
+  (`/licenses`, CHEESE-41), opened from About and Settings: short summary
+  (app Apache-2.0 + GitHub `sourceUri`, Flutter/packages, OFL fonts,
+  all-rights-reserved brand line) with "View all notices" →
+  `showLicensePage`. Don't trim that full list: the engine and packages
+  compiled into the APK need their notices shipped. Flutter's generated
+  `NOTICES` also lists dev_dependencies (build_runner, drift_dev, …; ~2 %
+  of it) and there is no supported way to drop them. The bundled fonts
+  aren't in `NOTICES`, so `main()` calls `registerBundledFontLicenses()`
+  to add `assets/fonts/licenses/*` to `LicenseRegistry`.
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
   (`/settings`, CHEESE-31): `SettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
@@ -185,24 +195,31 @@ Layout so far:
   memory once loaded so providers resolve under `pumpAndSettle`. Form tests
   set a tall viewport (`tallScreen`) so the whole `ListView` is built.
 
-Local toolchain (Tim's machine): Flutter 3.47.2 at `~/develop/flutter`, on
-PATH only through the shell rc — agent shells must
-`export PATH="$HOME/develop/flutter/bin:$PATH"` first. Android SDK 37 in
-`~/Android/Sdk`, JDK 21. AVDs `Pixel_10_Pro`, `Pixel_8`, `Pixel_7a` are set
-to software GPU (hardware GL segfaults on this box). From an agent shell,
-launch detached with `nohup ~/Android/Sdk/emulator/emulator -avd Pixel_10_Pro
--gpu swiftshader_indirect -no-boot-anim -no-audio &` and poll
-`adb shell getprop sys.boot_completed`; `flutter emulators --launch` never
-returns. Emulation is slow on this hardware — prefer widget-test PNG renders
+Local toolchain (Tim's machine, reinstalled 2026-09-26): Flutter 3.47.5
+(CI pins 3.47.2) at `~/flutter`, on PATH only through `.bashrc` — agent
+shells must `export PATH="$HOME/flutter/bin:$PATH"` first. Android SDK 37
+in `~/Android/Sdk`; Java 25 (system Corretto, and Android Studio's bundled
+JBR runs Gradle). One AVD, `Medium_Phone` (API 37, Play Store image,
+1080×2400 @ 420 dpi), whose config says GPU `auto`: always pass the
+software-GPU flag (hardware GL segfaulted on this box). From an agent
+shell, launch detached with `nohup ~/Android/Sdk/emulator/emulator -avd
+Medium_Phone -gpu swiftshader_indirect -no-boot-anim -no-audio &` and poll
+`adb shell getprop sys.boot_completed` (~2 min cold, ~30 s warm). The
+running process is `qemu-system-x86_64 -avd Medium_Phone …`, so a liveness
+check must match `"[q]emu-system.*Medium_Phone"`, not `emulator -avd`.
+Stop it with `adb emu kill`. `flutter emulators --launch` never returns.
+Emulator screenshots look soft from display scaling; that is not an app
+bug. Emulation is slow on this hardware — prefer widget-test PNG renders
 for routine visual checks and the emulator for confirmation. **Never run
 a Gradle build and the emulator at the same time** (15 GB box; both get
 OOM-killed): build, `pkill -f "[G]radleDaemon"`, then launch. Release
 APKs are debug-signed until the CHEESE-38 keystore exists, so
 `flutter build apk --release` (~100 s, ~63 MB) is installable; copies
 live in `~/cheesy-scribe-builds/`. Drive the emulator with
-`adb shell input tap/text/swipe` (Pixel_8: 1080×2400 @ 420 dpi) and
-`adb exec-out screencap -p`. Bracket `pkill -f` patterns
-(`"[e]mulator -avd"`) or the shell kills itself.
+`adb shell input tap/text/swipe` (1080×2400 px) and
+`adb exec-out screencap -p`; `adb shell uiautomator dump` exposes Flutter
+text as `content-desc`, handy for finding rows. Bracket `pkill -f`
+patterns (`"[q]emu-system"`) or the shell kills itself.
 
 | Task | Command |
 |---|---|
@@ -363,4 +380,10 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   `https://tkforgeworks.com/privacy/cheesy-scribe/`, the URL for the Play
   Console field) and linked from About. Flutter 3.47.2 defaults to
   targetSdk 36 / minSdk 24, which meets Play's API 36 requirement. First
-  AAB to Play arrives with the next RC.
+  AAB to Play arrives with the next RC. Later that day: rc.4 carried the
+  first AAB; Play Console internal testing is live and installs on Tim's
+  test phone (CHEESE-36), listing assets are in the Console (CHEESE-37);
+  35/36/37 and epics 5–8 + 10 closed (3 and 4 left for Tim). CSV
+  export (CHEESE-32) is an orphan task now, no epic or fix version.
+  Testers are on rc.4.
+  CHEESE-41 (licences summary screen) is the only open v0.1.0 code work.
