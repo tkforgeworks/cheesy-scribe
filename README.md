@@ -60,15 +60,18 @@ The base version comes from the release-branch name; `+BUILD` (the Android `vers
 The tag is created server-side when CI publishes, so nothing needs to bypass branch protection. Never hand-edit the
 version or push tags. CI's jobs: check-release (the table above) → release notes (org `release-notes.yml`, one line
 per `CHEESE-N:` commit subject, linked through the `JIRA_BASE_URL` repo variable) + `ci-flutter.yml` as the quality
-gate → APK on `ubuntu-latest` → draft release, upload, publish.
+gate → APK + AAB on `ubuntu-latest` → draft release, upload, publish.
 
-The build script CI runs is the one you run locally; the artifact lands in `release/` (gitignored):
+The build script CI runs is the one you run locally; the artifacts land in `release/` (gitignored):
 
 ```sh
-scripts/release/build-android.sh    # flutter build apk --release → release/cheesy-scribe-<v>-android.apk
+scripts/release/build-android.sh    # flutter build apk + appbundle --release → release/cheesy-scribe-<v>-android.{apk,aab}
 ```
 
-- **Signing**: the APK is signed with the upload keystore named in `android/key.properties`. Both files are gitignored
+The APK is for sideloading from GitHub Releases; the AAB is the Google Play upload (Play Console internal testing
+track first). Both are published as release assets.
+
+- **Signing**: the APK and AAB are signed with the upload keystore named in `android/key.properties`. Both files are gitignored
   and live in 1Password; `scripts/release/new-android-keystore.sh` creates a fresh pair the first time (never
   regenerate one that has shipped — Android ties updates to the key). CI gets them from the repo secrets
   `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD` and `ANDROID_KEY_ALIAS`. Without `key.properties`,
@@ -78,7 +81,8 @@ scripts/release/build-android.sh    # flutter build apk --release → release/ch
   throwaway debug key, so it never installs over another build — uninstall first. From `rc.2` on every release is
   keystore-signed and updates in place.
 - **Version**: `pubspec.yaml` `version: X.Y.Z[-rc.N]+BUILD`. `X.Y.Z[-rc.N]` names the tag and release; `+BUILD` is
-  the Android `versionCode` and must go up on every APK that reaches a device — the bump helper does that.
+  the Android `versionCode` and must go up on every APK or AAB that reaches a device or Play (Play rejects a reused
+  code) — the bump helper does that.
 
 ## License
 

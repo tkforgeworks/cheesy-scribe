@@ -79,8 +79,9 @@ Layout so far:
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
   CHEESE-33): badge, name, version, `AboutScreen.blurb` (TKFW voice; Tim
   owns the copy), maker line (`ForgeWorksMark`, tinted `textTertiary`),
-  tkforgeworks.com via `url_launcher`, licenses page, `privacyLine`
-  (links to the policy page later).
+  tkforgeworks.com and the privacy policy (`privacyUri`,
+  `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`,
+  licenses page, `privacyLine`.
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
   (`/settings`, CHEESE-31): `SettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
@@ -209,7 +210,7 @@ live in `~/cheesy-scribe-builds/`. Drive the emulator with
 | Format | `dart format --output=none --set-exit-if-changed .` |
 | Analyze | `flutter analyze` |
 | Test | `flutter test` |
-| Build | `scripts/release/build-android.sh` (→ `release/cheesy-scribe-<v>-android.apk`; `ANDROID_SIGNING=debug` for a debug-signed dry run) |
+| Build | `scripts/release/build-android.sh` (→ `release/cheesy-scribe-<v>-android.apk` + `.aab`; `ANDROID_SIGNING=debug` for a debug-signed dry run) |
 
 CI is `ci-flutter.yml`. Releases: `.github/workflows/release.yml` calls the
 org `release-flutter.yml` (`build-windows: false`, `java-version: '21'`,
@@ -288,7 +289,8 @@ else refers to it).
 Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md` §3.
 
 - **Flutter / Material 3, Android only, signed APK** on GitHub Releases; Play
-  Store readiness is a separate epic (CHEESE-10). Because the app is
+  Store readiness is a separate epic (CHEESE-10). Every release also
+  publishes the signed AAB for the Play Console (CHEESE-35). Because the app is
   mobile-only by intent and the handoff is Flutter-shaped.
 - **Local-first v0.1.0: no login, no backend.** Notes in SQLite (`drift`) on
   the device; app opens on `/notes`. Auth, cloud backup, delete-account are
@@ -353,3 +355,12 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   keystore-signed; rc.3 also dropped the `optional` line). rc.3 was
   installed on his phone after one uninstall. Next:
   Tim's device pass on rc.3 → CHEESE-40 close-out.
+- 2026-09-26: Play Console developer account confirmed and the app record
+  created (CHEESE-36 underway, Tim). CHEESE-35: `build-android.sh` also
+  builds the AAB; org `release-flutter.yml` uploads/publishes `release/*.aab`
+  (org PR). Privacy policy hosted on the website
+  (`TKForgeWorks_website` `content/privacy/cheesy-scribe.md` →
+  `https://tkforgeworks.com/privacy/cheesy-scribe/`, the URL for the Play
+  Console field) and linked from About. Flutter 3.47.2 defaults to
+  targetSdk 36 / minSdk 24, which meets Play's API 36 requirement. First
+  AAB to Play arrives with the next RC.

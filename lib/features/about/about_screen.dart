@@ -10,7 +10,8 @@ import '../../app/widgets/widgets.dart';
 
 /// `/about` (DESIGN_SPEC §6 About, CHEESE-33): badge, name, version, one
 /// paragraph in the TKFW voice, the maker line with the TK ForgeWorks mark
-/// (tinted, since this app has no purple), links and the privacy line.
+/// (tinted, since this app has no purple), links (site, privacy policy,
+/// licenses) and the privacy line.
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
@@ -23,6 +24,13 @@ class AboutScreen extends ConsumerWidget {
 
   static const privacyLine = 'Your notes stay on this device.';
   static final siteUri = Uri.https('tkforgeworks.com');
+
+  /// Same URL as the Play Console privacy policy field (CHEESE-35). The page
+  /// lives in the TKForgeWorks_website repo, `content/privacy/`.
+  static final privacyUri = Uri.https(
+    'tkforgeworks.com',
+    '/privacy/cheesy-scribe/',
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -91,6 +99,20 @@ class AboutScreen extends ConsumerWidget {
                   ),
                   onTap: () =>
                       launchUrl(siteUri, mode: LaunchMode.externalApplication),
+                ),
+                Divider(height: 1, color: x.rowDivider),
+                ListTile(
+                  key: const Key('about-privacy'),
+                  title: const Text('Privacy policy'),
+                  trailing: HeroIcon(
+                    HeroIcons.arrowTopRightOnSquare,
+                    size: 18,
+                    color: x.textTertiary,
+                  ),
+                  onTap: () => launchUrl(
+                    privacyUri,
+                    mode: LaunchMode.externalApplication,
+                  ),
                 ),
                 Divider(height: 1, color: x.rowDivider),
                 ListTile(
