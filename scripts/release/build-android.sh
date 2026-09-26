@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
-# Builds the Android release APK into release/. This is the script CI runs on
-# ubuntu-latest (org release-flutter.yml); it is the same one you run locally.
+# Builds the Android release APK and the Play Store app bundle (AAB) into
+# release/. This is the script CI runs on ubuntu-latest (org
+# release-flutter.yml, which publishes both as release assets); it is the same
+# one you run locally. The APK is for sideloading from GitHub Releases; the AAB
+# is what gets uploaded to the Play Console.
 #
-# flutter build apk --release, signed with the upload keystore named in
+# flutter build apk / appbundle --release, both signed with the upload keystore named in
 # android/key.properties (create one with new-android-keystore.sh, or let
 # release-flutter.yml write it from the ANDROID_KEYSTORE_* secrets). Without
 # key.properties Gradle falls back to the debug key, and a debug-signed APK is
 # not a release — so the script refuses, unless ANDROID_SIGNING=debug is set.
 # release-flutter.yml sets that only when the caller opted into
 # `android-signing: optional` (pipeline dry run before the keystore exists);
-# the artifact is then named "-debugsigned" so nobody mistakes it.
+# the artifacts are then named "-debugsigned" so nobody mistakes them (Play
+# rejects a debug-signed AAB anyway).
 #
 # The version and build number come from pubspec.yaml (`version:
 # X.Y.Z[-rc.N]+BUILD`; BUILD is the Android versionCode and must go up on
-# every APK that reaches a device — bump-version.sh does that).
+# every APK/AAB that reaches a device or Play — bump-version.sh does that).
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -32,11 +36,14 @@ fi
 
 full="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | tr -d '[:space:]')"
 app_version="${full%%+*}"
-echo "Cheesy Scribe $full → APK version $app_version"
+echo "Cheesy Scribe $full → APK + AAB version $app_version"
 
 flutter build apk --release
+flutter build appbundle --release
 
 mkdir -p release
 apk="release/cheesy-scribe-$app_version-android$suffix.apk"
+aab="release/cheesy-scribe-$app_version-android$suffix.aab"
 cp build/app/outputs/flutter-apk/app-release.apk "$apk"
-ls -l "$apk"
+cp build/app/outputs/bundle/release/app-release.aab "$aab"
+ls -l "$apk" "$aab"

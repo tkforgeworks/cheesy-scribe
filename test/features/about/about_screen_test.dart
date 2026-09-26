@@ -22,6 +22,11 @@ void main() {
     expect(find.text('A TK FORGEWORKS PRODUCT'), findsOneWidget);
     expect(find.byType(ForgeWorksMark), findsOneWidget);
     expect(find.text('tkforgeworks.com'), findsOneWidget);
+    expect(find.text('Privacy policy'), findsOneWidget);
+    expect(
+      AboutScreen.privacyUri.toString(),
+      'https://tkforgeworks.com/privacy/cheesy-scribe/',
+    );
     expect(find.text(AboutScreen.privacyLine), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('about-licenses')));
