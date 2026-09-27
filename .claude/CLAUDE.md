@@ -229,7 +229,14 @@ the org workflow for that): CI builds the debug-signed fallback, named
 `-debugsigned`, with a **per-runner throwaway debug key**, so such an APK
 never installs over another build (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`).
 Repo
-variable `JIRA_BASE_URL` is set for release-notes linking. `dart format` does not honour
+variable `JIRA_BASE_URL` is set for release-notes linking. **Play upload
+(CHEESE-42):** `release.yml` sets `play-package-name` + `play-track:
+internal`, so after each GitHub release the org workflow's `publish-play`
+job uploads the AAB to internal testing and rolls it out (What's new = the
+release-note bullets, links stripped, ≤ 500 chars). Needs the
+`PLAY_SERVICE_ACCOUNT_JSON` repo secret (service account invited in the Play
+Console with release rights); a failed upload leaves the GitHub release in
+place, so re-run just that job. `dart format` does not honour
 `analysis_options.yaml` excludes, so the handoff's remaining reference Dart
 file is `docs/design_handoff_cheesy_scribe/lib/theme.dart.txt` (models.dart
 was adopted and deleted in CHEESE-20; theme.dart.txt can go once nothing
