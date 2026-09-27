@@ -15,6 +15,14 @@
 # they are ever missing the build fails on purpose. For a keystore-less dry
 # run add `android-signing: optional` under `with:` (rc.1 was cut that way,
 # debug-signed).
+#
+# Google Play (CHEESE-42): once the release is published, the play-store job
+# (org release-play-store.yml) uploads its AAB to the internal testing track
+# and rolls it out to testers (What's new = the release-note bullets). Auth is
+# keyless Workload Identity Federation: repo variables
+# GCP_WORKLOAD_IDENTITY_PROVIDER and PLAY_SERVICE_ACCOUNT name the GitHub
+# OIDC provider and the service account invited in the Play Console. A failed
+# upload leaves the GitHub release in place; re-run just the play-store job.
 name: Release
 
 on:
@@ -37,3 +45,17 @@ jobs:
       java-version: '21'
       build-windows: false
     secrets: inherit
+
+  play-store:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: tkforgeworks/.github/.github/workflows/release-play-store.yml@main
+    with:
+      tag: v${{ needs.release.outputs.version }}
+      package-name: com.tkforgeworks.cheesy_scribe
+      track: internal
+      workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      service-account: ${{ vars.PLAY_SERVICE_ACCOUNT }}
