@@ -118,11 +118,7 @@ class SettingsScreen extends ConsumerWidget {
                   size: 18,
                   color: x.textTertiary,
                 ),
-                onTap: () => showLicensePage(
-                  context: context,
-                  applicationName: 'Cheesy Scribe',
-                  applicationVersion: version,
-                ),
+                onTap: () => context.push('/licenses'),
               ),
               ListTile(
                 title: const Text('About Cheesy Scribe'),

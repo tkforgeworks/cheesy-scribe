@@ -6,11 +6,13 @@ import 'package:go_router/go_router.dart';
 import 'app/router.dart';
 import 'app/theme/scribe_theme.dart';
 import 'data/providers.dart';
+import 'features/about/licenses_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Phone-portrait UI only (CHEESE-1 §3 C); the manifest also pins it.
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  registerBundledFontLicenses();
   runApp(const ProviderScope(child: ScribeApp()));
 }
 

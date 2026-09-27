@@ -1,5 +1,6 @@
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
+import 'package:cheesy_scribe/features/about/licenses_screen.dart';
 import 'package:cheesy_scribe/features/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -72,8 +73,8 @@ void main() {
     expect(find.text('0.1.0'), findsOneWidget);
     await tester.tap(find.text('Open-source licenses'));
     await tester.pumpAndSettle();
-    expect(find.byType(LicensePage), findsOneWidget);
-    await tester.pageBack();
+    expect(find.byType(LicensesScreen), findsOneWidget);
+    await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('About Cheesy Scribe'));
     await tester.pumpAndSettle();

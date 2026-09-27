@@ -1,12 +1,15 @@
 import 'package:cheesy_scribe/app/widgets/widgets.dart';
 import 'package:cheesy_scribe/features/about/about_screen.dart';
+import 'package:cheesy_scribe/features/about/licenses_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../support.dart';
 
 void main() {
-  testApp('renders the about page and opens the licenses', (tester) async {
+  testApp('renders the about page and opens the licenses summary', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -31,8 +34,8 @@ void main() {
 
     await tester.tap(find.byKey(const Key('about-licenses')));
     await tester.pumpAndSettle();
-    expect(find.byType(LicensePage), findsOneWidget);
-    await tester.pageBack();
+    expect(find.byType(LicensesScreen), findsOneWidget);
+    await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
