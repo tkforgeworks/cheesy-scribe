@@ -230,13 +230,14 @@ the org workflow for that): CI builds the debug-signed fallback, named
 never installs over another build (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`).
 Repo
 variable `JIRA_BASE_URL` is set for release-notes linking. **Play upload
-(CHEESE-42):** `release.yml` sets `play-package-name` + `play-track:
-internal`, so after each GitHub release the org workflow's `publish-play`
-job uploads the AAB to internal testing and rolls it out (What's new = the
-release-note bullets, links stripped, ≤ 500 chars). Needs the
-`PLAY_SERVICE_ACCOUNT_JSON` repo secret (service account invited in the Play
-Console with release rights); a failed upload leaves the GitHub release in
-place, so re-run just that job. `dart format` does not honour
+(CHEESE-42):** `release.yml`'s second job, `play-store`, calls the org
+`release-play-store.yml` once `release` reports `released == 'true'`: it
+uploads the release's AAB to internal testing and rolls it out (What's new
+= the release-note bullets, links stripped, ≤ 500 chars). Keyless auth via
+Workload Identity Federation (the Cheesy Scribe Google Cloud project, repo
+variables `GCP_WORKLOAD_IDENTITY_PROVIDER` + `PLAY_SERVICE_ACCOUNT`; key
+creation is blocked by org policy, so no JSON key). A failed upload leaves
+the GitHub release in place; re-run just that job. `dart format` does not honour
 `analysis_options.yaml` excludes, so the handoff's remaining reference Dart
 file is `docs/design_handoff_cheesy_scribe/lib/theme.dart.txt` (models.dart
 was adopted and deleted in CHEESE-20; theme.dart.txt can go once nothing

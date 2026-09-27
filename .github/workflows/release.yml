@@ -16,13 +16,13 @@
 # run add `android-signing: optional` under `with:` (rc.1 was cut that way,
 # debug-signed).
 #
-# Google Play (CHEESE-42): after the GitHub release is published, the org
-# workflow's publish-play job uploads the AAB to the internal testing track
-# and rolls it out to testers (What's new = the release-note bullets). Needs
-# the PLAY_SERVICE_ACCOUNT_JSON repo secret: a Google Cloud service account
-# key (Google Play Android Developer API enabled) whose account is invited in
-# Play Console → Users and permissions with release rights on this app. If
-# the upload fails, the GitHub release still stands; re-run publish-play.
+# Google Play (CHEESE-42): once the release is published, the play-store job
+# (org release-play-store.yml) uploads its AAB to the internal testing track
+# and rolls it out to testers (What's new = the release-note bullets). Auth is
+# keyless Workload Identity Federation: repo variables
+# GCP_WORKLOAD_IDENTITY_PROVIDER and PLAY_SERVICE_ACCOUNT name the GitHub
+# OIDC provider and the service account invited in the Play Console. A failed
+# upload leaves the GitHub release in place; re-run just the play-store job.
 name: Release
 
 on:
@@ -44,6 +44,18 @@ jobs:
       flutter-version: '3.47.2'
       java-version: '21'
       build-windows: false
-      play-package-name: com.tkforgeworks.cheesy_scribe
-      play-track: internal
     secrets: inherit
+
+  play-store:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: tkforgeworks/.github/.github/workflows/release-play-store.yml@main
+    with:
+      tag: v${{ needs.release.outputs.version }}
+      package-name: com.tkforgeworks.cheesy_scribe
+      track: internal
+      workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      service-account: ${{ vars.PLAY_SERVICE_ACCOUNT }}
