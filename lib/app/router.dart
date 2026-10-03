@@ -47,8 +47,10 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
               GoRoute(
                 path: ':id',
                 parentNavigatorKey: rootKey,
-                builder: (context, state) =>
-                    NoteDetailScreen(noteId: state.pathParameters['id']!),
+                pageBuilder: (context, state) => _pushedPage(
+                  state,
+                  NoteDetailScreen(noteId: state.pathParameters['id']!),
+                ),
                 routes: [
                   GoRoute(
                     path: 'edit',
@@ -70,8 +72,9 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
               GoRoute(
                 path: ':styleId',
                 parentNavigatorKey: rootKey,
-                builder: (context, state) => StyleDetailScreen(
-                  styleId: state.pathParameters['styleId']!,
+                pageBuilder: (context, state) => _pushedPage(
+                  state,
+                  StyleDetailScreen(styleId: state.pathParameters['styleId']!),
                 ),
               ),
             ],
@@ -90,12 +93,18 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
       ),
       GoRoute(
         path: '/account',
-        builder: (context, state) => const AccountScreen(),
+        pageBuilder: (context, state) =>
+            _pushedPage(state, const AccountScreen()),
       ),
-      GoRoute(path: '/about', builder: (context, state) => const AboutScreen()),
+      GoRoute(
+        path: '/about',
+        pageBuilder: (context, state) =>
+            _pushedPage(state, const AboutScreen()),
+      ),
       GoRoute(
         path: '/licenses',
-        builder: (context, state) => const LicensesScreen(),
+        pageBuilder: (context, state) =>
+            _pushedPage(state, const LicensesScreen()),
       ),
     ],
   );
@@ -105,6 +114,16 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
 /// entry animations; the drawer's own motion is enough).
 Page<void> _shellPage(GoRouterState state, Widget child) =>
     NoTransitionPage<void>(key: state.pageKey, child: child);
+
+/// A screen pushed over the shell: the platform page transition (Android's
+/// slide-and-fade, with the predictive-back preview).
+///
+/// Every pushed route needs a `pageBuilder`: for plain `builder:` routes
+/// go_router 18 looks for `material_ui`'s `MaterialApp`, doesn't find ours
+/// (`package:flutter/material.dart`'s) and falls back to `NoTransitionPage`,
+/// so the page snaps in and out (CHEESE-43).
+Page<void> _pushedPage(GoRouterState state, Widget child) =>
+    MaterialPage<void>(key: state.pageKey, child: child);
 
 /// Full-screen dialog that slides up from the bottom (the note form).
 Page<void> slideUpPage(GoRouterState state, Widget child) =>
