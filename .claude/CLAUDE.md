@@ -25,7 +25,11 @@ Layout so far:
   (initial), `/library`, `/stats`, `/settings` (`NoTransitionPage`), plus
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
   fullscreen dialog), `/notes/:id`, `/library/:styleId`, `/account`,
-  `/about`. No `/login`. `new` is declared before `:id`.
+  `/about`, `/licenses` (`_pushedPage` = Flutter's `MaterialPage`: Android
+  slide-and-fade + predictive back). No `/login`. `new` is declared before
+  `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
+  `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
+  routes a `NoTransitionPage` (CHEESE-43; `test/app_test.dart` pins it).
 - `lib/app/shell/` — `ScribeShell` (Scaffold owning the drawer; screens are
   their own Scaffolds and call `ScribeShell.openDrawer(context)`, not
   `Scaffold.of`), `ScribeDrawer` (`DrawerDestination`/`DrawerPill`; no Sign
@@ -207,7 +211,11 @@ Medium_Phone -gpu swiftshader_indirect -no-boot-anim -no-audio &` and poll
 `adb shell getprop sys.boot_completed` (~2 min cold, ~30 s warm). The
 running process is `qemu-system-x86_64 -avd Medium_Phone …`, so a liveness
 check must match `"[q]emu-system.*Medium_Phone"`, not `emulator -avd`.
-Stop it with `adb emu kill`. `flutter emulators --launch` never returns.
+Stop it with `adb emu kill`. Since 2026-10-03 its QEMU process has
+segfaulted (`coredumpctl`) within a minute or so once the app runs page
+transitions under SwiftShader, and a crash rolls back to the boot snapshot
+(installs are lost; `-no-snapshot` cold-boots). Use widget-test frame
+renders for motion and Tim's phone for the device pass. `flutter emulators --launch` never returns.
 Emulator screenshots look soft from display scaling; that is not an app
 bug. Emulation is slow on this hardware — prefer widget-test PNG renders
 for routine visual checks and the emulator for confirmation. **Never run

@@ -4,6 +4,7 @@ import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
 import 'package:cheesy_scribe/app/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'support.dart';
 
@@ -146,5 +147,33 @@ void main() {
     expect(find.text('Your notebook'), findsNothing);
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.themeMode, ThemeMode.dark);
+  });
+
+  // CHEESE-43: plain `builder:` routes fall back to NoTransitionPage under
+  // go_router 18, so pushed screens must animate (and keep predictive back)
+  // through an explicit MaterialPage.
+  testApp('pushed screens use the platform page transition', (tester) async {
+    await pumpApp(tester);
+    final router = GoRouter.of(tester.element(find.byType(Scaffold).first));
+    for (final path in [
+      '/account',
+      '/about',
+      '/licenses',
+      '/notes/missing',
+      '/library/fresh',
+    ]) {
+      router.push(path);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      final route = ModalRoute.of(
+        tester.element(find.byType(Scaffold, skipOffstage: false).last),
+      )!;
+      expect(route, isA<MaterialRouteTransitionMixin<void>>(), reason: path);
+      expect(route.animation!.isAnimating, isTrue, reason: path);
+      await tester.pumpAndSettle();
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Search your tastings'), findsOneWidget, reason: path);
+    }
   });
 }
