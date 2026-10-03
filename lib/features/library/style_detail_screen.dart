@@ -67,7 +67,12 @@ class _StyleBody extends ConsumerWidget {
     final count = notes.asData?.value.length;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, 32),
+      padding: const EdgeInsets.fromLTRB(
+        24,
+        4,
+        24,
+        32,
+      ).withNavBarInset(context),
       children: [
         MonoLabel(
           count == null ? 'Reference style' : '$count tasted',

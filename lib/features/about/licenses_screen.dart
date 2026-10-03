@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/shell/shell_providers.dart';
 import '../../app/theme/scribe_theme.dart';
+import '../../app/widgets/widgets.dart';
 import '../settings/settings_screen.dart';
 
 /// `/licenses` (CHEESE-41): a short summary of what the app is licensed
@@ -51,7 +52,12 @@ class LicensesScreen extends ConsumerWidget {
         title: const Text('Open-source licenses'),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          32,
+        ).withNavBarInset(context),
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(4, 8, 4, 22),

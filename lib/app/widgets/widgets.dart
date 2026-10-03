@@ -10,6 +10,7 @@ export 'forge_logo_badge.dart';
 export 'forgeworks_mark.dart';
 export 'journal_field.dart';
 export 'mono_label.dart';
+export 'nav_bar_inset.dart';
 export 'skeleton_row.dart';
 export 'star_rating.dart';
 export 'status_capsule.dart';

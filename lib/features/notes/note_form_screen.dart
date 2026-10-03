@@ -349,7 +349,12 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
 
   Widget _form(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      padding: const EdgeInsets.fromLTRB(
+        20,
+        8,
+        20,
+        32,
+      ).withNavBarInset(context),
       children: [
         JournalField(
           label: 'Cheese name',

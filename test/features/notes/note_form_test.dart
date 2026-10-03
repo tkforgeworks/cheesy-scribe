@@ -226,4 +226,30 @@ void main() {
     expect(find.widgetWithText(TextField, 'Other'), findsOneWidget);
     expect(find.text('RIND (OTHER)'), findsOneWidget);
   });
+
+  // CHEESE-44: edge-to-edge draws under the 3-button navigation bar, so the
+  // form's explicit list padding has to add the inset itself.
+  testApp('save button rests above the system navigation bar', (tester) async {
+    const navBar = 48.0;
+    tester.view.physicalSize = const Size(412, 915);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(bottom: navBar);
+    tester.view.viewPadding = const FakeViewPadding(bottom: navBar);
+    addTearDown(tester.view.reset);
+    await pumpApp(tester, at: '/notes/new');
+
+    await tester.scrollUntilVisible(
+      find.text('Save to journal'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    // Then all the way to the end, where the bottom padding shows.
+    final list = tester.state<ScrollableState>(find.byType(Scrollable).first);
+    list.position.jumpTo(list.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+    final save = tester.getRect(
+      find.widgetWithText(FilledButton, 'Save to journal'),
+    );
+    expect(save.bottom, lessThanOrEqualTo(915 - navBar));
+  });
 }

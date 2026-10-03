@@ -37,7 +37,12 @@ class SettingsScreen extends ConsumerWidget {
         title: const Text('Settings'),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          32,
+        ).withNavBarInset(context),
         children: [
           SettingsGroup(
             label: 'Appearance',

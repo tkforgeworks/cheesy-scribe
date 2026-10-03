@@ -37,6 +37,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
 
     return Scaffold(
       body: SafeArea(
+        bottom: false,
         child: CustomScrollView(
           slivers: [
             SliverPadding(
@@ -105,7 +106,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                padding: const EdgeInsets.fromLTRB(
+                  16,
+                  0,
+                  16,
+                  32,
+                ).withNavBarInset(context),
                 sliver: SliverGrid.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,

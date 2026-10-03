@@ -168,7 +168,10 @@ Layout so far:
   `StatusCapsule`, `StarRating`, `JournalField`, `BoxedField`, `ForgeFab`,
   `ForgeLogoBadge`/`WedgeGlyph`, `ForgeWorksMark` (the TKFW hammer/anvil,
   About only, tinted), `SkeletonRow`, `ErrorCard`, `EmptyState`,
-  `showConfirmSheet`); import the `widgets.dart` barrel.
+  `showConfirmSheet`, and the `EdgeInsets.withNavBarInset(context)`
+  extension); import the `widgets.dart` barrel. Android draws edge-to-edge
+  and a scroll view with an explicit `padding` drops the MediaQuery inset,
+  so every bottom-reaching scroll padding uses `withNavBarInset` (CHEESE-44).
 - `assets/brand/` (CHEESE-18; all rights reserved via `NOTICE`, not
   bundled): `wedge.svg`, `tkforgeworks-mark.svg` (verbatim from the parent
   design system), `launcher/*.png` (512² adaptive foreground / monochrome /

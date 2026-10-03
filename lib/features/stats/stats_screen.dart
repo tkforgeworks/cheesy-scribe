@@ -54,7 +54,12 @@ class _StatsBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final x = context.scribe;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+      padding: const EdgeInsets.fromLTRB(
+        16,
+        8,
+        16,
+        32,
+      ).withNavBarInset(context),
       children: [
         Row(
           children: [
