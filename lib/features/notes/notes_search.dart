@@ -128,7 +128,12 @@ class _SearchBody extends ConsumerWidget {
       ),
       AsyncData(value: final notes) => Padding(
         key: NotesSearchAnchor.resultsKey,
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+        padding: const EdgeInsets.fromLTRB(
+          16,
+          14,
+          16,
+          24,
+        ).withNavBarInset(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -177,7 +182,12 @@ class _Recents extends ConsumerWidget {
     }
     return Padding(
       key: NotesSearchAnchor.recentsKey,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+      padding: const EdgeInsets.fromLTRB(
+        16,
+        14,
+        16,
+        24,
+      ).withNavBarInset(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

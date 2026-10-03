@@ -101,7 +101,12 @@ class _NoteBody extends ConsumerWidget {
     final makerLine = [if (maker.isNotEmpty) maker, ?rind].join(' — ');
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(24, 4, 24, 32),
+      padding: const EdgeInsets.fromLTRB(
+        24,
+        4,
+        24,
+        32,
+      ).withNavBarInset(context),
       children: [
         MonoLabel(
           'Tasted ${formatTastingDate(note.tastedAt)}${price == null ? '' : ' · $price'}',

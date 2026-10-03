@@ -200,7 +200,10 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
                 ),
               ],
             },
-            const SliverPadding(padding: EdgeInsets.only(bottom: 96)),
+            SliverPadding(
+              padding: const EdgeInsets.only(bottom: 96)
+                  .withNavBarInset(context),
+            ),
           ],
         ),
       ),

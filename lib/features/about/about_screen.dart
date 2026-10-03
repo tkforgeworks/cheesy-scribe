@@ -51,7 +51,12 @@ class AboutScreen extends ConsumerWidget {
         title: const Text('About Cheesy Scribe'),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(28, 24, 28, 40),
+        padding: const EdgeInsets.fromLTRB(
+          28,
+          24,
+          28,
+          40,
+        ).withNavBarInset(context),
         children: [
           const Center(child: ForgeLogoBadge(size: 64)),
           const SizedBox(height: 16),

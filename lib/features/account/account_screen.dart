@@ -105,7 +105,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         title: const Text('Account'),
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        padding: const EdgeInsets.fromLTRB(
+          20,
+          12,
+          20,
+          32,
+        ).withNavBarInset(context),
         children: [
           Center(
             child: Container(
