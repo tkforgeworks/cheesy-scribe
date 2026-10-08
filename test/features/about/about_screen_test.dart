@@ -37,7 +37,11 @@ void main() {
     expect(find.byType(LicensesScreen), findsOneWidget);
     await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Back'));
+    expect(find.widgetWithText(AppBar, 'About Cheesy Scribe'), findsOneWidget);
+    expect(find.byTooltip('Back'), findsNothing);
+    await tester.tap(find.byTooltip('Open menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('My tasting notes'));
     await tester.pumpAndSettle();
     expect(find.text('Your tastings'), findsOneWidget);
   });

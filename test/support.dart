@@ -7,6 +7,7 @@ import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
 import 'package:cheesy_scribe/main.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -93,3 +94,17 @@ void testApp(
 /// forever at teardown. `runAsync` executes [op] on the real event loop.
 Future<T> onDb<T>(WidgetTester tester, Future<T> Function() op) async =>
     (await tester.runAsync(op)) as T;
+
+/// The Android system back button/gesture: the engine's `popRoute`, which
+/// go_router's delegate answers (unlike `tester.pageBack()`, which taps the
+/// app bar's back button).
+Future<void> systemBack(WidgetTester tester) async {
+  await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+    SystemChannels.navigation.name,
+    SystemChannels.navigation.codec.encodeMethodCall(
+      const MethodCall('popRoute'),
+    ),
+    (_) {},
+  );
+  await tester.pumpAndSettle();
+}

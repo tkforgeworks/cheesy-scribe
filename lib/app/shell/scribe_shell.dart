@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'scribe_drawer.dart';
 
-/// The `ShellRoute` chrome for the four top-level destinations: a Scaffold
-/// that owns the navigation drawer, with the routed screen as its body.
+/// The `ShellRoute` chrome for the drawer's destinations: a Scaffold that
+/// owns the navigation drawer, with the routed screen as its body.
+///
+/// System back on a destination opens the drawer, and back with the drawer
+/// open leaves the app (CHEESE-47). Anything above the destination (a
+/// pushed screen, sheet, dialog or the search view) sits on a navigator
+/// go_router asks first, so back still pops it as usual.
 ///
 /// Screens inside the shell are Scaffolds of their own (app bar, FAB,
 /// hide-on-scroll all stay per-screen); they open the drawer through
@@ -36,10 +42,25 @@ class _ScribeShellState extends State<ScribeShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: ScribeDrawer(selectedPath: widget.currentPath),
-      body: widget.child,
+    // canPop: false outranks the drawer's own local-history entry, so the
+    // open drawer doesn't swallow back by closing itself.
+    return PopScope<Object?>(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        final scaffold = _scaffoldKey.currentState;
+        if (scaffold == null) return;
+        if (scaffold.isDrawerOpen) {
+          SystemNavigator.pop();
+        } else {
+          scaffold.openDrawer();
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        drawer: ScribeDrawer(selectedPath: widget.currentPath),
+        body: widget.child,
+      ),
     );
   }
 }

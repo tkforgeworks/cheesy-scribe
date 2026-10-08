@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/shell/scribe_shell.dart';
 import '../../app/shell/shell_providers.dart';
 import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
@@ -40,13 +41,9 @@ class AboutScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Back',
-          onPressed: () => context.pop(),
-          icon: HeroIcon(
-            HeroIcons.arrowLeft,
-            size: 24,
-            color: c.onSurfaceVariant,
-          ),
+          tooltip: 'Open menu',
+          onPressed: () => ScribeShell.openDrawer(context),
+          icon: HeroIcon(HeroIcons.bars3, size: 24, color: c.onSurfaceVariant),
         ),
         title: const Text('About Cheesy Scribe'),
       ),
