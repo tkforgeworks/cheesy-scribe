@@ -58,7 +58,7 @@ class ScribeSearchBar extends ConsumerWidget {
             shape: const CircleBorder(),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
-              onTap: () => context.push('/account'),
+              onTap: () => context.go('/account'),
               child: SizedBox(
                 width: 32,
                 height: 32,

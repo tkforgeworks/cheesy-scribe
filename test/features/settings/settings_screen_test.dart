@@ -79,5 +79,6 @@ void main() {
     await tester.tap(find.text('About Cheesy Scribe'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'About Cheesy Scribe'), findsOneWidget);
+    expect(find.byTooltip('Open menu'), findsOneWidget);
   });
 }

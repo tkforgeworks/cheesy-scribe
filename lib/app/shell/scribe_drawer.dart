@@ -44,12 +44,7 @@ class ScribeDrawer extends ConsumerWidget {
   ];
 
   static const _secondary = [
-    DrawerDestination(
-      label: 'Account',
-      icon: HeroIcons.user,
-      path: '/account',
-      pushes: true,
-    ),
+    DrawerDestination(label: 'Account', icon: HeroIcons.user, path: '/account'),
     DrawerDestination(
       label: 'Settings',
       icon: HeroIcons.cog6Tooth,
@@ -59,7 +54,6 @@ class ScribeDrawer extends ConsumerWidget {
       label: 'About Cheesy Scribe',
       icon: HeroIcons.informationCircle,
       path: '/about',
-      pushes: true,
     ),
   ];
 
@@ -165,8 +159,8 @@ class ScribeDrawer extends ConsumerWidget {
   }
 }
 
-/// One drawer entry. [pushes] routes open over the shell (form, account,
-/// about) and are never shown selected; the rest are shell destinations.
+/// One drawer entry. [pushes] routes open over the shell (the note form)
+/// and are never shown selected; the rest are shell destinations.
 @immutable
 class DrawerDestination {
   const DrawerDestination({

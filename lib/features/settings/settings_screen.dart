@@ -132,7 +132,7 @@ class SettingsScreen extends ConsumerWidget {
                   size: 18,
                   color: x.textTertiary,
                 ),
-                onTap: () => context.push('/about'),
+                onTap: () => context.go('/about'),
               ),
             ],
           ),

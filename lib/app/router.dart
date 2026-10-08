@@ -15,9 +15,11 @@ import 'shell/scribe_shell.dart';
 
 /// Builds the app router (DESIGN_SPEC §7, minus `/login`: local-first).
 ///
-/// The `ShellRoute` owns the drawer for `/notes`, `/library`, `/stats` and
-/// `/settings`; everything else is pushed on the root navigator so it
-/// covers the shell and uses back/close instead of the drawer.
+/// The `ShellRoute` owns the drawer for the drawer's destinations
+/// (`/notes`, `/library`, `/stats`, `/settings`, `/account`, `/about`;
+/// CHEESE-47), reached with `context.go`. Everything else is pushed on the
+/// root navigator so it covers the shell and uses back/close instead of
+/// the drawer.
 GoRouter createScribeRouter({String initialLocation = '/notes'}) {
   final rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
   return GoRouter(
@@ -89,17 +91,17 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
             pageBuilder: (context, state) =>
                 _shellPage(state, const SettingsScreen()),
           ),
+          GoRoute(
+            path: '/account',
+            pageBuilder: (context, state) =>
+                _shellPage(state, const AccountScreen()),
+          ),
+          GoRoute(
+            path: '/about',
+            pageBuilder: (context, state) =>
+                _shellPage(state, const AboutScreen()),
+          ),
         ],
-      ),
-      GoRoute(
-        path: '/account',
-        pageBuilder: (context, state) =>
-            _pushedPage(state, const AccountScreen()),
-      ),
-      GoRoute(
-        path: '/about',
-        pageBuilder: (context, state) =>
-            _pushedPage(state, const AboutScreen()),
       ),
       GoRoute(
         path: '/licenses',

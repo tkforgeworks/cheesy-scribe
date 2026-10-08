@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
+import '../../app/shell/scribe_shell.dart';
 import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
@@ -94,13 +94,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          tooltip: 'Back',
-          onPressed: () => context.pop(),
-          icon: HeroIcon(
-            HeroIcons.arrowLeft,
-            size: 24,
-            color: c.onSurfaceVariant,
-          ),
+          tooltip: 'Open menu',
+          onPressed: () => ScribeShell.openDrawer(context),
+          icon: HeroIcon(HeroIcons.bars3, size: 24, color: c.onSurfaceVariant),
         ),
         title: const Text('Account'),
       ),

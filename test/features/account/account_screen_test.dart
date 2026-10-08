@@ -33,11 +33,12 @@ void main() {
     expect(find.text('T'), findsOneWidget); // avatar initial
 
     // Drawer reflects it immediately.
-    await tester.tap(find.byTooltip('Back'));
-    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Open menu'));
     await tester.pumpAndSettle();
-    expect(find.text('Tim'), findsOneWidget);
+    expect(
+      find.descendant(of: find.byType(Drawer), matching: find.text('Tim')),
+      findsOneWidget,
+    );
     expect(find.text('Your notebook'), findsNothing);
 
     // Persisted, and member-since was stamped on first visit.
@@ -86,5 +87,25 @@ void main() {
     final saved = await onDb(tester, () => SettingsRepository(db).load());
     expect(saved.displayName, isNull);
     expect(find.text('You'), findsOneWidget);
+  });
+
+  // CHEESE-47: Account is a drawer destination, so leaving it no longer
+  // goes through Back; an unsubmitted edit must still be kept.
+  testApp('leaving through the drawer keeps an unsubmitted name', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final db = await pumpApp(tester, at: '/account');
+    await tester.enterText(find.byType(TextField), 'Tim');
+    await tester.pump();
+    await tester.tap(find.byTooltip('Open menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('My tasting notes'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your tastings'), findsOneWidget);
+    final saved = await onDb(tester, () => SettingsRepository(db).load());
+    expect(saved.displayName, 'Tim');
   });
 }

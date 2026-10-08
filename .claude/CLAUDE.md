@@ -21,18 +21,25 @@ Layout so far:
 
 - `lib/main.dart` — `ProviderScope` + `ScribeApp` (`MaterialApp.router`;
   creates the router once in its State; `initialLocation` param for tests).
-- `lib/app/router.dart` — `createScribeRouter()`: `ShellRoute` for `/notes`
-  (initial), `/library`, `/stats`, `/settings` (`NoTransitionPage`), plus
+- `lib/app/router.dart` — `createScribeRouter()`: `ShellRoute` for every
+  drawer destination, `/notes` (initial), `/library`, `/stats`, `/settings`,
+  `/account`, `/about` (`NoTransitionPage`, reached with `context.go`, menu
+  icon in the app bar; CHEESE-47 moved Account and About in, against
+  DESIGN_SPEC §6/§7's "back app bar"), plus
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
-  fullscreen dialog), `/notes/:id`, `/library/:styleId`, `/account`,
-  `/about`, `/licenses` (`_pushedPage` = Flutter's `MaterialPage`: Android
+  fullscreen dialog), `/notes/:id`, `/library/:styleId`,
+  `/licenses` (`_pushedPage` = Flutter's `MaterialPage`: Android
   slide-and-fade + predictive back). No `/login`. `new` is declared before
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
   `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
   routes a `NoTransitionPage` (CHEESE-43; `test/app_test.dart` pins it).
 - `lib/app/shell/` — `ScribeShell` (Scaffold owning the drawer; screens are
   their own Scaffolds and call `ScribeShell.openDrawer(context)`, not
-  `Scaffold.of`), `ScribeDrawer` (`DrawerDestination`/`DrawerPill`; no Sign
+  `Scaffold.of`. Its `PopScope(canPop: false)` makes system back on a
+  destination open the drawer, and back with the drawer open call
+  `SystemNavigator.pop()`; pushed screens, sheets and the search view sit
+  on navigators go_router pops first, so back stays a real back there.
+  Costs the predictive back-to-home preview on destinations), `ScribeDrawer` (`DrawerDestination`/`DrawerPill`; no Sign
   out — local-first), `ScribeSearchBar` (menu icon + avatar), providers
   `appVersionProvider` (package_info_plus) and `displayNameProvider`
   (derived from settings). No placeholder screens remain.
@@ -192,6 +199,8 @@ Layout so far:
   drift's stream-cancel timer fires before flutter_test's pending-timer
   check (otherwise the test fails and `db.close()` hangs the runner).
   Repository tests use plain `test()` against `openTestDatabase()`.
+  `systemBack(tester)` sends the engine's `popRoute` (the Android back
+  button), unlike `tester.pageBack()`, which taps the app-bar arrow.
   **Inside a widget-test body, every direct DB call goes through
   `onDb(tester, () => …)`** (`tester.runAsync`): a drift stream read such
   as `.first` on the fake clock leaves state that makes `db.close()` hang
