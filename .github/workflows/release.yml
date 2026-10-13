@@ -2,8 +2,8 @@
 # (tkforgeworks/.github release-flutter.yml). Android only: no Windows build.
 #
 # How a release happens (docs/branching-and-release.md in the org repo):
-#   scripts/release/bump-version.sh rc     on v0.1.0/main → prerelease vX.Y.Z-rc.N
-#   scripts/release/bump-version.sh final  on v0.1.0/main → release PR; merging
+#   scripts/release/bump-version.sh rc     on vX.Y.Z/main → prerelease vX.Y.Z-rc.N
+#   scripts/release/bump-version.sh final  on vX.Y.Z/main → release PR; merging
 #                                          into main cuts the stable vX.Y.Z
 # The bump is an ordinary commit; this workflow self-gates on whether the
 # version's tag exists and creates the tag when it publishes the GitHub
