@@ -229,7 +229,13 @@ void main() {
     scene('settings', '/settings', plain);
     scene('account', '/account', plain);
     scene('about', '/about', scrolled);
-    scene('licenses', '/licenses', scrolled);
+    // Pushed from About, as in the app, so the app bar has its back button.
+    scene('licenses', '/about', (tester, p) async {
+      await tester.ensureVisible(find.text('Open-source licenses'));
+      await tester.tap(find.text('Open-source licenses'));
+      await tester.pumpAndSettle();
+      await scrolled(tester, p);
+    });
     // Material's own surfaces, where the theme's default font and action
     // icons show.
     scene('dlg-date', '/notes/rogue/edit', (tester, p) async {

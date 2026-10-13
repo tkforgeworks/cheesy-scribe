@@ -23,7 +23,7 @@ void main() {
     expect(find.textContaining('SIL Open Font License 1.1'), findsOneWidget);
     expect(find.text(LicensesScreen.assetsLine), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('licenses-all')));
+    await tester.tap(find.byKey(ForgeLicensesScreen.allNoticesKey));
     await tester.pumpAndSettle();
     expect(find.byType(LicensePage), findsOneWidget);
     await tester.pageBack();

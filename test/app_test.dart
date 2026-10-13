@@ -194,7 +194,7 @@ void main() {
       addTearDown(tester.view.reset);
       await pumpApp(tester, at: '/about');
       watchExits(tester);
-      await tester.tap(find.byKey(const Key('about-licenses')));
+      await tester.tap(find.byKey(ForgeAboutScreen.licensesKey));
       await tester.pumpAndSettle();
       expect(
         find.widgetWithText(AppBar, 'Open-source licenses'),

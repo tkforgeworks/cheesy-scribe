@@ -9,10 +9,9 @@ import '../../app/shell/scribe_shell.dart';
 import '../../app/shell/shell_providers.dart';
 import '../../app/widgets/widgets.dart';
 
-/// `/about` (DESIGN_SPEC §6 About, CHEESE-33): badge, name, version, one
-/// paragraph in the TKFW voice, the maker line with the TK ForgeWorks mark
-/// (tinted, since this app has no purple), links (site, privacy policy,
-/// licenses) and the privacy line.
+/// `/about` (DESIGN_SPEC §6 About, CHEESE-33): forge_ui's shared about
+/// screen with this app's badge, blurb, links and privacy line. The
+/// TK ForgeWorks mark is tinted, since this app has no purple.
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
@@ -36,112 +35,28 @@ class AboutScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final version = ref.watch(appVersionProvider).asData?.value;
-    final c = context.colors;
-    final x = context.forge;
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          tooltip: 'Open menu',
-          onPressed: () => ScribeShell.openDrawer(context),
-          icon: HeroIcon(HeroIcons.bars3, size: 24, color: c.onSurfaceVariant),
+    return ForgeAboutScreen(
+      appName: 'Cheesy Scribe',
+      // A drawer destination, so the menu icon and not a back arrow.
+      leading: IconButton(
+        tooltip: 'Open menu',
+        onPressed: () => ScribeShell.openDrawer(context),
+        icon: HeroIcon(
+          HeroIcons.bars3,
+          size: 24,
+          color: context.colors.onSurfaceVariant,
         ),
-        title: const Text('About Cheesy Scribe'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          28,
-          24,
-          28,
-          40,
-        ).withNavBarInset(context),
-        children: [
-          const Center(child: ForgeLogoBadge(size: 64)),
-          const SizedBox(height: 16),
-          Text(
-            'Cheesy Scribe',
-            textAlign: TextAlign.center,
-            style: ForgeType.ui(
-              size: 30,
-              weight: FontWeight.w700,
-              color: c.onSurface,
-            ),
-          ),
-          const SizedBox(height: 6),
-          ForgeMonoLabel(
-            version == null ? 'Version —' : 'Version $version',
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 22),
-          Text(blurb, style: context.text.bodyLarge),
-          const SizedBox(height: 22),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ForgeWorksMark(size: 18, color: x.textTertiary),
-              const SizedBox(width: 8),
-              ForgeMonoLabel(
-                'A TK ForgeWorks product',
-                size: 9.5,
-                color: x.textTertiary,
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          Card(
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                ListTile(
-                  key: const Key('about-site'),
-                  title: const Text('tkforgeworks.com'),
-                  trailing: HeroIcon(
-                    HeroIcons.arrowTopRightOnSquare,
-                    size: 18,
-                    color: x.textTertiary,
-                  ),
-                  onTap: () =>
-                      launchUrl(siteUri, mode: LaunchMode.externalApplication),
-                ),
-                Divider(height: 1, color: x.rowDivider),
-                ListTile(
-                  key: const Key('about-privacy'),
-                  title: const Text('Privacy policy'),
-                  trailing: HeroIcon(
-                    HeroIcons.arrowTopRightOnSquare,
-                    size: 18,
-                    color: x.textTertiary,
-                  ),
-                  onTap: () => launchUrl(
-                    privacyUri,
-                    mode: LaunchMode.externalApplication,
-                  ),
-                ),
-                Divider(height: 1, color: x.rowDivider),
-                ListTile(
-                  key: const Key('about-licenses'),
-                  title: const Text('Open-source licenses'),
-                  trailing: HeroIcon(
-                    HeroIcons.chevronRight,
-                    size: 18,
-                    color: x.textTertiary,
-                  ),
-                  onTap: () => context.push('/licenses'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 22),
-          Text(
-            privacyLine,
-            textAlign: TextAlign.center,
-            style: ForgeType.serif(
-              size: 13.5,
-              italic: true,
-              color: x.textTertiary,
-            ),
-          ),
-        ],
-      ),
+      badge: const ForgeLogoBadge(size: 64),
+      version: version,
+      blurb: blurb,
+      onOpenWebsite: () =>
+          launchUrl(siteUri, mode: LaunchMode.externalApplication),
+      onOpenPrivacyPolicy: () =>
+          launchUrl(privacyUri, mode: LaunchMode.externalApplication),
+      onOpenLicenses: () => context.push('/licenses'),
+      footnote: privacyLine,
+      tintMark: true,
     );
   }
 }

@@ -32,7 +32,7 @@ void main() {
     );
     expect(find.text(AboutScreen.privacyLine), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('about-licenses')));
+    await tester.tap(find.byKey(ForgeAboutScreen.licensesKey));
     await tester.pumpAndSettle();
     expect(find.byType(LicensesScreen), findsOneWidget);
     await tester.tap(find.byTooltip('Back'));
