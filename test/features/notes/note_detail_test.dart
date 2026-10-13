@@ -4,6 +4,7 @@ import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
 import 'package:cheesy_scribe/features/notes/widgets/flavor_wheel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../../support.dart';
 
@@ -51,7 +52,7 @@ void main() {
     expect(find.text('Tastes like winning an argument.'), findsOneWidget);
     expect(find.text('5.0'), findsOneWidget);
     for (final capsule in ['COW', 'RAW', '\$28/LB', 'BLUE']) {
-      expect(find.widgetWithText(TagCapsule, capsule), findsOneWidget);
+      expect(find.widgetWithText(ForgeTagCapsule, capsule), findsOneWidget);
     }
     // Texture appears as a capsule and as the meter's active label.
     expect(find.text('SEMI-SOFT'), findsNWidgets(2));
@@ -74,8 +75,8 @@ void main() {
     expect(find.text('TASTED SEP 1, 2026'), findsOneWidget);
     expect(find.text('Mystery wedge'), findsOneWidget);
     expect(find.byType(StarRating), findsNothing);
-    expect(find.widgetWithText(TagCapsule, 'COW'), findsOneWidget);
-    expect(find.widgetWithText(TagCapsule, 'SEMI-SOFT'), findsOneWidget);
+    expect(find.widgetWithText(ForgeTagCapsule, 'COW'), findsOneWidget);
+    expect(find.widgetWithText(ForgeTagCapsule, 'SEMI-SOFT'), findsOneWidget);
     expect(find.text('NOTES'), findsNothing);
     expect(find.byType(FlavorWheel), findsNothing);
     expect(find.text('TEXTURE'), findsOneWidget);

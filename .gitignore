@@ -50,3 +50,6 @@ app.*.map.json
 
 # Release artifacts built by scripts/release/*
 /release/
+
+# Screen renders from tool/visual/render_screens_test.dart
+/tool/visual/out/

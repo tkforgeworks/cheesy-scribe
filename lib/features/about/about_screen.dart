@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/shell/scribe_shell.dart';
 import '../../app/shell/shell_providers.dart';
-import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
 
 /// `/about` (DESIGN_SPEC §6 About, CHEESE-33): badge, name, version, one
@@ -37,7 +37,7 @@ class AboutScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final version = ref.watch(appVersionProvider).asData?.value;
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -60,14 +60,14 @@ class AboutScreen extends ConsumerWidget {
           Text(
             'Cheesy Scribe',
             textAlign: TextAlign.center,
-            style: ScribeTheme.ui(
+            style: ForgeType.ui(
               size: 30,
               weight: FontWeight.w700,
               color: c.onSurface,
             ),
           ),
           const SizedBox(height: 6),
-          MonoLabel(
+          ForgeMonoLabel(
             version == null ? 'Version —' : 'Version $version',
             textAlign: TextAlign.center,
           ),
@@ -79,7 +79,7 @@ class AboutScreen extends ConsumerWidget {
             children: [
               ForgeWorksMark(size: 18, color: x.textTertiary),
               const SizedBox(width: 8),
-              MonoLabel(
+              ForgeMonoLabel(
                 'A TK ForgeWorks product',
                 size: 9.5,
                 color: x.textTertiary,
@@ -134,7 +134,7 @@ class AboutScreen extends ConsumerWidget {
           Text(
             privacyLine,
             textAlign: TextAlign.center,
-            style: ScribeTheme.serif(
+            style: ForgeType.serif(
               size: 13.5,
               italic: true,
               color: x.textTertiary,

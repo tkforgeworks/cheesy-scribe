@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:heroicons/heroicons.dart';
 
 import '../../app/shell/scribe_shell.dart';
 import '../../app/theme/scribe_theme.dart';
-import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
 
@@ -37,9 +37,12 @@ class StatsScreen extends ConsumerWidget {
         ),
         AsyncError() => const Padding(
           padding: EdgeInsets.all(16),
-          child: ErrorCard(message: "Couldn't open the journal."),
+          child: ForgeErrorCard(message: "Couldn't open the journal."),
         ),
-        _ => const Padding(padding: EdgeInsets.all(16), child: SkeletonList()),
+        _ => const Padding(
+          padding: EdgeInsets.all(16),
+          child: ForgeSkeletonList(),
+        ),
       },
     );
   }
@@ -52,7 +55,7 @@ class _StatsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final x = context.scribe;
+    final x = context.forge;
     return ListView(
       padding: const EdgeInsets.fromLTRB(
         16,
@@ -87,7 +90,7 @@ class _StatsBody extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Text(
                 StatsScreen.needMaterial,
-                style: ScribeTheme.serif(
+                style: ForgeType.serif(
                   size: 13.5,
                   italic: true,
                   color: x.textTertiary,
@@ -121,14 +124,14 @@ class StatTile extends StatelessWidget {
         children: [
           Text(
             value,
-            style: ScribeTheme.ui(
+            style: ForgeType.ui(
               size: 34,
               weight: FontWeight.w600,
               color: context.colors.onPrimaryContainer,
             ),
           ),
           const SizedBox(height: 4),
-          MonoLabel(label, size: 9.5),
+          ForgeMonoLabel(label, size: 9.5),
         ],
       ),
     ),
@@ -146,7 +149,7 @@ class TopFlavorsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     final rows = stats.topFlavors.take(maxRows).toList();
     final max = rows.isEmpty ? 1 : rows.first.value;
     return Card(
@@ -155,12 +158,12 @@ class TopFlavorsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MonoLabel('Top flavors'),
+            const ForgeMonoLabel('Top flavors'),
             const SizedBox(height: 12),
             if (rows.isEmpty)
               Text(
                 'No flavor has scored a 3 yet. The wheel is waiting.',
-                style: ScribeTheme.serif(
+                style: ForgeType.serif(
                   size: 13,
                   italic: true,
                   color: x.textTertiary,
@@ -174,7 +177,7 @@ class TopFlavorsCard extends StatelessWidget {
                     width: 82,
                     child: Text(
                       e.key.label,
-                      style: ScribeTheme.mono(
+                      style: ForgeType.mono(
                         size: 9.5,
                         weight: FontWeight.w500,
                         color: c.onSecondaryContainer,
@@ -202,7 +205,7 @@ class TopFlavorsCard extends StatelessWidget {
                     child: Text(
                       '${e.value}',
                       textAlign: TextAlign.right,
-                      style: ScribeTheme.mono(
+                      style: ForgeType.mono(
                         size: 10,
                         weight: FontWeight.w500,
                         color: x.textTertiary,
@@ -246,7 +249,7 @@ class MilkBreakdownCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     final series = c.brightness == Brightness.dark ? darkSeries : lightSeries;
     final shares = stats.milkShares;
     return Card(
@@ -255,7 +258,7 @@ class MilkBreakdownCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MonoLabel('Milk breakdown'),
+            const ForgeMonoLabel('Milk breakdown'),
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(7),
@@ -288,13 +291,16 @@ class MilkBreakdownCard extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: series[i % series.length],
                           shape: BoxShape.circle,
-                          border: Border.all(color: x.dottedLine, width: 0.5),
+                          border: Border.all(
+                            color: context.scribe.dottedLine,
+                            width: 0.5,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 5),
                       Text(
                         '${e.key.label.toUpperCase()} ${percent(e.value)}',
-                        style: ScribeTheme.mono(
+                        style: ForgeType.mono(
                           size: 9.5,
                           weight: FontWeight.w500,
                           color: c.onSecondaryContainer,
@@ -307,7 +313,7 @@ class MilkBreakdownCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               stats.verdictLine,
-              style: ScribeTheme.serif(
+              style: ForgeType.serif(
                 size: 12.5,
                 italic: true,
                 color: x.textTertiary,

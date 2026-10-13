@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
 import '../../app/shell/scribe_shell.dart';
 import '../../app/shell/shell_providers.dart';
-import '../../app/theme/scribe_theme.dart';
-import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
 
@@ -24,7 +23,7 @@ class SettingsScreen extends ConsumerWidget {
         ref.watch(appSettingsProvider).asData?.value ?? const AppSettings();
     final version = ref.watch(appVersionProvider).asData?.value;
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     final repo = ref.read(settingsRepositoryProvider);
 
     return Scaffold(
@@ -44,7 +43,7 @@ class SettingsScreen extends ConsumerWidget {
           32,
         ).withNavBarInset(context),
         children: [
-          SettingsGroup(
+          ForgeSettingsGroup(
             label: 'Appearance',
             children: [
               _ChoiceRow<ThemeMode>(
@@ -73,7 +72,7 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 18),
-          SettingsGroup(
+          ForgeSettingsGroup(
             label: 'Notifications',
             children: [
               Opacity(
@@ -89,7 +88,7 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 18),
-          SettingsGroup(
+          ForgeSettingsGroup(
             label: 'Data',
             children: [
               Opacity(
@@ -109,12 +108,15 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 18),
-          SettingsGroup(
+          ForgeSettingsGroup(
             label: 'About',
             children: [
               ListTile(
                 title: const Text('Version'),
-                trailing: MonoLabel(version ?? '—', color: c.onSurfaceVariant),
+                trailing: ForgeMonoLabel(
+                  version ?? '—',
+                  color: c.onSurfaceVariant,
+                ),
               ),
               ListTile(
                 title: const Text('Open-source licenses'),
@@ -140,36 +142,6 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-/// Mono group label over a bordered card whose rows are divider-separated.
-class SettingsGroup extends StatelessWidget {
-  const SettingsGroup({super.key, required this.label, required this.children});
-
-  final String label;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.only(left: 4, bottom: 8),
-        child: MonoLabel(label),
-      ),
-      Card(
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            for (final (i, child) in children.indexed) ...[
-              if (i > 0) Divider(height: 1, color: context.scribe.rowDivider),
-              child,
-            ],
-          ],
-        ),
-      ),
-    ],
-  );
 }
 
 class _ChoiceRow<T> extends StatelessWidget {

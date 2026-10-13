@@ -1,8 +1,8 @@
-import 'package:cheesy_scribe/app/widgets/widgets.dart';
 import 'package:cheesy_scribe/features/about/about_screen.dart';
 import 'package:cheesy_scribe/features/about/licenses_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../../support.dart';
 

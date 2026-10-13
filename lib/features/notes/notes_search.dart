@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
 import '../../app/shell/scribe_search_bar.dart';
-import '../../app/theme/scribe_theme.dart';
-import '../../app/widgets/widgets.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/notes_repository.dart';
 import 'widgets/note_row.dart';
@@ -49,7 +48,7 @@ class _NotesSearchAnchorState extends ConsumerState<NotesSearchAnchor> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     return SearchAnchor(
       searchController: _controller,
       isFullScreen: true,
@@ -57,8 +56,8 @@ class _NotesSearchAnchorState extends ConsumerState<NotesSearchAnchor> {
       viewBackgroundColor: c.surface,
       viewSurfaceTintColor: Colors.transparent,
       dividerColor: c.outlineVariant,
-      headerTextStyle: ScribeTheme.ui(size: 15, color: c.onSurface),
-      headerHintStyle: ScribeTheme.ui(size: 15, color: x.textTertiary),
+      headerTextStyle: ForgeType.ui(size: 15, color: c.onSurface),
+      headerHintStyle: ForgeType.ui(size: 15, color: x.textTertiary),
       viewLeading: IconButton(
         tooltip: 'Close search',
         onPressed: () => _controller.closeView(null),
@@ -137,12 +136,12 @@ class _SearchBody extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            MonoLabel(
+            ForgeMonoLabel(
               '${count ?? notes.length} ${(count ?? notes.length) == 1 ? 'result' : 'results'}',
             ),
             const SizedBox(height: 4),
             for (final (i, n) in notes.indexed) ...[
-              if (i > 0) Divider(height: 1, color: context.scribe.rowDivider),
+              if (i > 0) Divider(height: 1, color: context.forge.rowDivider),
               NoteRow(note: n, onTap: () => onOpenNote(n.id)),
             ],
           ],
@@ -150,9 +149,12 @@ class _SearchBody extends ConsumerWidget {
       ),
       AsyncError() => const Padding(
         padding: EdgeInsets.all(16),
-        child: ErrorCard(message: "Couldn't search the journal."),
+        child: ForgeErrorCard(message: "Couldn't search the journal."),
       ),
-      _ => const Padding(padding: EdgeInsets.all(16), child: SkeletonList()),
+      _ => const Padding(
+        padding: EdgeInsets.all(16),
+        child: ForgeSkeletonList(),
+      ),
     };
   }
 }
@@ -165,14 +167,14 @@ class _Recents extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final recents = ref.watch(recentSearchesProvider).asData?.value ?? const [];
-    final x = context.scribe;
+    final x = context.forge;
     if (recents.isEmpty) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
         child: Text(
           'Search by name, creamery, origin, notes or flavor.',
           textAlign: TextAlign.center,
-          style: ScribeTheme.serif(
+          style: ForgeType.serif(
             size: 13.5,
             italic: true,
             color: x.textTertiary,
@@ -193,7 +195,7 @@ class _Recents extends ConsumerWidget {
         children: [
           const Padding(
             padding: EdgeInsets.only(left: 4),
-            child: MonoLabel('Recent searches'),
+            child: ForgeMonoLabel('Recent searches'),
           ),
           const SizedBox(height: 4),
           for (final term in recents)
@@ -232,14 +234,14 @@ class _NoResults extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const MonoLabel('0 results'),
+          const ForgeMonoLabel('0 results'),
           const SizedBox(height: 8),
           Text(
             'Nothing matches — either a typo or a cheese frontier.',
-            style: ScribeTheme.serif(
+            style: ForgeType.serif(
               size: 13.5,
               italic: true,
-              color: context.scribe.textTertiary,
+              color: context.forge.textTertiary,
             ),
           ),
           const SizedBox(height: 4),

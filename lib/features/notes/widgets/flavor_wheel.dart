@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../../../app/theme/scribe_theme.dart';
 import '../../../data/models/models.dart';
@@ -128,7 +129,7 @@ class _FlavorWheelState extends State<FlavorWheel>
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final labelStyle = ScribeTheme.mono(
+    final labelStyle = ForgeType.mono(
       size: 8,
       weight: FontWeight.w500,
       letterSpacing: 0.3,

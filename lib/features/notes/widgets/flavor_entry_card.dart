@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 
-import '../../../app/theme/scribe_theme.dart';
-import '../../../app/widgets/widgets.dart';
 import '../../../data/models/models.dart';
 import 'flavor_list.dart';
 import 'flavor_wheel.dart';
@@ -50,7 +49,7 @@ class _FlavorEntryCardState extends State<FlavorEntryCard> {
           children: [
             Row(
               children: [
-                const Expanded(child: MonoLabel('Flavor wheel')),
+                const Expanded(child: ForgeMonoLabel('Flavor wheel')),
                 if (editable)
                   SegmentedButton<FlavorEntryMode>(
                     showSelectedIcon: false,

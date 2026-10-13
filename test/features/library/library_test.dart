@@ -5,6 +5,7 @@ import 'package:cheesy_scribe/features/library/library_screen.dart';
 import 'package:cheesy_scribe/features/notes/widgets/note_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../../support.dart';
 
@@ -79,7 +80,7 @@ void main() {
     expect(find.text('2 TASTED'), findsOneWidget);
     expect(find.textContaining('Big cooked-curd wheels'), findsOneWidget);
     expect(find.text('TYPICAL PROFILE'), findsOneWidget);
-    expect(find.widgetWithText(TagCapsule, 'COW'), findsOneWidget);
+    expect(find.widgetWithText(ForgeTagCapsule, 'COW'), findsOneWidget);
     expect(find.text('FIRM'), findsOneWidget);
     expect(find.byType(NoteRow), findsNWidgets(2));
     await tester.tap(find.widgetWithText(NoteRow, 'Comté'));
@@ -121,7 +122,7 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'Save'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'Tasting note'), findsOneWidget);
-    expect(find.widgetWithText(TagCapsule, 'BLUE'), findsOneWidget);
+    expect(find.widgetWithText(ForgeTagCapsule, 'BLUE'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Back'));
     await tester.pumpAndSettle();

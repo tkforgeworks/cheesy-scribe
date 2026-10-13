@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/shell/scribe_search_bar.dart';
-import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
@@ -31,7 +31,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
   Widget build(BuildContext context) {
     final stylesAsync = ref.watch(cheeseStylesProvider);
     final counts = ref.watch(styleCountsProvider).asData?.value ?? const {};
-    final x = context.scribe;
+    final x = context.forge;
     final all = stylesAsync.asData?.value ?? const <CheeseStyle>[];
     final shown = LibraryRepository.search(all, _query.text);
 
@@ -60,7 +60,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                         ),
                       ),
                       if (stylesAsync.hasValue)
-                        MonoLabel(
+                        ForgeMonoLabel(
                           '${all.length} ${all.length == 1 ? 'style' : 'styles'}',
                         ),
                     ],
@@ -68,7 +68,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   const SizedBox(height: 4),
                   Text(
                     "Reference styles to taste against — the 'what am I even eating' section.",
-                    style: ScribeTheme.serif(
+                    style: ForgeType.serif(
                       size: 12.5,
                       italic: true,
                       color: x.textTertiary,
@@ -81,19 +81,19 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
             if (stylesAsync.isLoading)
               const SliverPadding(
                 padding: EdgeInsets.all(16),
-                sliver: SliverToBoxAdapter(child: SkeletonList()),
+                sliver: SliverToBoxAdapter(child: ForgeSkeletonList()),
               )
             else if (stylesAsync.hasError)
               const SliverPadding(
                 padding: EdgeInsets.all(16),
                 sliver: SliverToBoxAdapter(
-                  child: ErrorCard(message: "Couldn't open the library."),
+                  child: ForgeErrorCard(message: "Couldn't open the library."),
                 ),
               )
             else if (shown.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: EmptyState(
+                child: ForgeEmptyState(
                   icon: const WedgeGlyph(size: 28),
                   title: 'No such style',
                   aside:
@@ -151,7 +151,7 @@ class StyleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -165,14 +165,14 @@ class StyleCard extends StatelessWidget {
                 style.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: ScribeTheme.ui(
+                style: ForgeType.ui(
                   size: 15,
                   weight: FontWeight.w600,
                   color: c.onSurface,
                 ),
               ),
               const SizedBox(height: 6),
-              MonoLabel(
+              ForgeMonoLabel(
                 '$tasted tasted',
                 size: 9.5,
                 emphasis: tasted > 0,
@@ -183,7 +183,7 @@ class StyleCard extends StatelessWidget {
                 style.examples,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: ScribeTheme.serif(
+                style: ForgeType.serif(
                   size: 11.5,
                   italic: true,
                   color: x.textTertiary,

@@ -2,6 +2,7 @@ import 'package:cheesy_scribe/features/about/licenses_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../../support.dart';
 
@@ -30,12 +31,12 @@ void main() {
     expect(find.byType(LicensesScreen), findsOneWidget);
   });
 
-  test('registers the bundled font licences once', () async {
+  test("forge_ui's font licences reach the app's notices, once each", () async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    registerBundledFontLicenses();
-    registerBundledFontLicenses();
+    registerForgeFontLicenses();
+    registerForgeFontLicenses();
     final entries = await LicenseRegistry.licenses.toList();
-    for (final (family, _) in bundledFontLicenses) {
+    for (final family in ['Poppins', 'Source Serif 4', 'JetBrains Mono']) {
       final matches = entries.where((e) => e.packages.contains(family));
       expect(matches, hasLength(1), reason: family);
       final text = matches.single.paragraphs.map((p) => p.text).join('\n');

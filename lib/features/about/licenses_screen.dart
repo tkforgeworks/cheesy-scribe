@@ -1,15 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/shell/shell_providers.dart';
-import '../../app/theme/scribe_theme.dart';
-import '../../app/widgets/widgets.dart';
-import '../settings/settings_screen.dart';
 
 /// `/licenses` (CHEESE-41): a short summary of what the app is licensed
 /// under and what it is built with, in place of dropping people straight
@@ -37,7 +33,7 @@ class LicensesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final version = ref.watch(appVersionProvider).asData?.value;
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -63,7 +59,7 @@ class LicensesScreen extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(4, 8, 4, 22),
             child: Text(intro, style: context.text.bodyLarge),
           ),
-          SettingsGroup(
+          ForgeSettingsGroup(
             label: 'This app',
             children: [
               const ListTile(
@@ -85,7 +81,7 @@ class LicensesScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 18),
-          const SettingsGroup(
+          const ForgeSettingsGroup(
             label: 'Built with',
             children: [
               ListTile(
@@ -102,7 +98,7 @@ class LicensesScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 18),
-          SettingsGroup(
+          ForgeSettingsGroup(
             label: 'Full text',
             children: [
               ListTile(
@@ -126,7 +122,7 @@ class LicensesScreen extends ConsumerWidget {
           Text(
             assetsLine,
             textAlign: TextAlign.center,
-            style: ScribeTheme.serif(
+            style: ForgeType.serif(
               size: 13.5,
               italic: true,
               color: x.textTertiary,
@@ -137,28 +133,3 @@ class LicensesScreen extends ConsumerWidget {
     );
   }
 }
-
-/// The bundled fonts' OFL texts (`assets/fonts/licenses/`), which Flutter's
-/// generated notices do not include because the fonts are app assets, not
-/// packages. Adds them to [LicenseRegistry] once; the texts load lazily
-/// when the notices page asks for them.
-void registerBundledFontLicenses() {
-  if (_fontLicensesRegistered) return;
-  _fontLicensesRegistered = true;
-  LicenseRegistry.addLicense(() async* {
-    for (final (family, file) in bundledFontLicenses) {
-      final text = await rootBundle.loadString('assets/fonts/licenses/$file');
-      yield LicenseEntryWithLineBreaks([family], text);
-    }
-  });
-}
-
-var _fontLicensesRegistered = false;
-
-/// Font family → licence file under `assets/fonts/licenses/`.
-@visibleForTesting
-const bundledFontLicenses = [
-  ('Poppins', 'Poppins-OFL.txt'),
-  ('Source Serif 4', 'SourceSerif4-OFL.md'),
-  ('JetBrains Mono', 'JetBrainsMono-OFL.txt'),
-];

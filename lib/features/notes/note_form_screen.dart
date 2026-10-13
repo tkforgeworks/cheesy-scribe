@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
@@ -224,7 +225,7 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
       context.pop();
       return;
     }
-    final discard = await showConfirmSheet(
+    final discard = await showForgeConfirmSheet(
       context,
       title: 'Discard this note?',
       aside: 'The cheese deserved better.',
@@ -335,7 +336,7 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
           ],
         ),
         body: _missing
-            ? const EmptyState(
+            ? const ForgeEmptyState(
                 icon: WedgeGlyph(size: 28),
                 title: 'This note is gone',
                 aside: 'Deleted elsewhere, presumably on purpose.',
@@ -415,7 +416,7 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
           textInputAction: TextInputAction.next,
           textCapitalization: TextCapitalization.none,
           errorText: _priceError,
-          trailing: MonoLabel(_priceUnit.label),
+          trailing: ForgeMonoLabel(_priceUnit.label),
         ),
         _gap,
         JournalField(
@@ -511,7 +512,7 @@ class _ClearButton extends StatelessWidget {
     icon: HeroIcon(
       HeroIcons.xMark,
       size: 18,
-      color: context.scribe.textTertiary,
+      color: context.forge.textTertiary,
     ),
   );
 }
@@ -529,7 +530,7 @@ class _FormCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [MonoLabel(label), const SizedBox(height: 12), child],
+        children: [ForgeMonoLabel(label), const SizedBox(height: 12), child],
       ),
     ),
   );
@@ -622,7 +623,7 @@ class _AttributeRowsState extends State<_AttributeRows> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const MonoLabel('Milk'),
+        const ForgeMonoLabel('Milk'),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,

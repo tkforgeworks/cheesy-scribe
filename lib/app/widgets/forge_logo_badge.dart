@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../theme/scribe_theme.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 /// Forge-gradient circle with the white cheese-wedge glyph. 64 px on Login,
 /// 24 px in the drawer header, 56 px (on `primaryContainer`, not gradient)
@@ -17,7 +16,7 @@ class ForgeLogoBadge extends StatelessWidget {
       height: size,
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        gradient: ScribeTokens.forgeGradient,
+        gradient: ForgeBrand.forgeGradient,
       ),
       child: Center(
         child: WedgeGlyph(size: size * 0.5, color: Colors.white),
