@@ -3,7 +3,8 @@
 ## What this is
 
 Cheese-tasting notes app modeled on the 33Books tasting notebook: track,
-record, and look back at cheeses tasted. **No app code yet**; the plan is
+record, and look back at cheeses tasted. **v0.1.0 is released** (2026-10-12;
+GitHub release + Play internal testing). The original plan is
 `docs/CHEESE-1-decomposition.md` (inventory of the design handoff, decisions,
 architecture, and the ticket list mirrored in Jira epics CHEESE-3..12). The
 design handoff itself lives in `docs/design_handoff_cheesy_scribe/`
@@ -284,12 +285,11 @@ else refers to it).
 
 - Branching (`tkforgeworks/.github/docs/branching-and-release.md`): `main` is
   the released state; work accumulates on the current release branch
-  `vX.Y.Z/main` (currently **`v0.1.0/main`**); topic branches PR **into the
-  release branch**, never into `main`; the release branch reaches `main` via
-  a release PR. `main` is empty apart from the repo baseline until the first
-  release PR.
-- Branch names: `v0.1.0/CHEESE-N-short-topic`, cut from and PR'd into
-  `v0.1.0/main`. Delete after merge.
+  `vX.Y.Z/main` (currently **`v0.2.0/main`**, cut from `main` after the
+  v0.1.0 release PR, #34); topic branches PR **into the release branch**,
+  never into `main`; the release branch reaches `main` via a release PR.
+- Branch names: `v0.2.0/CHEESE-N-short-topic`, cut from and PR'd into
+  `v0.2.0/main`. Delete after merge.
 - **Two repository rulesets** (`tkforgeworks/.github/docs/branch-protection-ruleset.md`):
   - `main` (ruleset id 20916528): PR-only (0 approvals, self-merge allowed),
     no force-push or deletion, **no bypass actors** (not even admins).
@@ -414,4 +414,24 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   35/36/37 and epics 5–8 + 10 closed (3 and 4 left for Tim). CSV
   export (CHEESE-32) is an orphan task now, no epic or fix version.
   Testers are on rc.4.
-  CHEESE-41 (licences summary screen) is the only open v0.1.0 code work.
+- 2026-09-27 to 2026-10-08: rc.5 (CHEESE-41 licences summary, CHEESE-42 Play
+  upload job), rc.6 (CHEESE-43 page transitions, CHEESE-44 nav-bar inset),
+  rc.7 (CHEESE-47 Account/About in the shell + system back).
+- 2026-10-12: **v0.1.0 released** (CHEESE-40). `bump-version.sh final` →
+  `0.1.0+9` (`e326eb7`), release PR #34 merged into `main` (`ff34cc6`), the
+  first stable release through the pipeline (run 38333242641: GitHub
+  release with APK + AAB, Play internal upload); same code as rc.7. The
+  generated notes read "No notable changes": with no earlier stable tag the
+  org generator diffed against rc.7. The release body was corrected by hand
+  and the generator fixed in org PR #18; Play's "What's new" for build 9
+  is the upload job's fallback, "Bug fixes and improvements."
+  `v0.2.0/main` cut from `main`. `v0.1.0/main` still exists: the
+  `release-branches` ruleset blocks deletion and has no bypass, so removing
+  it means disabling that ruleset first (Tim's call). Scope agreed the same
+  day. **0.2.0** (the closed-testing release): CHEESE-45 glossary of tasting
+  terms, CHEESE-32 CSV export (pulled forward from 1.0.0), CHEESE-51 "Send
+  feedback" link in About, CHEESE-48 forge_ui adoption, CHEESE-50 opening
+  the Play closed testing track (Console work; promoted from internal by
+  hand). **1.0.0** (the public store release): CHEESE-46 production track,
+  CHEESE-49 guided first-use tour, CHEESE-52 choosing the Play track from
+  the pipeline, CHEESE-11 account + sync, CHEESE-12 weekly reminder.
