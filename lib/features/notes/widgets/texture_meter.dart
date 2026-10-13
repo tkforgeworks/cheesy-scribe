@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 
-import '../../../app/theme/scribe_theme.dart';
-import '../../../app/widgets/widgets.dart';
 import '../../../data/models/models.dart';
 
 /// Six-stop texture meter (DESIGN_SPEC §5): 4 px track, 18 px thumb,
@@ -36,7 +35,7 @@ class TextureMeter extends StatelessWidget {
           children: [
             for (final t in TextureLevel.values)
               Expanded(
-                child: MonoLabel(
+                child: ForgeMonoLabel(
                   t.label,
                   size: 8.5,
                   emphasis: t == value,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../../../app/theme/scribe_theme.dart';
 import '../../../app/widgets/widgets.dart';
@@ -32,7 +33,6 @@ class FlavorList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final x = context.scribe;
     final c = context.colors;
     return Column(
       children: [
@@ -40,13 +40,13 @@ class FlavorList extends StatelessWidget {
           if (i > 0)
             CustomPaint(
               size: const Size(double.infinity, 1.5),
-              painter: DottedUnderlinePainter(color: x.dottedLine),
+              painter: DottedUnderlinePainter(color: context.scribe.dottedLine),
             ),
           SizedBox(
             height: 34,
             child: Row(
               children: [
-                Expanded(child: MonoLabel(flavor.label)),
+                Expanded(child: ForgeMonoLabel(flavor.label)),
                 for (var n = 1; n <= pipCount; n++)
                   Semantics(
                     button: onChanged != null,
@@ -68,7 +68,7 @@ class FlavorList extends StatelessWidget {
                               shape: BoxShape.circle,
                               color: (values[flavor] ?? 0) >= n
                                   ? c.primary
-                                  : x.starInactive,
+                                  : context.scribe.starInactive,
                             ),
                           ),
                         ),

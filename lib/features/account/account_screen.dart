@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:heroicons/heroicons.dart';
 
 import '../../app/shell/scribe_shell.dart';
-import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
@@ -64,7 +64,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     final settingsAsync = ref.watch(appSettingsProvider);
     final settings = settingsAsync.asData?.value;
     if (settings != null && !_seeded) {
@@ -120,7 +120,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               child: initial != null
                   ? Text(
                       initial,
-                      style: ScribeTheme.ui(
+                      style: ForgeType.ui(
                         size: 26,
                         weight: FontWeight.w600,
                         color: c.onPrimaryContainer,
@@ -133,19 +133,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           Text(
             name,
             textAlign: TextAlign.center,
-            style: ScribeTheme.ui(
+            style: ForgeType.ui(
               size: 17,
               weight: FontWeight.w600,
               color: c.onSurface,
             ),
           ),
           const SizedBox(height: 4),
-          MonoLabel(
+          ForgeMonoLabel(
             'Member since $sinceYear · ${count ?? 0} ${count == 1 ? 'note' : 'notes'}',
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
-          BoxedField(
+          ForgeBoxedField(
             label: 'Display name',
             hint: 'What should the drawer call you?',
             controller: _name,
@@ -164,7 +164,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             'No account, no sign-in, no cloud. Your notes live on this phone; '
             'accounts arrive in a later version.',
             textAlign: TextAlign.center,
-            style: ScribeTheme.serif(
+            style: ForgeType.serif(
               size: 13.5,
               italic: true,
               color: x.textTertiary,

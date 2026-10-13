@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:heroicons/heroicons.dart';
 
 import '../theme/scribe_theme.dart';
@@ -26,7 +27,7 @@ class StarRating extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final x = context.scribe;
+    final s = context.scribe;
     // Input stars need a 44 px tap target (DESIGN_SPEC §3 minimum).
     final pad = _interactive
         ? ((44 - size) / 2).clamp(0, 8).toDouble()
@@ -37,7 +38,7 @@ class StarRating extends StatelessWidget {
         HeroIcons.star,
         style: HeroIconStyle.solid,
         size: size,
-        color: n <= value ? x.starActive : x.starInactive,
+        color: n <= value ? s.starActive : s.starInactive,
       );
       if (!_interactive) {
         return Padding(
@@ -66,7 +67,9 @@ class StarRating extends StatelessWidget {
               value == 0 ? '—' : value.toDouble().toStringAsFixed(1),
               style: context.text.labelMedium!.copyWith(
                 fontSize: scoreSize,
-                color: value == 0 ? x.textGhost : x.textTertiary,
+                color: value == 0
+                    ? context.forge.textGhost
+                    : context.forge.textTertiary,
               ),
             ),
           ],

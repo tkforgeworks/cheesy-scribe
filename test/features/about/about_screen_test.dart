@@ -1,8 +1,8 @@
-import 'package:cheesy_scribe/app/widgets/widgets.dart';
 import 'package:cheesy_scribe/features/about/about_screen.dart';
 import 'package:cheesy_scribe/features/about/licenses_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../../support.dart';
 
@@ -32,7 +32,7 @@ void main() {
     );
     expect(find.text(AboutScreen.privacyLine), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('about-licenses')));
+    await tester.tap(find.byKey(ForgeAboutScreen.licensesKey));
     await tester.pumpAndSettle();
     expect(find.byType(LicensesScreen), findsOneWidget);
     await tester.tap(find.byTooltip('Back'));

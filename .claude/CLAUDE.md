@@ -86,26 +86,33 @@ Layout so far:
   (`/account`, CHEESE-34): local profile — 72 px initial avatar, name
   (default "You"), mono `MEMBER SINCE <year> · N NOTES` (year = earliest
   note, else `AppSettings.memberSince`, which the screen stamps on first
-  visit), DISPLAY NAME `BoxedField` saved on blur / Done. The drawer and
+  visit), DISPLAY NAME `ForgeBoxedField` saved on blur / Done. The drawer and
   search-bar avatar read the same `displayNameProvider`.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
-  CHEESE-33): badge, name, version, `AboutScreen.blurb` (TKFW voice; Tim
-  owns the copy), maker line (`ForgeWorksMark`, tinted `textTertiary`),
+  CHEESE-33): a thin wrapper over forge_ui's `ForgeAboutScreen` (layout
+  and the maker line with the tinted mark live in the package; pass
+  `tintMark: true`, this palette has no purple). The app supplies the
+  badge, version, `AboutScreen.blurb` (TKFW voice; Tim owns the copy),
+  `privacyLine`, the menu-icon `leading`, and the link callbacks:
   tkforgeworks.com and the privacy policy (`privacyUri`,
   `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`,
-  a link to `/licenses`, `privacyLine`.
+  licences via `context.push('/licenses')`. Rows are found in tests by
+  the package's keys (`ForgeAboutScreen.licensesKey`, …).
 - `lib/features/about/licenses_screen.dart` — `LicensesScreen`
-  (`/licenses`, CHEESE-41), opened from About and Settings: short summary
-  (app Apache-2.0 + GitHub `sourceUri`, Flutter/packages, OFL fonts,
-  all-rights-reserved brand line) with "View all notices" →
-  `showLicensePage`. Don't trim that full list: the engine and packages
-  compiled into the APK need their notices shipped. Flutter's generated
-  `NOTICES` also lists dev_dependencies (build_runner, drift_dev, …; ~2 %
-  of it) and there is no supported way to drop them. The bundled fonts
-  aren't in `NOTICES`, so `main()` calls `registerBundledFontLicenses()`
-  to add `assets/fonts/licenses/*` to `LicenseRegistry`.
+  (`/licenses`, CHEESE-41), opened from About and Settings: a wrapper
+  over `ForgeLicensesScreen` (app Apache-2.0 + GitHub `sourceUri`,
+  Flutter/packages, OFL fonts, all-rights-reserved brand line) with
+  "View all notices" → `showLicensePage`
+  (`ForgeLicensesScreen.allNoticesKey`). It takes the app bar's automatic
+  back button, so it only has one when pushed. Don't trim that full list:
+  the engine and packages compiled into the APK need their notices
+  shipped. Flutter's generated `NOTICES` also lists dev_dependencies
+  (build_runner, drift_dev, …; ~2 % of it) and there is no supported way
+  to drop them. The fonts aren't in `NOTICES`, so `main()` calls
+  forge_ui's `registerForgeFontLicenses()` to add them to
+  `LicenseRegistry`.
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
-  (`/settings`, CHEESE-31): `SettingsGroup` cards (APPEARANCE theme +
+  (`/settings`, CHEESE-31): `ForgeSettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
   NOTIFICATIONS reminder and DATA export rows disabled at 45 % until
   CHEESE-12 / 32; ABOUT version, `showLicensePage`, link to `/about`).
@@ -168,18 +175,32 @@ Layout so far:
   `FlavorEntryCard` (Wheel/List toggle, helper line; read-only card when
   `onChanged` is null). Both modes edit one `Map<FlavorNote,int>`; zeros
   are removed from the map, never stored.
-- `lib/app/theme/scribe_theme.dart` — tokens, `ScribeColors` extension
-  (incl. `wheelGrid`), `ScribeTheme.light()/dark()`,
-  `ScribeTheme.ui/serif/mono` helpers, `context.colors/text/scribe`
-  shorthands, component themes (drawer, segmented button, chips, …).
-- `lib/app/widgets/` — the DESIGN_SPEC §5 atoms (`MonoLabel`, `TagCapsule`,
-  `StatusCapsule`, `StarRating`, `JournalField`, `BoxedField`, `ForgeFab`,
-  `ForgeLogoBadge`/`WedgeGlyph`, `ForgeWorksMark` (the TKFW hammer/anvil,
-  About only, tinted), `SkeletonRow`, `ErrorCard`, `EmptyState`,
-  `showConfirmSheet`, and the `EdgeInsets.withNavBarInset(context)`
-  extension); import the `widgets.dart` barrel. Android draws edge-to-edge
-  and a scroll view with an explicit `padding` drops the MediaQuery inset,
-  so every bottom-reaching scroll padding uses `withNavBarInset` (CHEESE-44).
+- **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
+  (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
+  `v0.1.0-rc.2`; local checkout `~/Projects/forge-ui`). It owns the theme
+  builder, type, radii, the forge gradient, every component theme, the
+  bundled fonts and the shared atoms. A defect in any of that is fixed in
+  forge-ui and the pin moved to the tag that carries the fix, never
+  patched here. Import `package:forge_ui/forge_ui.dart`.
+- `lib/app/theme/scribe_theme.dart` — this app's palette only:
+  `ScribeTokens` (raw colours), `ScribeTheme.light()/dark()`, which call
+  `forgeTheme(colorScheme:, tokens:, extensions:)` with the hand-tuned
+  schemes and `ForgeTokens`, and the `ScribeColors` extension for the four
+  roles forge_ui has no slot for (`dottedLine`, `starActive`,
+  `starInactive`, `wheelGrid`). Read colours through `context.colors`,
+  `context.forge` (`textTertiary`, `rowDivider`, …) and `context.scribe`;
+  text styles through `context.text` and `ForgeType.ui/serif/mono`.
+- `lib/app/widgets/` — the atoms that are this app's own: `StarRating`,
+  `JournalField`, `ForgeLogoBadge`/`WedgeGlyph`; import the `widgets.dart`
+  barrel. The rest of DESIGN_SPEC §5 comes from forge_ui:
+  `ForgeMonoLabel`, `ForgeTagCapsule`, `ForgeStatusCapsule`,
+  `ForgeBoxedField`, `ForgeFab` (needs a `label`), `ForgeSkeletonList`,
+  `ForgeErrorCard`, `ForgeEmptyState`, `ForgeSettingsGroup`,
+  `showForgeConfirmSheet`, `ForgeWorksMark`, and the
+  `EdgeInsets.withNavBarInset(context)` extension. Android draws
+  edge-to-edge and a scroll view with an explicit `padding` drops the
+  MediaQuery inset, so every bottom-reaching scroll padding uses
+  `withNavBarInset` (CHEESE-44).
 - `assets/brand/` (CHEESE-18; all rights reserved via `NOTICE`, not
   bundled): `wedge.svg`, `tkforgeworks-mark.svg` (verbatim from the parent
   design system), `launcher/*.png` (512² adaptive foreground / monochrome /
@@ -211,6 +232,14 @@ Layout so far:
   `libraryRepositoryProvider`; `LibraryRepository.load()` answers from
   memory once loaded so providers resolve under `pumpAndSettle`. Form tests
   set a tall viewport (`tallScreen`) so the whole `ListView` is built.
+- `tool/visual/render_screens_test.dart` (CHEESE-48) — renders every
+  screen of the real app, seeded, in light and dark, to PNG with the real
+  fonts (94 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
+  test --concurrency=4 tool/visual/render_screens_test.dart`, default
+  `tool/visual/out/` (gitignored). Runs are deterministic, so render
+  before and after a change and compare with ImageMagick `compare -metric
+  AE`: zero means pixel-identical. Use it for any change meant to leave
+  the look alone, and add a scene when a screen is added.
 
 Local toolchain (Tim's machine, reinstalled 2026-09-26): Flutter 3.47.5
 (CI pins 3.47.2) at `~/flutter`, on PATH only through `.bashrc` — agent
@@ -231,7 +260,11 @@ transitions under SwiftShader, and a crash rolls back to the boot snapshot
 renders for motion and Tim's phone for the device pass. `flutter emulators --launch` never returns.
 Emulator screenshots look soft from display scaling; that is not an app
 bug. Emulation is slow on this hardware — prefer widget-test PNG renders
-for routine visual checks and the emulator for confirmation. **Never run
+for routine visual checks and the emulator for confirmation. **Run tests
+with `flutter test --concurrency=4` on this machine**: the default (one
+runner per core, 20) peaks at 4.4 GB against 2.3 GB, and on 2026-10-13
+that pushed RAM and the 4 GB zram swap past 90 %, so `systemd-oomd`
+killed the whole desktop session. **Never run
 a Gradle build and the emulator at the same time** (15 GB box; both get
 OOM-killed): build, `pkill -f "[G]radleDaemon"`, then launch. Release
 APKs are debug-signed until the CHEESE-38 keystore exists, so
@@ -356,11 +389,16 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   "N TASTED", style-detail notes and Home style chips depend on it.
 - **Cheese library is a bundled JSON asset** (~25–35 styles drafted by Claude,
   reviewed by Tim). Read-only reference data, no DB table.
-- **Fonts bundled as static instances** (`assets/fonts/`, OFL, licences in
-  `LICENSES.md` there): Poppins 400/500/600/700, Source Serif 4 400/600 +
-  italics, JetBrains Mono 400/500. Static rather than variable so
-  `FontWeight` selects the face directly (lazy-sleeper-app went variable +
+- **Fonts bundled as static instances**, since CHEESE-48 by forge_ui
+  rather than this repo (families resolve as `packages/forge_ui/Poppins`
+  and so on; the files are byte-identical to the ones this repo carried):
+  Poppins 400/500/600/700, Source Serif 4 400/600 + italics, JetBrains
+  Mono 400/500, all OFL. Static rather than variable so `FontWeight`
+  selects the face directly (lazy-sleeper-app went variable +
   `FontVariation`; this repo does not). Icons via the `heroicons` package.
+- **The look comes from forge_ui, pinned to an exact tag** (CHEESE-48,
+  2026-10-13). The app keeps its palette and the widgets only it has;
+  shared code is changed upstream and released, then the pin moves.
 - **Weekly reminder deferred** (CHEESE-12); Settings row shown disabled.
 - **Portrait-only phone UI**; English only.
 - Tests are behaviour-level widget tests with an in-memory drift DB.
@@ -442,3 +480,14 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   `main` and are never merged there directly). **1.0.0** (the public store release): CHEESE-46 production track,
   CHEESE-49 guided first-use tour, CHEESE-52 choosing the Play track from
   the pipeline, CHEESE-11 account + sync, CHEESE-12 weekly reminder.
+- 2026-10-13: forge_ui adopted (CHEESE-48): theme, fonts, shared atoms,
+  About and licences now come from `forge_ui`; 26 files and
+  `assets/fonts/` deleted. Pinned to `v0.1.0-rc.2`: rc.1 required Dart
+  `^3.13.4`, which CI's Flutter 3.47.2 (Dart 3.13.2) could not resolve and
+  the local 3.47.5 could, so a green local run does not prove `pub get`
+  works in CI. forge-ui lowered its floor (forge-ui PR #9); moving this
+  repo's own Flutter pin is CHEESE-54. Checked with `tool/visual` renders against the
+  pre-adoption build, 94 per run: 90 pixel-identical, 4 intended (the date
+  picker's headline is now Poppins instead of the platform font, and
+  Flutter's licence page gets the Heroicons back arrow). Tim's device pass
+  is still owed.

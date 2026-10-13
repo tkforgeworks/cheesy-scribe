@@ -301,6 +301,15 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  forge_ui:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "v0.1.0-rc.2"
+      resolved-ref: "42bb00879f5df71834b0463335f9ab73e2c276f0"
+      url: "https://github.com/tkforgeworks/forge-ui.git"
+    source: git
+    version: "0.1.0-rc.2+3"
   glob:
     dependency: transitive
     description:
@@ -1044,4 +1053,4 @@ packages:
     version: "2.2.4"
 sdks:
   dart: ">=3.13.2 <4.0.0"
-  flutter: ">=3.44.0"
+  flutter: ">=3.47.2"

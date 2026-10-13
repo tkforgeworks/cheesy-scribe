@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
@@ -96,7 +97,7 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
       context.push('/notes/${note.id}/edit');
       return;
     }
-    final confirmed = await showConfirmSheet(
+    final confirmed = await showForgeConfirmSheet(
       context,
       title: 'Delete this note?',
       aside: "${note.cheeseName} won't be back.",
@@ -148,7 +149,9 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
                         ),
                       ),
                       if (count != null)
-                        MonoLabel('$count ${count == 1 ? 'note' : 'notes'}'),
+                        ForgeMonoLabel(
+                          '$count ${count == 1 ? 'note' : 'notes'}',
+                        ),
                     ],
                   ),
                   const SizedBox(height: 14),
@@ -186,7 +189,7 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
                 SliverPadding(
                   padding: const EdgeInsets.all(16),
                   sliver: SliverToBoxAdapter(
-                    child: ErrorCard(
+                    child: ForgeErrorCard(
                       message: "Couldn't open the journal.",
                       onRetry: () => ref.invalidate(notesPageProvider(query)),
                     ),
@@ -196,7 +199,7 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
               _ => const [
                 SliverPadding(
                   padding: EdgeInsets.all(16),
-                  sliver: SliverToBoxAdapter(child: SkeletonList()),
+                  sliver: SliverToBoxAdapter(child: ForgeSkeletonList()),
                 ),
               ],
             },
@@ -213,7 +216,10 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           opacity: _fabVisible ? 1 : 0,
-          child: ForgeFab(onPressed: () => context.push('/notes/new')),
+          child: ForgeFab(
+            label: 'New tasting notes',
+            onPressed: () => context.push('/notes/new'),
+          ),
         ),
       ),
     );
@@ -233,7 +239,7 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: EmptyState(
+          child: ForgeEmptyState(
             icon: const WedgeGlyph(size: 28),
             title: 'No tastings yet',
             aside: "The cheese isn't going to review itself.",
@@ -252,7 +258,7 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: const EmptyState(
+          child: const ForgeEmptyState(
             icon: WedgeGlyph(size: 28),
             title: 'Nothing matches',
             aside: 'Loosen the filters, or go taste something that fits.',
@@ -269,10 +275,10 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
             child: Text(
               'One tasting so far. The journal has room.',
               textAlign: TextAlign.center,
-              style: ScribeTheme.serif(
+              style: ForgeType.serif(
                 size: 13,
                 italic: true,
-                color: context.scribe.textTertiary,
+                color: context.forge.textTertiary,
               ),
             ),
           ),
@@ -294,7 +300,7 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
             );
           },
           separatorBuilder: (context, _) =>
-              Divider(height: 1, color: context.scribe.rowDivider),
+              Divider(height: 1, color: context.forge.rowDivider),
         ),
       ),
     ];

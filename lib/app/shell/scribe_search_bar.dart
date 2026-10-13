@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
-import '../theme/scribe_theme.dart';
 import '../widgets/widgets.dart';
 import 'scribe_shell.dart';
 import 'shell_providers.dart';
@@ -40,7 +40,7 @@ class ScribeSearchBar extends ConsumerWidget {
     return SearchBar(
       hintText: hint,
       hintStyle: WidgetStatePropertyAll(
-        ScribeTheme.ui(size: 14, color: context.scribe.textTertiary),
+        ForgeType.ui(size: 14, color: context.forge.textTertiary),
       ),
       onTap: onTap,
       controller: controller,
@@ -66,7 +66,7 @@ class ScribeSearchBar extends ConsumerWidget {
                   child: initial != null
                       ? Text(
                           initial,
-                          style: ScribeTheme.ui(
+                          style: ForgeType.ui(
                             size: 13,
                             weight: FontWeight.w600,
                             color: c.onPrimaryContainer,

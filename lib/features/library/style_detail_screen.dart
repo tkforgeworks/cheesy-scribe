@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
-import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
@@ -37,16 +37,19 @@ class StyleDetailScreen extends ConsumerWidget {
       ),
       body: switch (styleAsync) {
         AsyncData(value: final style?) => _StyleBody(style: style),
-        AsyncData() => const EmptyState(
+        AsyncData() => const ForgeEmptyState(
           icon: WedgeGlyph(size: 28),
           title: 'This style is off the menu',
           aside: 'No such entry in the library. The link may be stale.',
         ),
         AsyncError() => const Padding(
           padding: EdgeInsets.all(24),
-          child: ErrorCard(message: "Couldn't open the library."),
+          child: ForgeErrorCard(message: "Couldn't open the library."),
         ),
-        _ => const Padding(padding: EdgeInsets.all(24), child: SkeletonList()),
+        _ => const Padding(
+          padding: EdgeInsets.all(24),
+          child: ForgeSkeletonList(),
+        ),
       },
     );
   }
@@ -60,7 +63,7 @@ class _StyleBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     final notes = ref.watch(
       notesPageProvider(NotesQuery(styleId: style.id, limit: 200)),
     );
@@ -74,7 +77,7 @@ class _StyleBody extends ConsumerWidget {
         32,
       ).withNavBarInset(context),
       children: [
-        MonoLabel(
+        ForgeMonoLabel(
           count == null ? 'Reference style' : '$count tasted',
           size: 9.5,
           emphasis: (count ?? 0) > 0,
@@ -83,7 +86,7 @@ class _StyleBody extends ConsumerWidget {
         const SizedBox(height: 6),
         Text(
           style.name,
-          style: ScribeTheme.serif(
+          style: ForgeType.serif(
             size: 27,
             weight: FontWeight.w600,
             height: 1.2,
@@ -93,7 +96,7 @@ class _StyleBody extends ConsumerWidget {
         const SizedBox(height: 6),
         Text(
           style.examples,
-          style: ScribeTheme.serif(
+          style: ForgeType.serif(
             size: 13.5,
             italic: true,
             color: x.textTertiary,
@@ -110,14 +113,14 @@ class _StyleBody extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const MonoLabel('Typical profile'),
+                const ForgeMonoLabel('Typical profile'),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
                   children: [
                     for (final m in style.typicalMilk)
-                      TagCapsule(m.label, tone: CapsuleTone.emphasis),
+                      ForgeTagCapsule(m.label, tone: ForgeCapsuleTone.emphasis),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -127,7 +130,7 @@ class _StyleBody extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 22),
-        const MonoLabel('Your tastings'),
+        const ForgeMonoLabel('Your tastings'),
         const SizedBox(height: 4),
         switch (notes) {
           AsyncData(value: final list) when list.isEmpty => Padding(
@@ -137,7 +140,7 @@ class _StyleBody extends ConsumerWidget {
               children: [
                 Text(
                   "You haven't met this one yet.",
-                  style: ScribeTheme.serif(
+                  style: ForgeType.serif(
                     size: 13.5,
                     italic: true,
                     color: x.textTertiary,
@@ -163,10 +166,10 @@ class _StyleBody extends ConsumerWidget {
               ],
             ],
           ),
-          AsyncError() => const ErrorCard(
+          AsyncError() => const ForgeErrorCard(
             message: "Couldn't open the journal.",
           ),
-          _ => const SkeletonList(),
+          _ => const ForgeSkeletonList(),
         },
       ],
     );
