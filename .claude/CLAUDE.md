@@ -177,7 +177,7 @@ Layout so far:
   are removed from the map, never stored.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.1.0-rc.1`; local checkout `~/Projects/forge-ui`). It owns the theme
+  `v0.1.0-rc.2`; local checkout `~/Projects/forge-ui`). It owns the theme
   builder, type, radii, the forge gradient, every component theme, the
   bundled fonts and the shared atoms. A defect in any of that is fixed in
   forge-ui and the pin moved to the tag that carries the fix, never
@@ -481,8 +481,12 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   CHEESE-49 guided first-use tour, CHEESE-52 choosing the Play track from
   the pipeline, CHEESE-11 account + sync, CHEESE-12 weekly reminder.
 - 2026-10-13: forge_ui adopted (CHEESE-48): theme, fonts, shared atoms,
-  About and licences now come from `forge_ui` `v0.1.0-rc.1`; 26 files and
-  `assets/fonts/` deleted. Checked with `tool/visual` renders against the
+  About and licences now come from `forge_ui`; 26 files and
+  `assets/fonts/` deleted. Pinned to `v0.1.0-rc.2`: rc.1 required Dart
+  `^3.13.4`, which CI's Flutter 3.47.2 (Dart 3.13.2) could not resolve and
+  the local 3.47.5 could, so a green local run does not prove `pub get`
+  works in CI. forge-ui lowered its floor (forge-ui PR #9); moving this
+  repo's own Flutter pin is CHEESE-54. Checked with `tool/visual` renders against the
   pre-adoption build, 94 per run: 90 pixel-identical, 4 intended (the date
   picker's headline is now Poppins instead of the platform font, and
   Flutter's licence page gets the Heroicons back arrow). Tim's device pass
