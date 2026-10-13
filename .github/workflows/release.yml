@@ -1,0 +1,61 @@
+# Consumes the org standard tagless Flutter release pipeline
+# (tkforgeworks/.github release-flutter.yml). Android only: no Windows build.
+#
+# How a release happens (docs/branching-and-release.md in the org repo):
+#   scripts/release/bump-version.sh rc     on v0.1.0/main → prerelease vX.Y.Z-rc.N
+#   scripts/release/bump-version.sh final  on v0.1.0/main → release PR; merging
+#                                          into main cuts the stable vX.Y.Z
+# The bump is an ordinary commit; this workflow self-gates on whether the
+# version's tag exists and creates the tag when it publishes the GitHub
+# release. Never hand-edit the version or push tags.
+#
+# Signing: release-flutter.yml writes android/key.properties from the
+# ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS repo
+# secrets (set 2026-09-12; keystore + key.properties live in 1Password). If
+# they are ever missing the build fails on purpose. For a keystore-less dry
+# run add `android-signing: optional` under `with:` (rc.1 was cut that way,
+# debug-signed).
+#
+# Google Play (CHEESE-42): once the release is published, the play-store job
+# (org release-play-store.yml) uploads its AAB to the internal testing track
+# and rolls it out to testers (What's new = the release-note bullets). Auth is
+# keyless Workload Identity Federation: repo variables
+# GCP_WORKLOAD_IDENTITY_PROVIDER and PLAY_SERVICE_ACCOUNT name the GitHub
+# OIDC provider and the service account invited in the Play Console. A failed
+# upload leaves the GitHub release in place; re-run just the play-store job.
+name: Release
+
+on:
+  push:
+    branches: [main, 'v*/main']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    uses: tkforgeworks/.github/.github/workflows/release-flutter.yml@main
+    with:
+      ticket-prefix: CHEESE
+      flutter-version: '3.47.2'
+      java-version: '21'
+      build-windows: false
+    secrets: inherit
+
+  play-store:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: tkforgeworks/.github/.github/workflows/release-play-store.yml@main
+    with:
+      tag: v${{ needs.release.outputs.version }}
+      package-name: com.tkforgeworks.cheesy_scribe
+      track: internal
+      workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      service-account: ${{ vars.PLAY_SERVICE_ACCOUNT }}

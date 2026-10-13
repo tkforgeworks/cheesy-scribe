@@ -1,0 +1,15 @@
+# Analyzer and lint configuration. CI runs `flutter analyze` and
+# `dart format --set-exit-if-changed .` from the repo root (org ci-flutter.yml).
+# Note: `dart format` does not honour the excludes below, which is why the
+# handoff's reference Dart files under docs/ carry a .txt suffix.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - docs/**
+    - android/**
+
+linter:
+  rules:
+    prefer_single_quotes: true

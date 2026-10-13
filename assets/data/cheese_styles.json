@@ -1,0 +1,287 @@
+[
+  {
+    "id": "fresh",
+    "name": "Fresh",
+    "examples": "Chèvre, Burrata, Ricotta",
+    "description": "Unaged and unbothered: made, salted, eaten, usually within days. Mild, milky, lactic, sometimes tangy. Taste the milk, because there is nothing else to hide behind.",
+    "typicalMilk": [
+      "goat",
+      "cow",
+      "buffalo"
+    ],
+    "typicalTexture": "soft"
+  },
+  {
+    "id": "fresh-pressed",
+    "name": "Fresh pressed",
+    "examples": "Queso Fresco, Paneer, Farmer's cheese",
+    "description": "Fresh curd pressed just enough to hold a shape and take heat without melting. Salty, squeaky, a little crumbly. Built for the pan, not the cheese board, and honest about it.",
+    "typicalMilk": [
+      "cow",
+      "buffalo"
+    ],
+    "typicalTexture": "semiFirm"
+  },
+  {
+    "id": "cream-cheese",
+    "name": "Cream cheese & spreads",
+    "examples": "Cream cheese, Mascarpone, Boursin",
+    "description": "Cream-enriched fresh cheeses whipped until they spread. Rich, sweet-tangy, faintly cultured. The knife does most of the tasting work here.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "soft"
+  },
+  {
+    "id": "bloomy-rind",
+    "name": "Bloomy rind",
+    "examples": "Brie, Camembert, Humboldt Fog",
+    "description": "A white velvet mould grows in from the outside and softens the paste toward runny. Mushroom, butter, and a cabbage note when it gets ambitious. Ripe means the centre gives up its shape, not that the rind smells of ammonia.",
+    "typicalMilk": [
+      "cow",
+      "goat"
+    ],
+    "typicalTexture": "soft"
+  },
+  {
+    "id": "triple-cream",
+    "name": "Triple cream",
+    "examples": "Brillat-Savarin, Délice de Bourgogne, Saint-André",
+    "description": "Bloomy rind with extra cream folded in until the fat content becomes a personality. Dense, buttery, whipped-cheesecake texture, gentle tang. Not a cheese for arguments; nobody wins against it.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "soft"
+  },
+  {
+    "id": "aged-goat",
+    "name": "Aged goat",
+    "examples": "Valençay, Crottin de Chavignol, Sainte-Maure",
+    "description": "Small goat cheeses left to grow a wrinkly, often ash-dusted rind. Chalky at the core, creamy under the skin, with lemon and hay and a clean goaty finish. Wisdom in miniature.",
+    "typicalMilk": [
+      "goat"
+    ],
+    "typicalTexture": "semiSoft"
+  },
+  {
+    "id": "mixed-milk",
+    "name": "Mixed milk",
+    "examples": "La Tur, Robiola Tre Latti, Kunik",
+    "description": "Two or three milks in one small, soft, ripened cheese. Fluffy paste, yeasty rind, sweet cream from the cow and a tang from the rest. A committee that somehow made a good decision.",
+    "typicalMilk": [
+      "cow",
+      "goat",
+      "sheep"
+    ],
+    "typicalTexture": "soft"
+  },
+  {
+    "id": "washed-rind",
+    "name": "Washed rind",
+    "examples": "Époisses, Taleggio, Limburger",
+    "description": "Rind rubbed with brine, beer or spirits until orange bacteria move in. Barnyard and cured-meat aromas over a paste that is usually far gentler than the smell promises. Judge by the mouth, not the nose.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "soft"
+  },
+  {
+    "id": "trappist",
+    "name": "Trappist & monastery",
+    "examples": "Port Salut, Saint-Paulin, Chimay",
+    "description": "Lightly washed, semi-soft wheels in the tradition of monks who wanted something to go with the beer. Buttery, mild, a little tangy, with just a whiff of the cellar. Devotion, minus the drama.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "semiSoft"
+  },
+  {
+    "id": "semi-soft",
+    "name": "Semi-soft",
+    "examples": "Havarti, Fontina, Muenster",
+    "description": "Supple, sliceable, mild and built to melt. Butter and cream up front, not much of an argument after. The cheese most likely to be in the sandwich.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "semiSoft"
+  },
+  {
+    "id": "tomme",
+    "name": "Tomme",
+    "examples": "Tomme de Savoie, Tomme des Pyrénées, Toma Piemontese",
+    "description": "Rustic, natural-rinded farm wheels from the mountains, made with whatever milk the farm had. Earthy, grassy, cellar-floor rind, mild nutty paste. Plainly good in a way that does not photograph.",
+    "typicalMilk": [
+      "cow",
+      "sheep",
+      "goat"
+    ],
+    "typicalTexture": "semiFirm"
+  },
+  {
+    "id": "mountain-melters",
+    "name": "Mountain melters",
+    "examples": "Raclette, Morbier, Reblochon",
+    "description": "Semi-firm washed or brushed wheels whose real job is to melt over potatoes. Nutty, meaty, sometimes a little funky at the rind. Best experienced as a hot liquid; the wedge is merely storage.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "semiFirm"
+  },
+  {
+    "id": "alpine",
+    "name": "Alpine",
+    "examples": "Comté, Gruyère, Appenzeller",
+    "description": "Big cooked-curd wheels aged in mountain caves, the kind of cheese a village makes together. Nutty, brothy, sweet-onion and caramel, with crunchy crystals when old. The gold standard for the phrase 'a proper cheese'.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "firm"
+  },
+  {
+    "id": "swiss",
+    "name": "Swiss & holed",
+    "examples": "Emmentaler, Jarlsberg, Baby Swiss",
+    "description": "Alpine cousins where propionic bacteria blow the famous holes and leave a sweet, nutty flavour behind. Mild, pliable, faintly fruity. The holes cost nothing extra.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "firm"
+  },
+  {
+    "id": "cheddar",
+    "name": "Cheddar",
+    "examples": "Montgomery's, Cabot Clothbound, Keen's",
+    "description": "Milled and salted curd pressed into wheels or blocks, then aged from months to years. Sharp, savoury, sometimes earthy and horseradish-hot under a clothbound rind. The most-imitated word in cheese, so read the label.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "firm"
+  },
+  {
+    "id": "hard-aged",
+    "name": "Hard aged",
+    "examples": "Parmigiano, Manchego, Gouda",
+    "description": "Long-aged, low-moisture wheels that have traded suppleness for concentration. Salty, savoury, caramel and butterscotch, crunchy with protein crystals. Grate it, shard it, or just stand there eating it.",
+    "typicalMilk": [
+      "cow",
+      "sheep"
+    ],
+    "typicalTexture": "hard"
+  },
+  {
+    "id": "sheep-hard",
+    "name": "Hard sheep",
+    "examples": "Pecorino Romano, Ossau-Iraty, Roncal",
+    "description": "Firm to hard sheep's-milk wheels from the Mediterranean and the Pyrenees. Oily, nutty, lanolin-sweet, with salt that goes from seasoning to statement as they age. Sheep are generous; these show it.",
+    "typicalMilk": [
+      "sheep"
+    ],
+    "typicalTexture": "firm"
+  },
+  {
+    "id": "smoked",
+    "name": "Smoked",
+    "examples": "Idiazábal, Scamorza affumicata, Rauchkäse",
+    "description": "Any style, hung over smouldering wood until the rind takes on a bacon-adjacent glow. Campfire and cured meat over the base cheese. Cold-smoked is a flavour; liquid smoke is a confession.",
+    "typicalMilk": [
+      "sheep",
+      "cow"
+    ],
+    "typicalTexture": "firm"
+  },
+  {
+    "id": "blue",
+    "name": "Blue",
+    "examples": "Stilton, Roquefort, Rogue River",
+    "description": "Penicillium roqueforti seeded through the curd and fed air through pierced holes until blue veins run. Salty, peppery, sweet-spicy, sometimes buttery, occasionally feral. Strong opinions are the point.",
+    "typicalMilk": [
+      "cow",
+      "sheep"
+    ],
+    "typicalTexture": "semiSoft"
+  },
+  {
+    "id": "soft-blue",
+    "name": "Soft blue",
+    "examples": "Gorgonzola Dolce, Cambozola, Saint Agur",
+    "description": "Blues made young, creamy and mild, where the mould seasons rather than dominates. Spoonable, sweet, faintly spicy. The gateway blue, and a perfectly good place to stay.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "soft"
+  },
+  {
+    "id": "pasta-filata",
+    "name": "Pasta filata",
+    "examples": "Mozzarella, Provolone, Caciocavallo",
+    "description": "Curd heated and stretched into ropes until it turns elastic and layered. Milky and sweet when fresh, sharper and drier with age. The cheese that made 'stretchy' a review word.",
+    "typicalMilk": [
+      "cow",
+      "buffalo"
+    ],
+    "typicalTexture": "semiSoft"
+  },
+  {
+    "id": "brined",
+    "name": "Brined",
+    "examples": "Feta, Halloumi, Sirene",
+    "description": "Stored in salt water, which preserves the cheese and does most of the seasoning. Salty, tangy, crumbly or squeaky depending on the make. Rinse it if you must; the brine will not take it personally.",
+    "typicalMilk": [
+      "sheep",
+      "goat",
+      "cow"
+    ],
+    "typicalTexture": "semiFirm"
+  },
+  {
+    "id": "brown-whey",
+    "name": "Brown whey",
+    "examples": "Brunost, Gjetost, Mysost",
+    "description": "Whey boiled down until its sugars caramelise into a fudge-coloured block. Sweet, tangy, goat's-milk caramel; barely a cheese by the usual rules. Norway insists, and Norway is right.",
+    "typicalMilk": [
+      "goat",
+      "cow"
+    ],
+    "typicalTexture": "firm"
+  },
+  {
+    "id": "curds",
+    "name": "Cheese curds",
+    "examples": "Cheddar curds, Poutine curds, Beer-battered curds",
+    "description": "Fresh cheddar curd before it is pressed, sold the day it is made. Mild, salty, and squeaky against the teeth, which is the whole test. Refrigeration ends the squeak, so eat them now.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "semiFirm"
+  },
+  {
+    "id": "latin-aged",
+    "name": "Latin American aged",
+    "examples": "Cotija, Queso Añejo, Queso Duro",
+    "description": "Dry, salty, crumbly aged cheeses made for grating over things that are already good. Sharp, salty, sometimes smoky. The cheese equivalent of a good pinch of salt, and just as necessary.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "hard"
+  },
+  {
+    "id": "processed",
+    "name": "Processed",
+    "examples": "American singles, Velveeta, The Laughing Cow",
+    "description": "Real cheese melted with emulsifying salts so it never breaks, never ages and always slices the same. Mild, salty, engineered. It melts on a burger better than anything on this list, and everyone knows it.",
+    "typicalMilk": [
+      "cow"
+    ],
+    "typicalTexture": "soft"
+  },
+  {
+    "id": "other",
+    "name": "Something else",
+    "examples": "Whatever the label said",
+    "description": "For the wedge that fits no family, the market stall mystery, or the cheese you bought because of the name. Write down what you can. Every category started as a cheese nobody had a word for.",
+    "typicalMilk": [
+      "other"
+    ],
+    "typicalTexture": "semiSoft"
+  }
+]

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;family=Source+Serif+4:ital,wght@0,400;0,600;1,400;1,600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap">
+<style>body{margin:0;background:#f0eee9;font-family:Poppins,system-ui,sans-serif;color:#35291a}a{color:#93500f}a:hover{color:#b3641b}</style>
+</helmet>
+<div style="max-width:1160px;margin:0 auto;padding:40px 32px 64px">
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:6px"><div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#fbdf19,#f68f25 55%,#ee3423);display:flex;align-items:center;justify-content:center;color:#fff">{{ icWedge }}</div><div><div style="font:700 24px Poppins,sans-serif">Cheesy Scribe — component spec sheet</div><div style="font:italic 400 13px 'Source Serif 4',serif;color:#8a7a5f">Direction 1a "cream &amp; rind amber" · Flutter / Material 3 · pairs with DESIGN_SPEC.md and lib/theme.dart</div></div></div>
+<div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#b5a684;margin-bottom:28px">ALL MEASUREMENTS IN LOGICAL PX (FLUTTER DP) · A TK FORGEWORKS PRODUCT</div>
+
+<div style="font:600 16px Poppins,sans-serif;margin:26px 0 12px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,.1)">01 · Color tokens</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
+<sc-for list="{{ swatches }}" as="sw" hint-placeholder-count="8">
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;overflow:hidden"><div style="height:52px;background:{{ sw.hex }};border-bottom:1px solid rgba(0,0,0,.06)"></div><div style="padding:8px 10px"><div style="font:500 11px Poppins,sans-serif">{{ sw.name }}</div><div style="font:500 9.5px 'JetBrains Mono',monospace;color:#8a7a5f">{{ sw.hex }} · {{ sw.slot }}</div></div></div>
+</sc-for>
+</div>
+<div style="margin-top:12px;background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:16px"><div style="width:180px;height:34px;border-radius:8px;background:linear-gradient(135deg,#fbdf19,#f68f25 55%,#ee3423)"></div><div style="font:400 12.5px Poppins,sans-serif;color:#5f5138">Forge gradient <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#8a7a5f">135° #FBDF19 → #F68F25 → #EE3423</span> — logo badge, FAB, featured-card strip only. Never on ordinary buttons, surfaces, or status.</div></div>
+
+<div style="font:600 16px Poppins,sans-serif;margin:34px 0 12px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,.1)">02 · Type scale</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:6px 20px">
+<div style="display:flex;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px dotted #e6d9bf"><div style="width:270px;font:600 27px 'Source Serif 4',serif;line-height:1.2">Rogue River Blue</div><div style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">SOURCE SERIF 4 · 27/600 · LH 1.2 — DETAIL HEADER (displaySmall)</div></div>
+<div style="display:flex;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px dotted #e6d9bf"><div style="width:270px;font:600 21px 'Source Serif 4',serif">Rogue River Blue</div><div style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">SOURCE SERIF 4 · 21/600 — FEATURED CARD NAME (headlineSmall)</div></div>
+<div style="display:flex;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px dotted #e6d9bf"><div style="width:270px;font:600 22px Poppins,sans-serif">Your tastings</div><div style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">POPPINS · 22/600 — SCREEN TITLE (titleLarge)</div></div>
+<div style="display:flex;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px dotted #e6d9bf"><div style="width:270px;font:600 18px Poppins,sans-serif">New tasting note</div><div style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">POPPINS · 18/600 — APP BAR TITLE (titleMedium)</div></div>
+<div style="display:flex;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px dotted #e6d9bf"><div style="width:270px;font:500 15px Poppins,sans-serif">Comté 24 mo</div><div style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">POPPINS · 15/500 — ROW TITLE (titleSmall)</div></div>
+<div style="display:flex;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px dotted #e6d9bf"><div style="width:270px;font:400 14.5px/1.7 'Source Serif 4',serif">Sweet caramel up front, then the blue shows up like it owns the place.</div><div style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">SOURCE SERIF 4 · 14.5/400 · LH 1.7 — NOTES PROSE (bodyLarge)</div></div>
+<div style="display:flex;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px dotted #e6d9bf"><div style="width:270px;font:italic 400 13px 'Source Serif 4',serif;color:#8a7a5f">Tastes like winning an argument.</div><div style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">SOURCE SERIF 4 ITALIC · 11.5–14 — WIT LINES, HINTS, TAGLINES</div></div>
+<div style="display:flex;align-items:baseline;gap:18px;padding:12px 0;border-bottom:1px dotted #e6d9bf"><div style="width:270px;font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">TEXTURE METER</div><div style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">JETBRAINS MONO · 10/500 · TRACKING 1.4 · UPPERCASE — FIELD LABEL (labelSmall)</div></div>
+<div style="display:flex;align-items:baseline;gap:18px;padding:12px 0"><div style="width:270px"><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#6b5a3d;padding:4px 8px;border-radius:4px">CARAMEL</span></div><div style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">JETBRAINS MONO · 9.5/500 — TAG CAPSULE (labelMedium)</div></div>
+</div>
+
+<div style="font:600 16px Poppins,sans-serif;margin:34px 0 12px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,.1)">03 · Controls</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px">
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">SEARCH BAR — SearchBar · H52 · R28 · FILL #F2E8D5</div>
+<div style="display:flex;align-items:center;gap:12px;background:#f2e8d5;border-radius:28px;height:52px;padding:0 10px 0 16px"><span style="color:#5f5138;display:flex">{{ icMenu }}</span><span style="flex:1;font-size:14px;color:#8a7a5f">Search your tasting notes</span><span style="color:#5f5138;display:flex">{{ icSearch }}</span><div style="width:32px;height:32px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center;font:600 13px Poppins,sans-serif">T</div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Leading menu icon opens drawer · trailing 32px avatar, fill #F6E5C8, initial 13/600 #93500F</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">FILTER / CHOICE CHIPS — FilterChip · R8 · PAD 7×14 · POPPINS 12/500</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><div style="padding:7px 14px;border:1px solid #b3641b;background:#f6e5c8;border-radius:8px;font:500 12px Poppins,sans-serif;color:#93500f">✓ Selected</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#5f5138">Unselected</div><div style="padding:7px 14px;border:1px solid #e6d9bf;border-radius:8px;font:500 12px Poppins,sans-serif;color:#b5a684">Disabled</div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Selected: fill #F6E5C8 · border #B3641B · text #93500F · checkmark. Unselected: transparent, border #E6D9BF</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">BUTTONS — FilledButton H50 · OutlinedButton H48 · R8</div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="background:#b3641b;color:#fff;border-radius:8px;padding:15px;text-align:center;font:600 15px Poppins,sans-serif">Sign in</div><div style="display:flex;gap:12px"><div style="flex:1;border:1px solid #e6d9bf;background:#fffdf8;border-radius:8px;padding:13px;text-align:center;font:500 14px Poppins,sans-serif;color:#5f5138">Google</div><div style="flex:1;border:1px solid #e6d9bf;border-radius:8px;padding:13px;text-align:center;font:500 14px Poppins,sans-serif;color:#5f5138">Apple</div></div><div style="display:flex;gap:18px;align-items:center"><span style="font:600 14px Poppins,sans-serif;color:#93500f">Text button #93500F</span><span style="font:500 13px Poppins,sans-serif;color:#b3382b">Destructive #B3382B</span></div></div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">EXTENDED FAB — DecoratedBox(forgeGradient) + FAB · R16 · PAD 16×20</div>
+<div style="display:inline-flex;align-items:center;gap:10px;padding:16px 20px;border-radius:16px;background:linear-gradient(135deg,#f9a825,#f68f25 45%,#ee3423);color:#fff;font:600 14px Poppins,sans-serif;box-shadow:0 6px 18px rgba(238,52,35,.35)">{{ icPlus }}New tasting notes</div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:10px">Shadow 0 6 18 rgba(238,52,35,.35) · hides on scroll-down · the only gradient button in the app</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">BOXED INPUT — TextField · R8 · PAD 14×16 · MONO LABEL OUTSIDE</div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">EMAIL</div><div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:14px 16px;font-size:14px">tyler@example.com</div></div>
+<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">FOCUSED</div><div style="background:#fffdf8;border:1.5px solid #b3641b;border-radius:8px;padding:14px 16px;font-size:14px">Rogue River Blue</div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">No floating M3 label — label sits above, mono 10/1.4 uppercase. Focus: border #B3641B 1.5px</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">JOURNAL INPUT — custom · 1.5PX DOTTED #C4B18B · SERIF ITALIC HINT</div>
+<div style="display:flex;flex-direction:column;gap:8px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">CHEESE NAME</div><div style="border-bottom:1.5px dotted #c4b18b;padding:6px 2px;font:italic 400 14px 'Source Serif 4',serif;color:#b5a684">Start with what the label says</div></div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px"><div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">FILLED</div><div style="border-bottom:1.5px dotted #c4b18b;padding:6px 2px;font-size:14px">Rogue Creamery</div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Note-form fields only; auth/account screens use the boxed input</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">STAR RATING — custom · INPUT 30PX / DISPLAY 12–22PX</div>
+<div style="display:flex;align-items:center;gap:10px"><span style="color:#b3641b;font-size:30px;letter-spacing:6px">★★★★</span><span style="color:#e0d2b4;font-size:30px">★</span><span style="font:500 13px 'JetBrains Mono',monospace;color:#8a7a5f;margin-left:6px">4.0</span></div>
+<div style="display:flex;align-items:center;gap:8px;margin-top:10px"><span style="color:#b3641b;font-size:12px;letter-spacing:1px">★★★★☆</span><span style="font:400 11px Poppins,sans-serif;color:#8a7a5f">row display, 12px</span></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Active #B3641B · inactive #E0D2B4 · mono score beside · whole stars 0–5</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">TEXTURE METER — Slider · 6 STOPS · TRACK 4PX · THUMB 18PX</div>
+<div style="padding:8px 6px 0"><div style="position:relative;height:4px;background:#f2e8d5;border-radius:2px"><div style="position:absolute;left:0;top:0;bottom:0;width:44%;background:#b3641b;border-radius:2px"></div><div style="position:absolute;left:44%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:#b3641b;border:3px solid #fffdf8;box-shadow:0 1px 4px rgba(53,41,26,.3)"></div></div>
+<div style="display:flex;justify-content:space-between;margin-top:10px;font:500 7.5px 'JetBrains Mono',monospace;color:#8a7a5f"><span>RUNNY</span><span>SOFT</span><span style="color:#93500f;font-weight:600">SEMI-SOFT</span><span>SEMI-FIRM</span><span>FIRM</span><span>HARD</span></div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:10px">Active label → #93500F 600 · thumb ring 3px card-white</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">SEGMENTED + SWITCH — SegmentedButton R8 · Switch 44×24</div>
+<div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap"><div style="display:flex;border:1px solid #e6d9bf;border-radius:8px;overflow:hidden;font:500 11px Poppins,sans-serif"><span style="padding:6px 12px;background:#f6e5c8;color:#93500f">Light</span><span style="padding:6px 12px;color:#8a7a5f">Dark</span><span style="padding:6px 12px;color:#8a7a5f">System</span></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="width:44px;height:24px;border-radius:12px;background:#b3641b;position:relative"><div style="position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fffdf8"></div></div><div style="width:44px;height:24px;border-radius:12px;background:#f2e8d5;position:relative"><div style="position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fffdf8;box-shadow:0 1px 2px rgba(53,41,26,.25)"></div></div></div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:10px">Switch: on #B3641B / off #F2E8D5, white 18px thumb, no outline</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">TAG + STATUS CAPSULES — R4 MONO 9.5 · STATUS R-FULL</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#6b5a3d;padding:4px 8px;border-radius:4px">CARAMEL</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f6e5c8;color:#93500f;padding:5px 9px;border-radius:4px">COW</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#e8f2e5;color:#3d7a33;padding:4px 8px;border-radius:9999px">CONNECTED</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#8a7a5f;padding:4px 8px;border-radius:9999px">NOT CONNECTED</span></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Neutral: #F2E8D5/#6B5A3D · emphasis: #F6E5C8/#93500F · success: #E8F2E5/#3D7A33 (status only)</div></div>
+</div>
+
+<div style="font:600 16px Poppins,sans-serif;margin:34px 0 12px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,.1)">04 · Composites</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px">
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">FEATURED CARD — Card R8 · 4PX FORGE STRIP · PAD 16×18</div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;overflow:hidden"><div style="height:4px;background:linear-gradient(90deg,#fbdf19,#f68f25,#ee3423)"></div><div style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+<div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#8a7a5f">LATEST TASTING · AUG 12</div>
+<div style="font:600 21px 'Source Serif 4',serif">Rogue River Blue</div>
+<div style="font-size:12.5px;color:#8a7a5f">Rogue Creamery — Central Point, Oregon</div>
+<div style="display:flex;align-items:center;gap:8px"><span style="color:#b3641b;font-size:16px;letter-spacing:2px">★★★★★</span><span style="font:500 11px 'JetBrains Mono',monospace;color:#8a7a5f">5.0</span></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#6b5a3d;padding:4px 8px;border-radius:4px">CARAMEL</span><span style="font:500 9.5px 'JetBrains Mono',monospace;background:#f2e8d5;color:#6b5a3d;padding:4px 8px;border-radius:4px">EARTHY</span></div>
+<div style="font:italic 400 13px 'Source Serif 4',serif;color:#6b5a3d">"Tastes like winning an argument."</div>
+</div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Anatomy: mono meta → serif 21 name → maker 12.5 → stars+score → tags → italic quote. Most recent note only.</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">NOTE ROW — ListTile · AVATAR 42 · PAD 13×4 · DIVIDER #EFE4CF</div>
+<div style="display:flex;gap:14px;align-items:center;padding:13px 4px;border-bottom:1px solid #efe4cf"><div style="width:42px;height:42px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace;flex-shrink:0">CO</div><div style="flex:1;min-width:0"><div style="font:500 15px Poppins,sans-serif">Comté 24 mo</div><div style="font-size:11.5px;color:#8a7a5f">Marcel Petite · Jura, France — Aug 3</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><span style="color:#b3641b;font-size:12px;letter-spacing:1px">★★★★☆</span><span style="font:500 9px 'JetBrains Mono',monospace;color:#b5a684">COW</span></div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Avatar initials: first 2 letters, mono 12/600 · trailing column: 12px stars + mono milk tag · tap → detail, long-press → edit/delete sheet</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">DRAWER ITEM — NavigationDrawer · W300 · PILL R28 · PAD 12×16</div>
+<div style="display:flex;flex-direction:column;gap:4px;max-width:276px"><div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:28px;background:#f6e5c8;font:500 14px Poppins,sans-serif;color:#93500f"><span style="display:flex">{{ icNotes }}</span>My tasting notes</div>
+<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:28px;font:500 14px Poppins,sans-serif;color:#5f5138"><span style="display:flex;color:#8a7a5f">{{ icBook }}</span>Cheese library</div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Selected: fill #F6E5C8, text #93500F · rest: text #5F5138, icon #8A7A5F · drawer right radius 16, scrim rgba(35,24,8,.38)</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">FLAVOR WHEEL — CustomPainter · 16 SPOKES × 5 RINGS</div>
+{{ wheelSpec }}
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:4px">Grid #D9CBAA · polygon fill #B3641B @18% · stroke #B3641B 1.5 · dots 2.6 · labels mono 8. Tap spoke×ring to score; pairs with List entry mode (Wheel/List segmented in card header)</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">FLAVOR LIST ROW — ALT ENTRY · 6 PIPS · DOTTED DIVIDERS</div>
+<div style="display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #e6d9bf"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6b5a3d">CARAMEL</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#b3641b">●●●●</span><span style="color:#e0d2b4">○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px;border-bottom:1px dotted #e6d9bf"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6b5a3d">NUTTY</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#b3641b">●●●</span><span style="color:#e0d2b4">○○○</span></span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 2px"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6b5a3d">MOLDY/BLUE</span><span style="font-size:13px;letter-spacing:4px"><span style="color:#e0d2b4">○○○○○○</span></span></div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Pips 13px, filled #B3641B / empty #E0D2B4 · tap pip N sets score N (tap current score to clear) · same data as wheel</div></div>
+
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">STATS — STAT TILE · BAR ROW · STACKED BREAKDOWN</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:14px"><div style="font:600 34px Poppins,sans-serif;color:#93500f">128</div><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-top:4px">CHEESES TASTED</div></div>
+<div style="display:flex;flex-direction:column;justify-content:center;gap:10px"><div style="display:flex;align-items:center;gap:10px"><span style="font:500 9.5px 'JetBrains Mono',monospace;color:#6b5a3d;width:60px">CARAMEL</span><div style="flex:1;height:8px;background:#f2e8d5;border-radius:4px"><div style="width:82%;height:100%;background:#b3641b;border-radius:4px"></div></div><span style="font:500 10px 'JetBrains Mono',monospace;color:#8a7a5f">32</span></div>
+<div style="display:flex;height:14px;border-radius:7px;overflow:hidden"><div style="width:62%;background:#b3641b"></div><div style="width:22%;background:#dfa04b"></div><div style="width:11%;background:#f0cf95"></div><div style="width:5%;background:#f2e8d5"></div></div></div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f;margin-top:8px">Number 34/600 #93500F · bar track 8px r4 · stacked bar 14px r7, milk series #B3641B/#DFA04B/#F0CF95/#F2E8D5</div></div>
+</div>
+
+<div style="font:600 16px Poppins,sans-serif;margin:34px 0 12px;padding-bottom:6px;border-bottom:1px solid rgba(0,0,0,.1)">05 · States &amp; rules</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px">
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">DISABLED / SSO GREY-OUT — 45% OPACITY + EXPLAINER</div>
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid #efe4cf;border-radius:8px;opacity:.45"><div style="flex:1"><div style="font:500 14px Poppins,sans-serif;color:#8a7a5f">Change password</div><div style="font-size:11px;color:#b5a684">Managed by Google sign-in</div></div><span style="display:flex;color:#b5a684">{{ icChevR }}</span></div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">ERROR — INLINE CARD + FIELD ERROR</div>
+<div style="background:#fbedea;border:1px solid #eccac4;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px"><span style="font:400 13px Poppins,sans-serif;color:#7a2119;flex:1">Couldn't reach the cellar.</span><span style="font:600 13px Poppins,sans-serif;color:#b3382b">Retry</span></div>
+<div style="margin-top:10px"><div style="background:#fffdf8;border:1px solid #b3382b;border-radius:8px;padding:12px 16px;font-size:14px;color:#b5a684">&nbsp;</div><div style="font:500 9.5px 'JetBrains Mono',monospace;color:#b3382b;margin-top:5px">A CHEESE NEEDS A NAME.</div></div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">EMPTY STATE — ICON CIRCLE 56 + WIT LINE + CTA</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0"><div style="width:56px;height:56px;border-radius:50%;background:#f6e5c8;color:#93500f;display:flex;align-items:center;justify-content:center">{{ icWedge }}</div><div style="font:600 18px Poppins,sans-serif">No tastings yet</div><div style="font:italic 400 13px 'Source Serif 4',serif;color:#8a7a5f">The cheese isn't going to review itself.</div><div style="background:#b3641b;color:#fff;border-radius:8px;padding:11px 22px;font:600 14px Poppins,sans-serif">New tasting notes</div></div></div>
+<div style="background:#fffdf8;border:1px solid #e6d9bf;border-radius:8px;padding:16px"><div style="font:500 9.5px 'JetBrains Mono',monospace;letter-spacing:1.2px;color:#8a7a5f;margin-bottom:10px">LOADING — SKELETON ROW · SHIMMER 1.2S</div>
+<div style="display:flex;gap:14px;align-items:center;padding:10px 0"><div style="width:42px;height:42px;border-radius:50%;background:#f2e8d5"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px"><div style="height:13px;width:55%;background:#f2e8d5;border-radius:4px"></div><div style="height:10px;width:80%;background:#f5eedd;border-radius:4px"></div></div></div>
+<div style="font:400 11px Poppins,sans-serif;color:#8a7a5f">Shimmer #F2E8D5 → #F6E5C8 @40% · 3 rows · motion rule: 200ms color transitions only, no bounces or entry animations</div></div>
+</div>
+<div style="margin-top:30px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1.4px;color:#b5a684">CHEESY SCRIBE · A TK FORGEWORKS PRODUCT · SPEC SHEET V1 · AUG 2026</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  ic(kids, size) {
+    const e = React.createElement, s = size || 20;
+    return e('svg', { width: s, height: s, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', style: { flexShrink: 0, display: 'block' } },
+      kids.map((k, i) => e(k[0], Object.assign({ key: i }, k[1]))));
+  }
+  wheel(vals) {
+    const e = React.createElement;
+    const L = ['SALTY','SWEET','SHARP/TANGY','LEMON','GRASSY','HERBAL','CARAMEL','NUTTY','EARTHY','MOLDY/BLUE','STINKY','ROBUST','BUTTERY/CREAMY','MILKY/LACTIC','CRUMBLY','CRYSTALLINE'];
+    const cx = 150, cy = 150, R = 92, n = 16;
+    const pt = (i, r) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+    const kids = [];
+    for (let g = 1; g <= 5; g++) kids.push(e('polygon', { key: 'g' + g, points: Array.from({ length: n }, (_, i) => pt(i, R * g / 5).join(',')).join(' '), fill: 'none', stroke: '#d9cbaa', strokeWidth: g === 5 ? 1.2 : 0.6 }));
+    for (let i = 0; i < n; i++) { const p2 = pt(i, R); kids.push(e('line', { key: 's' + i, x1: cx, y1: cy, x2: p2[0], y2: p2[1], stroke: '#d9cbaa', strokeWidth: 0.6 })); }
+    kids.push(e('polygon', { key: 'v', points: vals.map((v, i) => pt(i, R * v / 5).join(',')).join(' '), fill: 'rgba(179,100,27,.18)', stroke: '#b3641b', strokeWidth: 1.5, strokeLinejoin: 'round' }));
+    vals.forEach((v, i) => { const p2 = pt(i, R * v / 5); kids.push(e('circle', { key: 'd' + i, cx: p2[0], cy: p2[1], r: 2.6, fill: '#b3641b' })); });
+    L.forEach((t, i) => {
+      const p2 = pt(i, R + 12), c = Math.cos(-Math.PI / 2 + i * 2 * Math.PI / n);
+      const anchor = c > 0.25 ? 'start' : c < -0.25 ? 'end' : 'middle';
+      const lines = t.split('/');
+      kids.push(e('text', { key: 't' + i, x: p2[0], y: p2[1] + 3, textAnchor: anchor, fontSize: 8, fontFamily: '"JetBrains Mono",monospace', fontWeight: 500, fill: '#6b5a3d', letterSpacing: 0.3 },
+        lines.length > 1 ? lines.map((ln, j) => e('tspan', { key: j, x: p2[0], dy: j === 0 ? 0 : 9 }, ln)) : t));
+    });
+    return e('svg', { viewBox: '-46 -16 392 336', style: { width: '100%', display: 'block' } }, kids);
+  }
+  renderVals() {
+    const p = d => ['path', { d }];
+    return {
+      wheelSpec: this.wheel([4, 3, 2, 1, 1, 1, 4, 3, 4, 5, 2, 4, 3, 2, 3, 1]),
+      swatches: [
+        { name: 'Page background', hex: '#FAF6EE', slot: 'surface' },
+        { name: 'Card surface', hex: '#FFFDF8', slot: 'surfaceContainerLowest' },
+        { name: 'Search / track', hex: '#F2E8D5', slot: 'surfaceContainer' },
+        { name: 'Selected tint', hex: '#F6E5C8', slot: 'primaryContainer' },
+        { name: 'Rind amber', hex: '#B3641B', slot: 'primary' },
+        { name: 'Rind deep', hex: '#93500F', slot: 'onPrimaryContainer' },
+        { name: 'Ink brown', hex: '#35291A', slot: 'onSurface' },
+        { name: 'Ink soft', hex: '#5F5138', slot: 'onSurfaceVariant' },
+        { name: 'Ink faint', hex: '#8A7A5F', slot: 'ext textTertiary' },
+        { name: 'Ink ghost', hex: '#B5A684', slot: 'ext textGhost' },
+        { name: 'Border', hex: '#E6D9BF', slot: 'outline' },
+        { name: 'Divider', hex: '#EFE4CF', slot: 'outlineVariant' },
+        { name: 'Dotted line', hex: '#C4B18B', slot: 'ext dottedLine' },
+        { name: 'Star inactive', hex: '#E0D2B4', slot: 'ext starInactive' },
+        { name: 'Error', hex: '#B3382B', slot: 'error' },
+        { name: 'Dark surface', hex: '#211D17', slot: 'dark surface' },
+        { name: 'Dark card', hex: '#2B2620', slot: 'dark surfaceContainerLowest' },
+        { name: 'Butter amber', hex: '#F4B656', slot: 'dark primary' },
+      ],
+      icMenu: this.ic([p('M4 7h16'), p('M4 12h16'), p('M4 17h16')]),
+      icSearch: this.ic([['circle', { cx: 11, cy: 11, r: 7 }], p('M21 21l-4.2-4.2')]),
+      icPlus: this.ic([p('M12 5v14'), p('M5 12h14')]),
+      icChevR: this.ic([p('M9 6l6 6-6 6')]),
+      icNotes: this.ic([p('M7 3h7l4 4v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z'), p('M14 3v4h4'), p('M9.5 12h5'), p('M9.5 15.5h5')]),
+      icBook: this.ic([p('M12 6.3C10 4.9 7.6 4.4 4 4.4v13.2c3.6 0 6 .5 8 1.9 2-1.4 4.4-1.9 8-1.9V4.4c-3.6 0-6 .5-8 1.9z'), p('M12 6.3v13.2')]),
+      icWedge: this.ic([p('M2.8 16.8v-4.6L21.2 6v10.8H2.8z'), ['circle', { cx: 8, cy: 13.6, r: 1.2 }], ['circle', { cx: 13.5, cy: 12, r: 1 }], ['circle', { cx: 17.6, cy: 13.8, r: 0.9 }]], 24),
+    };
+  }
+}
+</script>
+</body>
+</html>
