@@ -424,7 +424,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   generated notes read "No notable changes": with no earlier stable tag the
   org generator diffed against rc.7. The release body was corrected by hand
   and the generator fixed in org PR #18; Play's "What's new" for build 9
-  kept the empty text.
+  is the upload job's fallback, "Bug fixes and improvements."
   `v0.2.0/main` cut from `main`. `v0.1.0/main` still exists: the
   `release-branches` ruleset blocks deletion and has no bypass, so removing
   it means disabling that ruleset first (Tim's call). Scope agreed the same
