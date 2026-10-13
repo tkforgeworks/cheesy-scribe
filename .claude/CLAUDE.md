@@ -289,7 +289,10 @@ else refers to it).
   v0.1.0 release PR, #34); topic branches PR **into the release branch**,
   never into `main`; the release branch reaches `main` via a release PR.
 - Branch names: `v0.2.0/CHEESE-N-short-topic`, cut from and PR'd into
-  `v0.2.0/main`. Delete after merge.
+  `v0.2.0/main`. GitHub deletes the remote branch when its PR merges (repo
+  setting `delete_branch_on_merge`, on since 2026-10-12; it is a repository
+  setting, not a ruleset rule). A branch whose PR was closed unmerged is
+  still deleted by hand, as is the local copy.
 - **Two repository rulesets** (`tkforgeworks/.github/docs/branch-protection-ruleset.md`):
   - `main` (ruleset id 20916528): PR-only (0 approvals, self-merge allowed),
     no force-push or deletion, **no bypass actors** (not even admins).
@@ -425,13 +428,17 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   org generator diffed against rc.7. The release body was corrected by hand
   and the generator fixed in org PR #18; Play's "What's new" for build 9
   is the upload job's fallback, "Bug fixes and improvements."
-  `v0.2.0/main` cut from `main`. `v0.1.0/main` still exists: the
-  `release-branches` ruleset blocks deletion and has no bypass, so removing
-  it means disabling that ruleset first (Tim's call). Scope agreed the same
-  day. **0.2.0** (the closed-testing release): CHEESE-45 glossary of tasting
+  `v0.2.0/main` cut from `main`. `v0.1.0/main` was deleted the same day:
+  the `release-branches` ruleset blocks deletion and has no bypass, so it
+  was disabled, the branch deleted, and the ruleset re-enabled at once (the
+  runbook is in the org `branch-protection-ruleset.md`). Whether that rule
+  also stops the release PR's head from being auto-deleted on merge is
+  unobserved until the 0.2.0 release PR. Scope agreed the same day. **0.2.0** (the closed-testing release): CHEESE-45 glossary of tasting
   terms, CHEESE-32 CSV export (pulled forward from 1.0.0), CHEESE-51 "Send
   feedback" link in About, CHEESE-48 forge_ui adoption, CHEESE-50 opening
   the Play closed testing track (Console work; promoted from internal by
-  hand). **1.0.0** (the public store release): CHEESE-46 production track,
+  hand), CHEESE-53 the Dependabot updates in one bundled change plus a pub
+  `groups` entry, done last before the final bump (Dependabot PRs target
+  `main` and are never merged there directly). **1.0.0** (the public store release): CHEESE-46 production track,
   CHEESE-49 guided first-use tour, CHEESE-52 choosing the Play track from
   the pipeline, CHEESE-11 account + sync, CHEESE-12 weekly reminder.
