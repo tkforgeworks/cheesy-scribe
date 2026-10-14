@@ -281,7 +281,12 @@ void main() {
   testApp('pushed screens use the platform page transition', (tester) async {
     await pumpApp(tester);
     final router = GoRouter.of(tester.element(find.byType(Scaffold).first));
-    for (final path in ['/licenses', '/notes/missing', '/library/fresh']) {
+    for (final path in [
+      '/licenses',
+      '/feedback',
+      '/notes/missing',
+      '/library/fresh',
+    ]) {
       router.push(path);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));

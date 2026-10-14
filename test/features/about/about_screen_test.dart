@@ -24,6 +24,7 @@ void main() {
     expect(find.text(AboutScreen.blurb), findsOneWidget);
     expect(find.text('A TK FORGEWORKS PRODUCT'), findsOneWidget);
     expect(find.byType(ForgeWorksMark), findsOneWidget);
+    expect(find.text('Send feedback'), findsOneWidget);
     expect(find.text('tkforgeworks.com'), findsOneWidget);
     expect(find.text('Privacy policy'), findsOneWidget);
     expect(

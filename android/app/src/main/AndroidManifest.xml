@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The in-app feedback form posts to tkforgeworks.com (CHEESE-51); the
+         app makes no other network calls. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Cheesy Scribe"
         android:name="${applicationName}"
