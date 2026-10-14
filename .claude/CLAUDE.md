@@ -29,7 +29,7 @@ Layout so far:
   DESIGN_SPEC §6/§7's "back app bar"), plus
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
   fullscreen dialog), `/notes/:id`, `/library/:styleId`,
-  `/licenses` (`_pushedPage` = Flutter's `MaterialPage`: Android
+  `/licenses`, `/feedback` (`_pushedPage` = Flutter's `MaterialPage`: Android
   slide-and-fade + predictive back). No `/login`. `new` is declared before
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
   `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
@@ -96,8 +96,23 @@ Layout so far:
   `privacyLine`, the menu-icon `leading`, and the link callbacks:
   tkforgeworks.com and the privacy policy (`privacyUri`,
   `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`,
-  licences via `context.push('/licenses')`. Rows are found in tests by
-  the package's keys (`ForgeAboutScreen.licensesKey`, …).
+  licences via `context.push('/licenses')`, Send feedback via
+  `context.push('/feedback')` (`onSendFeedback`, forge_ui rc.3). Rows are
+  found in tests by the package's keys (`ForgeAboutScreen.licensesKey`,
+  `feedbackKey`, …).
+- `lib/features/feedback/` (CHEESE-51) — `FeedbackScreen` (`/feedback`):
+  topic chips (`FeedbackTopic`), optional 1-5 `StarRating`, required
+  comments (≤ 4,000), optional reply email, a "Sent with your feedback"
+  card showing app version, Android version and device model
+  (`feedbackDeviceProvider`, `device_info_plus`), discard sheet,
+  `ForgeErrorCard` with retry on failure, snackbar + pop on success.
+  `FeedbackClient` POSTs JSON to `https://tkforgeworks.com/api/feedback`,
+  the relay in the TKForgeWorks_website repo (`functions/api/feedback.ts`,
+  TKFW-82) that holds the Resend key and emails
+  `support@tkforgeworks.com` from `feedback+cheesy-scribe@`. The JSON
+  shape and the `cheesy-scribe` app id must match that function. This is
+  the app's only network call; it is why the release manifest declares
+  `INTERNET`, and the privacy policy describes it.
 - `lib/features/about/licenses_screen.dart` — `LicensesScreen`
   (`/licenses`, CHEESE-41), opened from About and Settings: a wrapper
   over `ForgeLicensesScreen` (app Apache-2.0 + GitHub `sourceUri`,
@@ -177,7 +192,7 @@ Layout so far:
   are removed from the map, never stored.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.1.0-rc.2`; local checkout `~/Projects/forge-ui`). It owns the theme
+  `v0.1.0-rc.3`; local checkout `~/Projects/forge-ui`). It owns the theme
   builder, type, radii, the forge gradient, every component theme, the
   bundled fonts and the shared atoms. A defect in any of that is fixed in
   forge-ui and the pin moved to the tag that carries the fix, never
@@ -216,7 +231,9 @@ Layout so far:
 - Tests: `test/support.dart` — `wrap()` (themed MaterialApp for atoms),
   `openTestDatabase()` (in-memory drift, closed on teardown), `pumpApp()`
   (real app on an in-memory DB, optional seeded `AppSettings`, mocked
-  package info) and **`testApp()`**, which must replace `testWidgets` for
+  package info, `testDevice` for the feedback form, and `feedbackHttp:` a
+  `MockClient` for the relay; without one any network call fails the
+  test) and **`testApp()`**, which must replace `testWidgets` for
   any test that calls `pumpApp`: it unmounts the tree and pumps 1 ms so
   drift's stream-cancel timer fires before flutter_test's pending-timer
   check (otherwise the test fails and `db.close()` hangs the runner).
@@ -234,7 +251,7 @@ Layout so far:
   set a tall viewport (`tallScreen`) so the whole `ListView` is built.
 - `tool/visual/render_screens_test.dart` (CHEESE-48) — renders every
   screen of the real app, seeded, in light and dark, to PNG with the real
-  fonts (94 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
+  fonts (106 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
   test --concurrency=4 tool/visual/render_screens_test.dart`, default
   `tool/visual/out/` (gitignored). Runs are deterministic, so render
   before and after a change and compare with ImageMagick `compare -metric
@@ -376,7 +393,9 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - **Local-first v0.1.0: no login, no backend.** Notes in SQLite (`drift`) on
   the device; app opens on `/notes`. Auth, cloud backup, delete-account are
   deferred (CHEESE-11) because the handoff names no backend and identity adds
-  a project's worth of scope.
+  a project's worth of scope. The one exception (CHEESE-51, 2026-10-14): the
+  feedback form posts what the user writes, on Send only, to the website's
+  relay.
 - **State: `flutter_riverpod` 3 without codegen; routing `go_router` with a
   `ShellRoute` for the four top-level destinations.** lazy-sleeper-app
   precedent.
@@ -489,5 +508,15 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   repo's own Flutter pin is CHEESE-54. Checked with `tool/visual` renders against the
   pre-adoption build, 94 per run: 90 pixel-identical, 4 intended (the date
   picker's headline is now Poppins instead of the platform font, and
-  Flutter's licence page gets the Heroicons back arrow). Tim's device pass
-  is still owed.
+  Flutter's licence page gets the Heroicons back arrow). `v0.2.0-rc.1`
+  shipped it; Tim's device pass on rc.1 found it matching (2026-10-14).
+- 2026-10-14: CHEESE-51 rescoped by Tim from a mailto link to an in-app
+  form that submits itself. forge-ui PR #10 added
+  `ForgeAboutScreen.onSendFeedback` (released as `v0.1.0-rc.3`, now
+  pinned); TKFW-82 adds the website relay (PR #26, Resend key in the Pages
+  secret `RESEND_API_KEY`, WAF rate limit 3 per 10 s per IP on
+  `/api/feedback`) and the privacy-policy update (PR #27, a draft to merge
+  when the RC with the form is cut). Preview deploys sit behind
+  Cloudflare Access, so the relay is tested from a logged-in browser.
+  The Play Data safety form must be updated in the Console before that RC
+  reaches testers.

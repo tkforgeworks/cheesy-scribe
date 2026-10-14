@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/about/about_screen.dart';
 import '../features/about/licenses_screen.dart';
+import '../features/feedback/feedback_screen.dart';
 import '../features/account/account_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/style_detail_screen.dart';
@@ -107,6 +108,11 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
         path: '/licenses',
         pageBuilder: (context, state) =>
             _pushedPage(state, const LicensesScreen()),
+      ),
+      GoRoute(
+        path: '/feedback',
+        pageBuilder: (context, state) =>
+            _pushedPage(state, const FeedbackScreen()),
       ),
     ],
   );

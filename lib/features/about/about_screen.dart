@@ -50,6 +50,7 @@ class AboutScreen extends ConsumerWidget {
       badge: const ForgeLogoBadge(size: 64),
       version: version,
       blurb: blurb,
+      onSendFeedback: () => context.push('/feedback'),
       onOpenWebsite: () =>
           launchUrl(siteUri, mode: LaunchMode.externalApplication),
       onOpenPrivacyPolicy: () =>

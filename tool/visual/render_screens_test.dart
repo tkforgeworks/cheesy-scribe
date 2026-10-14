@@ -236,6 +236,29 @@ void main() {
       await tester.pumpAndSettle();
       await scrolled(tester, p);
     });
+    // CHEESE-51: pushed from About's "Send feedback" row.
+    Future<void> openFeedback(WidgetTester tester) async {
+      await tester.tap(find.text('Send feedback'));
+      await tester.pumpAndSettle();
+    }
+
+    scene('feedback', '/about', (tester, p) async {
+      await openFeedback(tester);
+      await scrolled(tester, p);
+    });
+    scene('feedback-invalid', '/about', (tester, p) async {
+      await openFeedback(tester);
+      await tester.enterText(find.byType(TextField).last, 'not-an-email');
+      await tester.tap(find.widgetWithText(FilledButton, 'Send feedback'));
+      await tester.pumpAndSettle();
+      await tester.drag(
+        find.byType(Scrollable).first,
+        const Offset(0, 2000),
+        warnIfMissed: false,
+      );
+      await tester.pumpAndSettle();
+      await scrolled(tester, p);
+    });
     // Material's own surfaces, where the theme's default font and action
     // icons show.
     scene('dlg-date', '/notes/rogue/edit', (tester, p) async {
