@@ -259,6 +259,32 @@ void main() {
       await tester.pumpAndSettle();
       await scrolled(tester, p);
     });
+    // CHEESE-45: from the drawer, shot top to bottom.
+    scene('glossary', '/notes', (tester, p) async {
+      await tester.tap(find.byTooltip('Open menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tasting terms'));
+      await tester.pumpAndSettle();
+      final list = tester.state<ScrollableState>(find.byType(Scrollable).first);
+      for (var i = 1; ; i++) {
+        await _shot(tester, '$p-$i');
+        if (list.position.pixels >= list.position.maxScrollExtent) break;
+        await scroll(tester, 700);
+      }
+    });
+    // From the note form's `?`, opened at its section.
+    scene('glossary-from-form', '/notes/new', (tester, p) async {
+      final help = find.byTooltip('Texture terms');
+      await tester.scrollUntilVisible(
+        help,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await _shot(tester, '$p-form');
+      await tester.tap(help);
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    });
     // Material's own surfaces, where the theme's default font and action
     // icons show.
     scene('dlg-date', '/notes/rogue/edit', (tester, p) async {
