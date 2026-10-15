@@ -29,7 +29,7 @@ Layout so far:
   DESIGN_SPEC §6/§7's "back app bar"), plus
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
   fullscreen dialog), `/notes/:id`, `/library/:styleId`,
-  `/licenses`, `/feedback` (`_pushedPage` = Flutter's `MaterialPage`: Android
+  `/licenses`, `/feedback`, `/glossary` (`_pushedPage` = Flutter's `MaterialPage`: Android
   slide-and-fade + predictive back). No `/login`. `new` is declared before
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
   `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
@@ -53,14 +53,20 @@ Layout so far:
   maintained, and `test/data/models_test.dart` validates emitted JSON
   against them with `json_schema`. `tastedAt` is a local-midnight date
   (`YYYY-MM-DD` in JSON); `createdAt` is UTC date-time.
-- `lib/data/db/app_database.dart` — drift schema v1: `notes` (16 `fl_*`
+- `lib/data/db/app_database.dart` — drift schema v2 (v2 changed no
+  table; CHEESE-45): `notes` (16 `fl_*`
   flavor int columns, ISO text dates, enums by name, a normalised
   `search_text` haystack), `recent_searches`, `settings` (key/value).
   `app_database.g.dart` is generated and committed: after any table change
   run `dart run build_runner build --delete-conflicting-outputs` **then
   `dart format .`** (the generator's output is not format-clean and CI
   checks it). Schema bumps: raise `schemaVersion`, add a `case` to
-  `_upgradeTo`; never edit a released case. `search_text.dart` holds
+  `_upgradeTo`; never edit a released case. The haystack stores flavor
+  **labels**, so relabelling one means raising `schemaVersion` and
+  `AppDatabase.searchTextVersion` together: upgrading from below it
+  rebuilds every note's `search_text` after all schema steps
+  (`test/data/migration_test.dart`). Enum names are what's stored and
+  never change; `FlavorNote.lemon` is labelled CITRUS since CHEESE-45. `search_text.dart` holds
   `normalizeForSearch` (lower-case, diacritics folded, `[a-z0-9 ]` only),
   applied to both the stored haystack and the typed query.
 - `lib/data/repositories/` — `NotesRepository` (`NotesQuery` = search +
@@ -126,6 +132,18 @@ Layout so far:
   to drop them. The fonts aren't in `NOTICES`, so `main()` calls
   forge_ui's `registerForgeFontLicenses()` to add them to
   `LicenseRegistry`.
+- `lib/features/glossary/` (CHEESE-45) — `GlossaryScreen` (`/glossary`,
+  pushed; "Tasting terms" in the drawer, a `pushes` entry like New tasting
+  note): sections Flavor wheel / Texture / Rind / Milk (Raw + Grassfed),
+  `?section=<GlossarySection.name>` opens it scrolled there (a
+  `SingleChildScrollView`, not lazy, so `ensureVisible` can reach every
+  section). `glossary_terms.dart` holds all the copy as exhaustive
+  `definition` switches on the enums, so a new term doesn't compile
+  without one; Tim owns the prose, edit in place. `GlossaryButton(section:)`
+  is the note form's `?` (Rind field trailing, Milk and Texture card
+  labels, `FlavorEntryCard.help`); it pushes, so the form stays mounted
+  with its draft. Keys: `GlossaryScreen.sectionKey/termKey`, tooltips
+  `GlossaryButton.tooltipFor` ("Texture terms").
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
   (`/settings`, CHEESE-31): `ForgeSettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
@@ -251,7 +269,7 @@ Layout so far:
   set a tall viewport (`tallScreen`) so the whole `ListView` is built.
 - `tool/visual/render_screens_test.dart` (CHEESE-48) — renders every
   screen of the real app, seeded, in light and dark, to PNG with the real
-  fonts (106 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
+  fonts (124 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
   test --concurrency=4 tool/visual/render_screens_test.dart`, default
   `tool/visual/out/` (gitignored). Runs are deterministic, so render
   before and after a change and compare with ImageMagick `compare -metric
@@ -520,3 +538,10 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   Cloudflare Access, so the relay is tested from a logged-in browser.
   The Play Data safety form must be updated in the Console before that RC
   reaches testers.
+- 2026-10-14: CHEESE-45 glossary. Tim reviewed the terms first: no change
+  to the set of flavors, textures, rinds or milks; LEMON relabelled CITRUS
+  (search text rebuilt by the v2 migration); CRUMBLY / CRYSTALLINE stay on
+  the wheel and are defined as textures; STINKY stays informal (definition
+  says pungent); ROBUST = savory with richness and depth; GRASSY = the farm
+  and barnyard, HERBAL = its more floral cousin. Claude drafted the copy in
+  Tim's voice for Tim to edit.

@@ -8,6 +8,8 @@ import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
+import '../glossary/glossary_button.dart';
+import '../glossary/glossary_terms.dart';
 import 'note_dates.dart';
 import 'widgets/flavor_entry_card.dart';
 import 'widgets/pickers.dart';
@@ -394,9 +396,13 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
           readOnly: true,
           onTap: _pickRind,
           controller: _rindText,
-          trailing: _rind == null
-              ? null
-              : _ClearButton(onTap: () => _setRind(null)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_rind != null) _ClearButton(onTap: () => _setRind(null)),
+              const GlossaryButton(section: GlossarySection.rind),
+            ],
+          ),
         ),
         if (_rind == RindType.other) ...[
           _gap,
@@ -461,6 +467,7 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
         _gap,
         _FormCard(
           label: 'Texture meter',
+          glossary: GlossarySection.texture,
           child: TextureMeter(
             value: _texture,
             onChanged: (t) => setState(() => _texture = t),
@@ -483,6 +490,7 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
         FlavorEntryCard(
           values: _flavors,
           onChanged: (v) => setState(() => _flavors = v),
+          help: const GlossaryButton(section: GlossarySection.flavor),
         ),
         const SizedBox(height: 24),
         FilledButton(
@@ -517,12 +525,14 @@ class _ClearButton extends StatelessWidget {
   );
 }
 
-/// Bordered card with a mono label and one child (rating, texture).
+/// Bordered card with a mono label and one child (rating, texture), and
+/// a `?` to the [glossary] section when it has one.
 class _FormCard extends StatelessWidget {
-  const _FormCard({required this.label, required this.child});
+  const _FormCard({required this.label, required this.child, this.glossary});
 
   final String label;
   final Widget child;
+  final GlossarySection? glossary;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -530,10 +540,32 @@ class _FormCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [ForgeMonoLabel(label), const SizedBox(height: 12), child],
+        children: [
+          _CardLabel(label, glossary: glossary),
+          const SizedBox(height: 12),
+          child,
+        ],
       ),
     ),
   );
+}
+
+/// A card's mono label, followed by its glossary `?` if it has one.
+class _CardLabel extends StatelessWidget {
+  const _CardLabel(this.label, {this.glossary});
+
+  final String label;
+  final GlossarySection? glossary;
+
+  @override
+  Widget build(BuildContext context) => glossary == null
+      ? ForgeMonoLabel(label)
+      : Row(
+          children: [
+            ForgeMonoLabel(label),
+            GlossaryButton(section: glossary!),
+          ],
+        );
 }
 
 class _MilkCard extends StatelessWidget {
@@ -623,7 +655,7 @@ class _AttributeRowsState extends State<_AttributeRows> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ForgeMonoLabel('Milk'),
+        const _CardLabel('Milk', glossary: GlossarySection.milk),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,

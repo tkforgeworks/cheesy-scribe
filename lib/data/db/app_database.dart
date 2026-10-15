@@ -86,7 +86,12 @@ class AppDatabase extends _$AppDatabase {
   /// Bump with every table change and add a case to [_upgradeTo]. Never
   /// edit a released case; users upgrade through each step in order.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  /// The schema version that last changed what [searchTextFor] produces
+  /// (2: LEMON relabelled CITRUS, CHEESE-45). Raise it, and the schema
+  /// version with it, whenever a label in the haystack changes.
+  static const searchTextVersion = 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -95,15 +100,32 @@ class AppDatabase extends _$AppDatabase {
       for (var target = from + 1; target <= to; target++) {
         await _upgradeTo(m, target);
       }
+      // After every schema step, so the rebuild reads the current tables.
+      if (from < searchTextVersion) await _rebuildSearchText();
     },
   );
 
   Future<void> _upgradeTo(Migrator m, int version) async {
     switch (version) {
-      // case 2: await m.addColumn(notes, notes.newColumn);
+      case 2:
+        // No table change; the search text is rebuilt (searchTextVersion).
+        break;
       default:
         throw StateError('No migration to schema version $version');
     }
+  }
+
+  Future<void> _rebuildSearchText() async {
+    final rows = await select(notes).get();
+    await batch((b) {
+      for (final row in rows) {
+        b.update(
+          notes,
+          NotesCompanion(searchText: Value(searchTextFor(noteFromRow(row)))),
+          where: (n) => n.id.equals(row.id),
+        );
+      }
+    });
   }
 }
 

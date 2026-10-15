@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../features/about/about_screen.dart';
 import '../features/about/licenses_screen.dart';
 import '../features/feedback/feedback_screen.dart';
+import '../features/glossary/glossary_screen.dart';
+import '../features/glossary/glossary_terms.dart';
 import '../features/account/account_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/style_detail_screen.dart';
@@ -108,6 +110,17 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
         path: '/licenses',
         pageBuilder: (context, state) =>
             _pushedPage(state, const LicensesScreen()),
+      ),
+      // CHEESE-45: from the drawer, or the note form's `?` at a section.
+      GoRoute(
+        path: '/glossary',
+        pageBuilder: (context, state) => _pushedPage(
+          state,
+          GlossaryScreen(
+            initialSection: GlossarySection.values
+                .asNameMap()[state.uri.queryParameters['section']],
+          ),
+        ),
       ),
       GoRoute(
         path: '/feedback',

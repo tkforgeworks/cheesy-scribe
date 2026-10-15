@@ -37,6 +37,12 @@ class ScribeDrawer extends ConsumerWidget {
       path: '/library',
     ),
     DrawerDestination(
+      label: 'Tasting terms',
+      icon: HeroIcons.questionMarkCircle,
+      path: '/glossary',
+      pushes: true,
+    ),
+    DrawerDestination(
       label: 'Stats & insights',
       icon: HeroIcons.chartBar,
       path: '/stats',

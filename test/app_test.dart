@@ -17,6 +17,9 @@ Future<void> openDrawer(WidgetTester tester) async {
 
 Future<void> tapDrawerItem(WidgetTester tester, String label) async {
   await openDrawer(tester);
+  // The drawer scrolls on a short screen (600 px here).
+  await tester.ensureVisible(find.widgetWithText(DrawerPill, label));
+  await tester.pumpAndSettle();
   await tester.tap(find.widgetWithText(DrawerPill, label));
   await tester.pumpAndSettle();
 }
@@ -81,6 +84,10 @@ void main() {
     expect(find.byTooltip('Back'), findsNothing);
     await openDrawer(tester);
     expect(pillSelected(tester, 'Account'), isTrue);
+    await tester.ensureVisible(
+      find.widgetWithText(DrawerPill, 'About Cheesy Scribe'),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(DrawerPill, 'About Cheesy Scribe'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'About Cheesy Scribe'), findsOneWidget);
