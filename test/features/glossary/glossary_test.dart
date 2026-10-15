@@ -18,84 +18,93 @@ void phoneScreen(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-Finder get glossaryBar => find.widgetWithText(AppBar, 'Tasting terms');
+Finder get indexBar => find.widgetWithText(AppBar, 'Tasting terms');
+
+Finder sectionBar(GlossarySection s) => find.widgetWithText(AppBar, s.title);
 
 /// The definition text inside [term]'s entry.
 Finder definitionOf(Object term, String definition) => find.descendant(
-  of: find.byKey(GlossaryScreen.termKey(term)),
+  of: find.byKey(GlossarySectionScreen.termKey(term)),
   matching: find.text(definition),
 );
 
 void main() {
-  testApp('every flavor, texture, rind and milk term has its definition', (
+  testApp('the index lists every section with its summary and term count', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(800, 12000);
+    await pumpApp(tester, at: '/glossary');
+    expect(find.text(glossaryIntro), findsOneWidget);
+    for (final s in GlossarySection.values) {
+      final row = find.byKey(GlossaryScreen.rowKey(s));
+      for (final text in [
+        s.title,
+        s.summary,
+        '${glossaryTerms(s).length} TERMS',
+      ]) {
+        expect(
+          find.descendant(of: row, matching: find.text(text)),
+          findsOneWidget,
+          reason: '${s.name}: $text',
+        );
+      }
+    }
+  });
+
+  testApp('every section page defines each of its terms', (tester) async {
+    tester.view.physicalSize = const Size(800, 6000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await pumpApp(tester, at: '/glossary');
 
     for (final s in GlossarySection.values) {
-      expect(find.text(s.title), findsOneWidget);
+      await pumpApp(tester, at: '/glossary/${s.name}');
+      expect(sectionBar(s), findsOneWidget);
       expect(find.text(s.intro), findsOneWidget);
+      for (final t in glossaryTerms(s)) {
+        expect(definitionOf(t.key, t.definition), findsOneWidget);
+      }
     }
-    for (final f in FlavorNote.values) {
-      expect(definitionOf(f, f.definition), findsOneWidget, reason: f.name);
-    }
-    for (final t in TextureLevel.values) {
-      expect(definitionOf(t, t.definition), findsOneWidget, reason: t.name);
-    }
-    for (final r in RindType.values) {
-      expect(definitionOf(r, r.definition), findsOneWidget, reason: r.name);
-    }
-    expect(definitionOf('raw', rawDefinition), findsOneWidget);
-    expect(definitionOf('grassfed', grassfedDefinition), findsOneWidget);
-    // Stored as `lemon`, shown as CITRUS (CHEESE-45).
+    // Stored as `lemon`, shown as CITRUS.
+    await pumpApp(tester, at: '/glossary/flavor');
     expect(
       find.descendant(
-        of: find.byKey(GlossaryScreen.termKey(FlavorNote.lemon)),
+        of: find.byKey(GlossarySectionScreen.termKey(FlavorNote.lemon)),
         matching: find.text('CITRUS'),
       ),
       findsOneWidget,
     );
   });
 
-  testApp('the drawer opens the glossary and back returns to the notes', (
-    tester,
-  ) async {
+  testApp('drawer → index → section, and back the same way', (tester) async {
     await pumpApp(tester);
     await tester.tap(find.byTooltip('Open menu'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(DrawerPill, 'Tasting terms'));
     await tester.pumpAndSettle();
-    expect(glossaryBar, findsOneWidget);
+    expect(indexBar, findsOneWidget);
     expect(find.byType(BackButton), findsOneWidget);
 
+    await tester.tap(find.byKey(GlossaryScreen.rowKey(GlossarySection.rind)));
+    await tester.pumpAndSettle();
+    expect(sectionBar(GlossarySection.rind), findsOneWidget);
+    expect(
+      definitionOf(RindType.washed, RindType.washed.definition),
+      findsOneWidget,
+    );
+
     await systemBack(tester);
-    expect(glossaryBar, findsNothing);
+    expect(indexBar, findsOneWidget);
+    await systemBack(tester);
+    expect(indexBar, findsNothing);
     expect(find.text('Search your tastings'), findsOneWidget);
   });
 
-  testApp('a section link opens the glossary scrolled to that section', (
-    tester,
-  ) async {
-    phoneScreen(tester);
-    await pumpApp(tester, at: '/glossary?section=rind');
-
-    final rind = tester.getRect(
-      find.byKey(GlossaryScreen.sectionKey(GlossarySection.rind)),
-    );
-    final bar = tester.getRect(glossaryBar);
-    expect(rind.top, closeTo(bar.bottom, 1));
-    expect(
-      find.byKey(GlossaryScreen.termKey(FlavorNote.salty)).hitTestable(),
-      findsNothing,
-    );
+  testApp('an unknown section says so', (tester) async {
+    await pumpApp(tester, at: '/glossary/nope');
+    expect(find.text('No such section'), findsOneWidget);
   });
 
-  testApp('each form section opens its own part of the glossary', (
-    tester,
-  ) async {
+  testApp('each form `?` opens its own section page, and back returns to '
+      'the form', (tester) async {
     phoneScreen(tester);
     await pumpApp(tester, at: '/notes/new');
 
@@ -114,21 +123,13 @@ void main() {
       );
       await tester.tap(help);
       await tester.pumpAndSettle();
-      expect(glossaryBar, findsOneWidget, reason: s.name);
-      // The section's title, since the flavor section outgrows the screen.
-      expect(
-        find
-            .descendant(
-              of: find.byKey(GlossaryScreen.sectionKey(s)),
-              matching: find.text(s.title),
-            )
-            .hitTestable(),
-        findsOneWidget,
-        reason: s.name,
-      );
+      expect(sectionBar(s), findsOneWidget, reason: s.name);
+
+      // Straight back to the form: the index is not underneath.
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(glossaryBar, findsNothing);
+      expect(indexBar, findsNothing, reason: s.name);
+      expect(find.widgetWithText(AppBar, 'New tasting note'), findsOneWidget);
     }
   });
 
@@ -150,12 +151,12 @@ void main() {
       find.byTooltip(GlossaryButton.tooltipFor(GlossarySection.texture)),
     );
     await tester.pumpAndSettle();
-    expect(glossaryBar, findsOneWidget);
+    expect(sectionBar(GlossarySection.texture), findsOneWidget);
 
     // The Android back button pops the glossary, not the form, and asks
     // nothing on the way.
     await systemBack(tester);
-    expect(glossaryBar, findsNothing);
+    expect(sectionBar(GlossarySection.texture), findsNothing);
     expect(find.text('Discard this note?'), findsNothing);
     expect(find.widgetWithText(AppBar, 'New tasting note'), findsOneWidget);
 
@@ -173,7 +174,7 @@ void main() {
   });
 
   // CHEESE-44: the list's explicit padding has to add the nav-bar inset.
-  testApp('the last entry rests above the system navigation bar', (
+  testApp('the longest section ends above the system navigation bar', (
     tester,
   ) async {
     const navBar = 48.0;
@@ -182,12 +183,19 @@ void main() {
     tester.view.padding = const FakeViewPadding(bottom: navBar);
     tester.view.viewPadding = const FakeViewPadding(bottom: navBar);
     addTearDown(tester.view.reset);
-    await pumpApp(tester, at: '/glossary');
+    await pumpApp(tester, at: '/glossary/flavor');
 
+    final last = find.byKey(
+      GlossarySectionScreen.termKey(FlavorNote.values.last),
+    );
+    await tester.scrollUntilVisible(
+      last,
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
     final list = tester.state<ScrollableState>(find.byType(Scrollable).first);
     list.position.jumpTo(list.position.maxScrollExtent);
     await tester.pumpAndSettle();
-    final last = tester.getRect(find.byKey(GlossaryScreen.termKey('grassfed')));
-    expect(last.bottom, lessThanOrEqualTo(915 - navBar));
+    expect(tester.getRect(last).bottom, lessThanOrEqualTo(915 - navBar));
   });
 }
