@@ -111,14 +111,21 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
         pageBuilder: (context, state) =>
             _pushedPage(state, const LicensesScreen()),
       ),
-      // CHEESE-45: from the drawer, or the note form's `?` at a section.
+      // CHEESE-45: the index from the drawer; a section from the index or
+      // straight from the note form's `?`. Siblings rather than nested, so
+      // pushing a section from the form pushes that page alone.
       GoRoute(
         path: '/glossary',
+        pageBuilder: (context, state) =>
+            _pushedPage(state, const GlossaryScreen()),
+      ),
+      GoRoute(
+        path: '/glossary/:section',
         pageBuilder: (context, state) => _pushedPage(
           state,
-          GlossaryScreen(
-            initialSection: GlossarySection.values
-                .asNameMap()[state.uri.queryParameters['section']],
+          GlossarySectionScreen(
+            section: GlossarySection.values
+                .asNameMap()[state.pathParameters['section']],
           ),
         ),
       ),

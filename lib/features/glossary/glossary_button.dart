@@ -5,9 +5,9 @@ import 'package:heroicons/heroicons.dart';
 
 import 'glossary_terms.dart';
 
-/// The note form's `?` beside a section (CHEESE-45): pushes the glossary
-/// at [section]. Pushing leaves the form mounted, draft and all, so back
-/// returns to it as it was.
+/// The note form's `?` beside a section (CHEESE-45): pushes that
+/// section's glossary page. Pushing leaves the form mounted, draft and all,
+/// so back returns to it as it was.
 class GlossaryButton extends StatelessWidget {
   const GlossaryButton({super.key, required this.section});
 
@@ -21,7 +21,7 @@ class GlossaryButton extends StatelessWidget {
     tooltip: tooltipFor(section),
     // Narrow, so it fits between the flavor card's title and its toggle.
     visualDensity: const VisualDensity(horizontal: -4, vertical: -2),
-    onPressed: () => context.push('/glossary?section=${section.name}'),
+    onPressed: () => context.push('/glossary/${section.name}'),
     icon: HeroIcon(
       HeroIcons.questionMarkCircle,
       size: 18,

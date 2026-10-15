@@ -29,7 +29,7 @@ Layout so far:
   DESIGN_SPEC §6/§7's "back app bar"), plus
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
   fullscreen dialog), `/notes/:id`, `/library/:styleId`,
-  `/licenses`, `/feedback`, `/glossary` (`_pushedPage` = Flutter's `MaterialPage`: Android
+  `/licenses`, `/feedback`, `/glossary`, `/glossary/:section` (`_pushedPage` = Flutter's `MaterialPage`: Android
   slide-and-fade + predictive back). No `/login`. `new` is declared before
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
   `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
@@ -134,16 +134,18 @@ Layout so far:
   `LicenseRegistry`.
 - `lib/features/glossary/` (CHEESE-45) — `GlossaryScreen` (`/glossary`,
   pushed; "Tasting terms" in the drawer, a `pushes` entry like New tasting
-  note): sections Flavor wheel / Texture / Rind / Milk (Raw + Grassfed),
-  `?section=<GlossarySection.name>` opens it scrolled there (a
-  `SingleChildScrollView`, not lazy, so `ensureVisible` can reach every
-  section). `glossary_terms.dart` holds all the copy as exhaustive
-  `definition` switches on the enums, so a new term doesn't compile
-  without one; Tim owns the prose, edit in place. `GlossaryButton(section:)`
-  is the note form's `?` (Rind field trailing, Milk and Texture card
-  labels, `FlavorEntryCard.help`); it pushes, so the form stays mounted
-  with its draft. Keys: `GlossaryScreen.sectionKey/termKey`, tooltips
-  `GlossaryButton.tooltipFor` ("Texture terms").
+  note) is the index: one row per `GlossarySection` (title, `summary`, term
+  count) pushing `GlossarySectionScreen` (`/glossary/:section`, the enum
+  `name`; unknown → "No such section"). The two routes are top-level
+  siblings, not nested, so the note form's `?` (`GlossaryButton(section:)`:
+  Rind field trailing, Milk and Texture card labels, `FlavorEntryCard.help`)
+  pushes the section page alone and back returns straight to the form,
+  which stays mounted with its draft. `glossary_terms.dart` holds all the
+  copy (`glossaryTerms(section)`, exhaustive `definition` switches on the
+  enums, so a new term doesn't compile without one); Tim owns the prose,
+  edit in place. Keys: `GlossaryScreen.rowKey`,
+  `GlossarySectionScreen.termKey`; tooltips `GlossaryButton.tooltipFor`
+  ("Texture terms").
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
   (`/settings`, CHEESE-31): `ForgeSettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
@@ -269,7 +271,7 @@ Layout so far:
   set a tall viewport (`tallScreen`) so the whole `ListView` is built.
 - `tool/visual/render_screens_test.dart` (CHEESE-48) — renders every
   screen of the real app, seeded, in light and dark, to PNG with the real
-  fonts (124 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
+  fonts (134 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
   test --concurrency=4 tool/visual/render_screens_test.dart`, default
   `tool/visual/out/` (gitignored). Runs are deterministic, so render
   before and after a change and compare with ImageMagick `compare -metric
@@ -544,4 +546,6 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   the wheel and are defined as textures; STINKY stays informal (definition
   says pungent); ROBUST = savory with richness and depth; GRASSY = the farm
   and barnyard, HERBAL = its more floral cousin. Claude drafted the copy in
-  Tim's voice for Tim to edit.
+  Tim's voice; Tim kept it. Shipped in rc.3 as one long page; after the
+  device pass Tim asked for an index plus a page per section, with the
+  form's `?` going straight to its section.

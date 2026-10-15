@@ -5,8 +5,8 @@ library;
 
 import '../../data/models/models.dart';
 
-/// The glossary's sections in page order. `name` is the `?section=` value
-/// the note form's help buttons open it at.
+/// The glossary's sections, in index order. `name` is the page's path
+/// segment (`/glossary/texture`), which the note form's `?` opens directly.
 enum GlossarySection { flavor, texture, rind, milk }
 
 extension GlossarySectionCopy on GlossarySection {
@@ -17,6 +17,15 @@ extension GlossarySectionCopy on GlossarySection {
     GlossarySection.milk => 'Milk',
   };
 
+  /// The index row's one line.
+  String get summary => switch (this) {
+    GlossarySection.flavor => 'The sixteen spokes, and how to score them.',
+    GlossarySection.texture => 'Runny to hard: the six stops on the meter.',
+    GlossarySection.rind => 'Natural, bloomy, washed and the rest.',
+    GlossarySection.milk => 'What Raw and Grassfed mean.',
+  };
+
+  /// The section page's opening paragraph.
   String get intro => switch (this) {
     GlossarySection.flavor =>
       'Score each spoke 0 to 5 for how loudly it shows up: 0 is not there, '
@@ -38,7 +47,30 @@ extension GlossarySectionCopy on GlossarySection {
   };
 }
 
-/// The page's opening line.
+/// One entry: [key] is the enum value, or `'raw'` / `'grassfed'`.
+typedef GlossaryTerm = ({Object key, String label, String definition});
+
+/// A section's terms, in the order the note form shows them.
+List<GlossaryTerm> glossaryTerms(GlossarySection s) => switch (s) {
+  GlossarySection.flavor => [
+    for (final f in FlavorNote.values)
+      (key: f, label: f.label, definition: f.definition),
+  ],
+  GlossarySection.texture => [
+    for (final t in TextureLevel.values)
+      (key: t, label: t.label, definition: t.definition),
+  ],
+  GlossarySection.rind => [
+    for (final r in RindType.values)
+      (key: r, label: r.label, definition: r.definition),
+  ],
+  GlossarySection.milk => const [
+    (key: 'raw', label: 'Raw', definition: rawDefinition),
+    (key: 'grassfed', label: 'Grassfed', definition: grassfedDefinition),
+  ],
+};
+
+/// The index page's opening line.
 const glossaryIntro =
     'What the words on the note form mean, so you can score a cheese '
     'without guessing. Nobody checks your answers.';

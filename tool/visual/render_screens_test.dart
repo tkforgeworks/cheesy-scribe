@@ -259,20 +259,27 @@ void main() {
       await tester.pumpAndSettle();
       await scrolled(tester, p);
     });
-    // CHEESE-45: from the drawer, shot top to bottom.
-    scene('glossary', '/notes', (tester, p) async {
+    // CHEESE-45: the index from the drawer, then each section from it.
+    Future<void> openGlossary(WidgetTester tester) async {
       await tester.tap(find.byTooltip('Open menu'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Tasting terms'));
       await tester.pumpAndSettle();
-      final list = tester.state<ScrollableState>(find.byType(Scrollable).first);
-      for (var i = 1; ; i++) {
-        await _shot(tester, '$p-$i');
-        if (list.position.pixels >= list.position.maxScrollExtent) break;
-        await scroll(tester, 700);
-      }
+    }
+
+    scene('glossary', '/notes', (tester, p) async {
+      await openGlossary(tester);
+      await _shot(tester, p);
     });
-    // From the note form's `?`, opened at its section.
+    for (final s in ['flavor', 'texture', 'rind', 'milk']) {
+      scene('glossary-$s', '/notes', (tester, p) async {
+        await openGlossary(tester);
+        await tester.tap(find.byKey(ValueKey('glossary-row-$s')));
+        await tester.pumpAndSettle();
+        await scrolled(tester, p);
+      });
+    }
+    // From the note form's `?`, straight to its section.
     scene('glossary-from-form', '/notes/new', (tester, p) async {
       final help = find.byTooltip('Texture terms');
       await tester.scrollUntilVisible(
@@ -280,7 +287,6 @@ void main() {
         300,
         scrollable: find.byType(Scrollable).first,
       );
-      await _shot(tester, '$p-form');
       await tester.tap(help);
       await tester.pumpAndSettle();
       await _shot(tester, p);
