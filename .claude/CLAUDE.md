@@ -103,7 +103,7 @@ Layout so far:
   tkforgeworks.com and the privacy policy (`privacyUri`,
   `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`,
   licences via `context.push('/licenses')`, Send feedback via
-  `context.push('/feedback')` (`onSendFeedback`, forge_ui rc.3). Rows are
+  `context.push('/feedback')` (`onSendFeedback`, forge_ui since rc.3). Rows are
   found in tests by the package's keys (`ForgeAboutScreen.licensesKey`,
   `feedbackKey`, …).
 - `lib/features/feedback/` (CHEESE-51) — `FeedbackScreen` (`/feedback`):
@@ -212,7 +212,7 @@ Layout so far:
   are removed from the map, never stored.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.1.0-rc.3`; local checkout `~/Projects/forge-ui`). It owns the theme
+  `v0.1.0`, its first stable release; local checkout `~/Projects/forge-ui`). It owns the theme
   builder, type, radii, the forge gradient, every component theme, the
   bundled fonts and the shared atoms. A defect in any of that is fixed in
   forge-ui and the pin moved to the tag that carries the fix, never
@@ -532,8 +532,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   shipped it; Tim's device pass on rc.1 found it matching (2026-10-14).
 - 2026-10-14: CHEESE-51 rescoped by Tim from a mailto link to an in-app
   form that submits itself. forge-ui PR #10 added
-  `ForgeAboutScreen.onSendFeedback` (released as `v0.1.0-rc.3`, now
-  pinned); TKFW-82 adds the website relay (PR #26, Resend key in the Pages
+  `ForgeAboutScreen.onSendFeedback` (released as `v0.1.0-rc.3`); TKFW-82 adds the website relay (PR #26, Resend key in the Pages
   secret `RESEND_API_KEY`, WAF rate limit 3 per 10 s per IP on
   `/api/feedback`) and the privacy-policy update (PR #27, a draft to merge
   when the RC with the form is cut). Preview deploys sit behind
@@ -548,4 +547,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   and barnyard, HERBAL = its more floral cousin. Claude drafted the copy in
   Tim's voice; Tim kept it. Shipped in rc.3 as one long page; after the
   device pass Tim asked for an index plus a page per section, with the
-  form's `?` going straight to its section.
+  form's `?` going straight to its section (PR #45, rc.4); Tim passed it
+  on rc.4.
+- 2026-10-14: forge_ui `v0.1.0` released (forge-ui PRs #11 status, #12
+  release; the package code is identical to rc.3) and re-pinned here under
+  CHEESE-48. No RC was cut for the re-pin; it ships with the next one.
