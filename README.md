@@ -12,7 +12,7 @@ in [`docs/design_handoff_cheesy_scribe/`](docs/design_handoff_cheesy_scribe/).
 
 ## Development
 
-Flutter 3.47.2 (stable), Android SDK, JDK 17+. The application id is `com.tkforgeworks.cheesy_scribe`.
+Flutter 3.47.5 (stable), Android SDK, JDK 17+. The application id is `com.tkforgeworks.cheesy_scribe`.
 
 ```sh
 flutter pub get
