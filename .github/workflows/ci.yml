@@ -27,4 +27,4 @@ jobs:
   ci:
     uses: tkforgeworks/.github/.github/workflows/ci-flutter.yml@main
     with:
-      flutter-version: '3.47.2'
+      flutter-version: '3.47.5'

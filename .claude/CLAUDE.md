@@ -13,7 +13,7 @@ HTML mockups). Keep this file in sync as decisions land.
 
 ## Stack & commands
 
-Flutter 3.47.2 / Material 3, **Android only** (no desktop, iOS or web
+Flutter 3.47.5 / Material 3, **Android only** (no desktop, iOS or web
 targets). Dart package `cheesy_scribe`, application id
 `com.tkforgeworks.cheesy_scribe`. Android platform only; portrait-only via the
 manifest and `SystemChrome`.
@@ -283,7 +283,8 @@ Layout so far:
   the look alone, and add a scene when a screen is added.
 
 Local toolchain (Tim's machine, reinstalled 2026-09-26): Flutter 3.47.5
-(CI pins 3.47.2) at `~/flutter`, on PATH only through `.bashrc` — agent
+(Dart 3.13.4; the same version CI and release builds pin since CHEESE-54)
+at `~/flutter`, on PATH only through `.bashrc` — agent
 shells must `export PATH="$HOME/flutter/bin:$PATH"` first. Android SDK 37
 in `~/Android/Sdk`; Java 25 (system Corretto, and Android Studio's bundled
 JBR runs Gradle). One AVD, `Medium_Phone` (API 37, Play Store image,
@@ -383,7 +384,10 @@ else refers to it).
     `gh api repos/tkforgeworks/cheesy-scribe/rules/branches/<branch>`.
 - CI: `.github/workflows/ci.yml` consumes
   `tkforgeworks/.github/.github/workflows/ci-flutter.yml@main`
-  (`flutter-version: '3.47.2'`) with the canonical envelope — `push` on every
+  (`flutter-version: '3.47.5'`, as does `release.yml`; it matches the local
+  toolchain and forge-ui's CI, whose goldens are pinned to it, so move all
+  three together. `environment.sdk` stays `^3.13.2`: nothing needs a newer
+  floor, and a lower floor costs nothing) with the canonical envelope — `push` on every
   branch but `main`, `pull_request` into `main` and `'v*/main'`. Contract from
   the repo root: `dart format --output=none --set-exit-if-changed .`,
   `flutter analyze`, `flutter test`. Don't hand-roll steps that belong in the
@@ -557,6 +561,10 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - 2026-10-14: CSV export (CHEESE-32) dropped by Tim in favour of
   account-based cloud backup (CHEESE-11); it may return only if a web or
   desktop app is spun off. CHEESE-55 removes the Settings placeholder.
+- 2026-10-16: Flutter pin moved 3.47.2 → 3.47.5 in CI and release
+  (CHEESE-54; Tim chose 3.47.5 over the newer 3.47.7 so local, CI and
+  forge-ui stay on one version). Local renders were already on 3.47.5, so
+  the first build on the new engine to check is the next RC on a device.
 - 2026-10-14: forge_ui `v0.1.0` released (forge-ui PRs #11 status, #12
   release; the package code is identical to rc.3) and re-pinned here under
   CHEESE-48. No RC was cut for the re-pin; it ships with the next one.

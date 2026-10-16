@@ -41,7 +41,7 @@ jobs:
     uses: tkforgeworks/.github/.github/workflows/release-flutter.yml@main
     with:
       ticket-prefix: CHEESE
-      flutter-version: '3.47.2'
+      flutter-version: '3.47.5'
       java-version: '21'
       build-windows: false
     secrets: inherit
