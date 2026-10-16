@@ -109,7 +109,7 @@ class NotesRepository {
     return query.watchSingle().map((row) => row.read(count) ?? 0);
   }
 
-  /// Every note, newest first (stats, CSV export).
+  /// Every note, newest first (stats).
   Stream<List<TastingNote>> watchAll() =>
       (_db.select(_t)..orderBy(_newestFirst)).watch().map(
         (rows) => rows.map(noteFromRow).toList(),

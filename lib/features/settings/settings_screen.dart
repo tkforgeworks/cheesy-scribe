@@ -11,7 +11,7 @@ import '../../data/providers.dart';
 
 /// `/settings` (DESIGN_SPEC §6, CHEESE-31): mono-labelled groups of
 /// bordered cards. Theme and units persist through [AppSettings]; the
-/// deferred rows (reminder, CSV export) sit disabled at 45 %.
+/// deferred reminder row (CHEESE-12) sits disabled at 45 %.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -83,26 +83,6 @@ class SettingsScreen extends ConsumerWidget {
                   title: const Text("Weekly 'go eat cheese' reminder"),
                   subtitle: const Text('Coming soon. The cheese will wait.'),
                   trailing: const Switch(value: false, onChanged: null),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          ForgeSettingsGroup(
-            label: 'Data',
-            children: [
-              Opacity(
-                opacity: disabledOpacity,
-                child: ListTile(
-                  key: const Key('export-row'),
-                  enabled: false,
-                  title: const Text('Export my notes (CSV)'),
-                  subtitle: const Text('Coming soon.'),
-                  trailing: HeroIcon(
-                    HeroIcons.chevronRight,
-                    size: 18,
-                    color: x.textTertiary,
-                  ),
                 ),
               ),
             ],

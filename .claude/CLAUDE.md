@@ -149,8 +149,10 @@ Layout so far:
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
   (`/settings`, CHEESE-31): `ForgeSettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
-  NOTIFICATIONS reminder and DATA export rows disabled at 45 % until
-  CHEESE-12 / 32; ABOUT version, `showLicensePage`, link to `/about`).
+  NOTIFICATIONS reminder row disabled at 45 % until CHEESE-12; ABOUT
+  version, `showLicensePage`, link to `/about`). No DATA group: CSV export
+  (CHEESE-32) was dropped on 2026-10-14 and its placeholder removed in
+  CHEESE-55; account backup (CHEESE-11) will bring its own section.
 - `lib/features/library/` — `LibraryScreen` (`/library`, CHEESE-29):
   `ScribeSearchBar` with a controller filters the 2-col `StyleCard` grid
   inline via `LibraryRepository.search`; counts from `styleCountsProvider`.
@@ -273,8 +275,10 @@ Layout so far:
   screen of the real app, seeded, in light and dark, to PNG with the real
   fonts (134 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
   test --concurrency=4 tool/visual/render_screens_test.dart`, default
-  `tool/visual/out/` (gitignored). Runs are deterministic, so render
-  before and after a change and compare with ImageMagick `compare -metric
+  `tool/visual/out/` (gitignored). Runs are deterministic within a day
+  (the new-note form defaults to today's date, so it and the rind dialog
+  over it differ between days), so render before and after a change and
+  compare with ImageMagick `compare -metric
   AE`: zero means pixel-identical. Use it for any change meant to leave
   the look alone, and add a scene when a screen is added.
 
@@ -511,7 +515,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   runbook is in the org `branch-protection-ruleset.md`). Whether that rule
   also stops the release PR's head from being auto-deleted on merge is
   unobserved until the 0.2.0 release PR. Scope agreed the same day. **0.2.0** (the closed-testing release): CHEESE-45 glossary of tasting
-  terms, CHEESE-32 CSV export (pulled forward from 1.0.0), CHEESE-51 "Send
+  terms, CHEESE-32 CSV export (pulled forward from 1.0.0; dropped
+  2026-10-14, placeholder removed in CHEESE-55), CHEESE-51 "Send
   feedback" link in About, CHEESE-48 forge_ui adoption, CHEESE-50 opening
   the Play closed testing track (Console work; promoted from internal by
   hand), CHEESE-53 the Dependabot updates in one bundled change plus a pub
@@ -549,6 +554,9 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   device pass Tim asked for an index plus a page per section, with the
   form's `?` going straight to its section (PR #45, rc.4); Tim passed it
   on rc.4.
+- 2026-10-14: CSV export (CHEESE-32) dropped by Tim in favour of
+  account-based cloud backup (CHEESE-11); it may return only if a web or
+  desktop app is spun off. CHEESE-55 removes the Settings placeholder.
 - 2026-10-14: forge_ui `v0.1.0` released (forge-ui PRs #11 status, #12
   release; the package code is identical to rc.3) and re-pinned here under
   CHEESE-48. No RC was cut for the re-pin; it ships with the next one.
