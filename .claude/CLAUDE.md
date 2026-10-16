@@ -565,6 +565,14 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (CHEESE-54; Tim chose 3.47.5 over the newer 3.47.7 so local, CI and
   forge-ui stay on one version). Local renders were already on 3.47.5, so
   the first build on the new engine to check is the next RC on a device.
+- 2026-10-16: Dependabot's five pub PRs (#35–39, against `main`) taken
+  as one change on `v0.2.0/main` (CHEESE-53): build_runner 2.16.2, drift
+  2.35.2, drift_dev 2.35.1, url_launcher 6.3.3, go_router 18.1.0 (one minor
+  past the PR's 18.0.2). Regenerated drift code was identical; renders
+  pixel-identical. `.github/dependabot.yml`'s pub block now has a
+  `pub-minor-patch` group, effective once it reaches `main` with the 0.2.0
+  release PR. Future Dependabot PRs still target `main` and are handled
+  the same way: bundled on the release branch, never merged into `main`.
 - 2026-10-14: forge_ui `v0.1.0` released (forge-ui PRs #11 status, #12
   release; the package code is identical to rc.3) and re-pinned here under
   CHEESE-48. No RC was cut for the re-pin; it ships with the next one.
