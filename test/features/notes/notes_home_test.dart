@@ -5,6 +5,7 @@ import 'package:cheesy_scribe/features/notes/widgets/featured_note_card.dart';
 import 'package:cheesy_scribe/features/notes/widgets/note_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../../support.dart';
 
@@ -108,7 +109,7 @@ void main() {
     expect(find.text('LATEST TASTING · AUG 12'), findsOneWidget);
     expect(find.text('“Tastes like winning an argument.”'), findsOneWidget);
     expect(find.text('5.0'), findsOneWidget);
-    expect(find.widgetWithText(TagCapsule, 'CARAMEL'), findsOneWidget);
+    expect(find.widgetWithText(ForgeTagCapsule, 'CARAMEL'), findsOneWidget);
     // Rows exclude the featured note and show the initials avatar.
     expect(find.byType(NoteRow), findsNWidgets(4));
     expect(find.widgetWithText(NoteRow, 'Rogue River Blue'), findsNothing);

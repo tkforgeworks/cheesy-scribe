@@ -69,6 +69,9 @@ extension FlavorNoteLabel on FlavorNote {
   /// Mono uppercase label as printed on the wheel and capsules.
   String get label => switch (this) {
     FlavorNote.sharpTangy => 'SHARP/TANGY',
+    // Stored as `lemon`; relabelled in CHEESE-45. The search haystack holds
+    // labels, so a relabel raises AppDatabase.searchTextVersion.
+    FlavorNote.lemon => 'CITRUS',
     FlavorNote.moldyBlue => 'MOLDY/BLUE',
     FlavorNote.butteryCreamy => 'BUTTERY/CREAMY',
     FlavorNote.milkyLactic => 'MILKY/LACTIC',

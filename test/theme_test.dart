@@ -1,6 +1,7 @@
 import 'package:cheesy_scribe/app/theme/scribe_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 void main() {
   group('ScribeTheme.light', () {
@@ -23,21 +24,30 @@ void main() {
       expect(chip.borderRadius, BorderRadius.circular(8));
     });
 
-    test('type scale uses the three bundled families', () {
-      expect(t.textTheme.bodyMedium!.fontFamily, 'Poppins');
+    test("type scale uses forge_ui's three families", () {
+      expect(t.textTheme.bodyMedium!.fontFamily, 'packages/forge_ui/Poppins');
       expect(t.textTheme.titleLarge!.fontSize, 22);
-      expect(t.textTheme.displaySmall!.fontFamily, 'Source Serif 4');
+      expect(
+        t.textTheme.displaySmall!.fontFamily,
+        'packages/forge_ui/Source Serif 4',
+      );
       expect(t.textTheme.displaySmall!.fontSize, 27);
       expect(t.textTheme.bodyLarge!.height, 1.7);
-      expect(t.textTheme.labelSmall!.fontFamily, 'JetBrains Mono');
+      expect(
+        t.textTheme.labelSmall!.fontFamily,
+        'packages/forge_ui/JetBrains Mono',
+      );
       expect(t.textTheme.labelSmall!.letterSpacing, 1.4);
     });
 
-    test('exposes the journal extension', () {
+    test("exposes the app's own roles and the hand-tuned forge tokens", () {
       final x = t.extension<ScribeColors>()!;
       expect(x.dottedLine, const Color(0xFFC4B18B));
       expect(x.starInactive, const Color(0xFFE0D2B4));
-      expect(x.successFg, const Color(0xFF3D7A33));
+      final f = t.extension<ForgeTokens>()!;
+      expect(f.onSuccessContainer, const Color(0xFF3D7A33));
+      expect(f.textTertiary, const Color(0xFF8A7A5F));
+      expect(f.link, const Color(0xFF93500F));
     });
   });
 
@@ -49,16 +59,8 @@ void main() {
       expect(t.scaffoldBackgroundColor, const Color(0xFF211D17));
       expect(t.colorScheme.primary, const Color(0xFFF4B656));
       expect(t.colorScheme.surfaceContainerLowest, const Color(0xFF2B2620));
-      expect(t.extension<ScribeColors>()!.errorTint, const Color(0xFF3A2320));
+      expect(t.extension<ForgeTokens>()!.errorTint, const Color(0xFF3A2320));
+      expect(t.extension<ForgeTokens>()!.link, const Color(0xFFF4B656));
     });
-  });
-
-  test('forge gradient is the brand spark, unchanged', () {
-    expect(ScribeTokens.forgeGradient.colors.last, const Color(0xFFEE3423));
-    expect(ScribeTokens.forgeStrip.colors, const [
-      Color(0xFFFBDF19),
-      Color(0xFFF68F25),
-      Color(0xFFEE3423),
-    ]);
   });
 }

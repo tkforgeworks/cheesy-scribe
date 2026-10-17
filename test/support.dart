@@ -4,12 +4,15 @@ import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/providers.dart';
 import 'package:cheesy_scribe/data/repositories/library_repository.dart';
 import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
+import 'package:cheesy_scribe/features/feedback/feedback_client.dart';
 import 'package:cheesy_scribe/main.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 /// Wraps [child] in a themed MaterialApp + Scaffold for atom tests.
@@ -27,8 +30,15 @@ AppDatabase openTestDatabase() {
   return db;
 }
 
+/// The device every test's feedback form reports.
+const testDevice = FeedbackDevice(
+  os: 'Android 16 (SDK 36)',
+  model: 'Google Pixel 9',
+);
+
 /// Boots the real app on an in-memory database with mocked package info.
-/// [settings] is saved before the first frame. The bundled cheese library
+/// [settings] is saved before the first frame. [feedbackHttp] answers the
+/// feedback relay; without one, any network call fails the test. The bundled cheese library
 /// is pre-loaded on the real event loop (asset I/O never completes on the
 /// fake clock) so style pickers and counts resolve under `pumpAndSettle`.
 /// Returns the database so tests can seed or inspect it.
@@ -37,6 +47,7 @@ Future<AppDatabase> pumpApp(
   String at = '/notes',
   AppDatabase? db,
   AppSettings? settings,
+  http.Client? feedbackHttp,
 }) async {
   final database = db ?? openTestDatabase();
   final library = LibraryRepository();
@@ -60,6 +71,13 @@ Future<AppDatabase> pumpApp(
       overrides: [
         appDatabaseProvider.overrideWithValue(database),
         libraryRepositoryProvider.overrideWithValue(library),
+        feedbackHttpClientProvider.overrideWithValue(
+          feedbackHttp ??
+              MockClient((request) async {
+                fail('Unexpected network call: ${request.url}');
+              }),
+        ),
+        feedbackDeviceProvider.overrideWith((ref) async => testDevice),
       ],
       child: ScribeApp(key: ValueKey(restart), initialLocation: at),
     ),

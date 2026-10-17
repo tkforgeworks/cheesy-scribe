@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
-import '../theme/scribe_theme.dart';
 import '../widgets/widgets.dart';
 import 'shell_providers.dart';
 
@@ -35,6 +35,12 @@ class ScribeDrawer extends ConsumerWidget {
       label: 'Cheese library',
       icon: HeroIcons.bookOpen,
       path: '/library',
+    ),
+    DrawerDestination(
+      label: 'Tasting terms',
+      icon: HeroIcons.questionMarkCircle,
+      path: '/glossary',
+      pushes: true,
     ),
     DrawerDestination(
       label: 'Stats & insights',
@@ -74,7 +80,7 @@ class ScribeDrawer extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final displayName = ref.watch(displayNameProvider);
     final version = ref.watch(appVersionProvider).asData?.value;
-    final x = context.scribe;
+    final x = context.forge;
 
     return Drawer(
       child: SafeArea(
@@ -99,7 +105,7 @@ class ScribeDrawer extends ConsumerWidget {
                               'Cheesy Scribe',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: ScribeTheme.ui(
+                              style: ForgeType.ui(
                                 size: 18,
                                 weight: FontWeight.w700,
                                 color: context.colors.onSurface,
@@ -140,7 +146,7 @@ class ScribeDrawer extends ConsumerWidget {
                         version == null
                             ? 'A TK FORGEWORKS PRODUCT'
                             : 'A TK FORGEWORKS PRODUCT · V$version',
-                        style: ScribeTheme.mono(
+                        style: ForgeType.mono(
                           size: 8.5,
                           weight: FontWeight.w500,
                           letterSpacing: 1.2,
@@ -196,8 +202,8 @@ class DrawerPill extends StatelessWidget {
     final fg = selected ? c.onPrimaryContainer : c.onSurfaceVariant;
     final iconColor = selected
         ? c.onPrimaryContainer
-        : context.scribe.textTertiary;
-    final radius = BorderRadius.circular(ScribeTokens.rSearch);
+        : context.forge.textTertiary;
+    final radius = BorderRadius.circular(ForgeRadii.pill);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Material(
@@ -220,7 +226,7 @@ class DrawerPill extends StatelessWidget {
                 Expanded(
                   child: Text(
                     destination.label,
-                    style: ScribeTheme.ui(
+                    style: ForgeType.ui(
                       size: 14,
                       weight: FontWeight.w500,
                       color: fg,
@@ -245,7 +251,7 @@ class _AccountRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     final name = displayName?.trim();
     final hasName = name != null && name.isNotEmpty;
     return Material(
@@ -272,7 +278,7 @@ class _AccountRow extends StatelessWidget {
                   child: hasName
                       ? Text(
                           name.characters.first.toUpperCase(),
-                          style: ScribeTheme.ui(
+                          style: ForgeType.ui(
                             size: 15,
                             weight: FontWeight.w600,
                             color: c.onPrimaryContainer,
@@ -290,7 +296,7 @@ class _AccountRow extends StatelessWidget {
                       hasName ? name : 'Your notebook',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: ScribeTheme.ui(
+                      style: ForgeType.ui(
                         size: 14,
                         weight: FontWeight.w600,
                         color: c.onSurface,

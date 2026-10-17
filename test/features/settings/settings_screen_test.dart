@@ -17,9 +17,12 @@ void main() {
     addTearDown(tester.view.reset);
     final db = await pumpApp(tester, at: '/settings');
     expect(find.widgetWithText(AppBar, 'Settings'), findsOneWidget);
-    for (final g in ['APPEARANCE', 'NOTIFICATIONS', 'DATA', 'ABOUT']) {
+    for (final g in ['APPEARANCE', 'NOTIFICATIONS', 'ABOUT']) {
       expect(find.text(g), findsOneWidget, reason: g);
     }
+    // CSV export was dropped (CHEESE-32 → CHEESE-55): no DATA group.
+    expect(find.text('DATA'), findsNothing);
+    expect(find.textContaining('CSV'), findsNothing);
     expect(appThemeMode(tester), ThemeMode.system);
 
     await tester.tap(find.text('Dark'));
@@ -39,7 +42,9 @@ void main() {
     expect(find.text('€/KG'), findsOneWidget);
   });
 
-  testApp('deferred rows are disabled at 45 percent', (tester) async {
+  testApp('the deferred reminder row is disabled at 45 percent', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -50,8 +55,6 @@ void main() {
     expect(reminder.enabled, isFalse);
     expect(find.text('Coming soon. The cheese will wait.'), findsOneWidget);
     expect(tester.widget<Switch>(find.byType(Switch)).onChanged, isNull);
-    final export = tester.widget<ListTile>(find.byKey(const Key('export-row')));
-    expect(export.enabled, isFalse);
     final opacities = tester
         .widgetList<Opacity>(
           find.ancestor(

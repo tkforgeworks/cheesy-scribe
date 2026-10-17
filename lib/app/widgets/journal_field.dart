@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../theme/scribe_theme.dart';
-import 'mono_label.dart';
 
 /// Note-form input: no box, a 1.5 px dotted underline, mono label above and
 /// a serif-italic hint (spec sheet 03 "journal input"). Error state turns the
@@ -44,17 +44,17 @@ class JournalField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final x = context.scribe;
+    final x = context.forge;
     final c = context.colors;
     final hasError = errorText != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        MonoLabel(label),
+        ForgeMonoLabel(label),
         const SizedBox(height: 8),
         CustomPaint(
           painter: DottedUnderlinePainter(
-            color: hasError ? c.error : x.dottedLine,
+            color: hasError ? c.error : context.scribe.dottedLine,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -81,7 +81,7 @@ class JournalField extends StatelessWidget {
                     focusedBorder: InputBorder.none,
                     contentPadding: const EdgeInsets.only(top: 2, bottom: 8),
                     hintText: hint,
-                    hintStyle: ScribeTheme.serif(
+                    hintStyle: ForgeType.serif(
                       size: 14,
                       italic: true,
                       color: x.textGhost,

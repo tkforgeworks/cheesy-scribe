@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:heroicons/heroicons.dart';
 
-import '../../../app/theme/scribe_theme.dart';
-import '../../../app/widgets/widgets.dart';
 import '../../../data/models/models.dart';
 import '../../../data/repositories/library_repository.dart';
 
@@ -30,7 +29,7 @@ Future<PickResult<RindType>?> showRindPicker(
       children: [
         const Padding(
           padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
-          child: MonoLabel('Rind'),
+          child: ForgeMonoLabel('Rind'),
         ),
         _PickRow(
           label: 'Not noted',
@@ -89,7 +88,7 @@ class _StylePickerSheetState extends State<_StylePickerSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const MonoLabel('Style'),
+                  const ForgeMonoLabel('Style'),
                   const SizedBox(height: 8),
                   SearchBar(
                     hintText: 'Search the library',
@@ -97,7 +96,7 @@ class _StylePickerSheetState extends State<_StylePickerSheet> {
                     leading: HeroIcon(
                       HeroIcons.magnifyingGlass,
                       size: 20,
-                      color: context.scribe.textTertiary,
+                      color: context.forge.textTertiary,
                     ),
                     onChanged: (q) => setState(() => _query = q),
                   ),
@@ -130,10 +129,10 @@ class _StylePickerSheetState extends State<_StylePickerSheet> {
                       child: Text(
                         'Nothing matches — either a typo or a cheese frontier.',
                         textAlign: TextAlign.center,
-                        style: ScribeTheme.serif(
+                        style: ForgeType.serif(
                           size: 13.5,
                           italic: true,
-                          color: context.scribe.textTertiary,
+                          color: context.forge.textTertiary,
                         ),
                       ),
                     ),
@@ -168,19 +167,19 @@ class _PickRow extends StatelessWidget {
       selectedTileColor: c.primaryContainer,
       selectedColor: c.onPrimaryContainer,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ScribeTokens.rCard),
+        borderRadius: BorderRadius.circular(ForgeRadii.card),
       ),
       title: Text(label),
       subtitle: subtitle == null
           ? null
           : Text(
               subtitle!,
-              style: ScribeTheme.serif(
+              style: ForgeType.serif(
                 size: 12.5,
                 italic: true,
                 color: selected
                     ? c.onPrimaryContainer
-                    : context.scribe.textTertiary,
+                    : context.forge.textTertiary,
               ),
             ),
       trailing: selected

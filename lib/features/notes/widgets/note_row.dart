@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 
-import '../../../app/theme/scribe_theme.dart';
 import '../../../app/widgets/widgets.dart';
 import '../../../data/models/models.dart';
 import '../note_dates.dart';
@@ -36,7 +36,7 @@ class NoteRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     final sub = [
       [?note.creamery, ?note.origin].join(' · '),
       formatShortDate(note.tastedAt),
@@ -58,7 +58,7 @@ class NoteRow extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 initials(note.cheeseName),
-                style: ScribeTheme.mono(
+                style: ForgeType.mono(
                   size: 12,
                   weight: FontWeight.w600,
                   color: c.onPrimaryContainer,
@@ -97,7 +97,7 @@ class NoteRow extends StatelessWidget {
                           ? (note.milkOther ?? 'other')
                           : note.milk.label)
                       .toUpperCase(),
-                  style: ScribeTheme.mono(
+                  style: ForgeType.mono(
                     size: 9,
                     weight: FontWeight.w500,
                     color: x.textGhost,

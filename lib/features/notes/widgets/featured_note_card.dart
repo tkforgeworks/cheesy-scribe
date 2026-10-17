@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 
-import '../../../app/theme/scribe_theme.dart';
 import '../../../app/widgets/widgets.dart';
 import '../../../data/models/models.dart';
 import '../note_dates.dart';
@@ -24,7 +24,7 @@ class FeaturedNoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     final maker = [?note.creamery, ?note.origin].join(' — ');
     final quote = note.featuredQuote;
     return Card(
@@ -37,23 +37,21 @@ class FeaturedNoteCard extends StatelessWidget {
           children: [
             Container(
               height: 4,
-              decoration: const BoxDecoration(
-                gradient: ScribeTokens.forgeStrip,
-              ),
+              decoration: const BoxDecoration(gradient: ForgeBrand.forgeStrip),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MonoLabel(
+                  ForgeMonoLabel(
                     'Latest tasting · ${formatShortDate(note.tastedAt)}',
                     size: 9.5,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     note.cheeseName,
-                    style: ScribeTheme.serif(
+                    style: ForgeType.serif(
                       size: 21,
                       weight: FontWeight.w600,
                       color: c.onSurface,
@@ -63,7 +61,7 @@ class FeaturedNoteCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       maker,
-                      style: ScribeTheme.ui(size: 12.5, color: x.textTertiary),
+                      style: ForgeType.ui(size: 12.5, color: x.textTertiary),
                     ),
                   ],
                   if (note.isRated) ...[
@@ -76,7 +74,8 @@ class FeaturedNoteCard extends StatelessWidget {
                       spacing: 6,
                       runSpacing: 6,
                       children: [
-                        for (final f in note.topFlavors) TagCapsule(f.label),
+                        for (final f in note.topFlavors)
+                          ForgeTagCapsule(f.label),
                       ],
                     ),
                   ],
@@ -84,7 +83,7 @@ class FeaturedNoteCard extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       '“$quote”',
-                      style: ScribeTheme.serif(
+                      style: ForgeType.serif(
                         size: 13,
                         italic: true,
                         color: c.onSecondaryContainer,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
-import '../../app/theme/scribe_theme.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
@@ -56,16 +56,19 @@ class NoteDetailScreen extends ConsumerWidget {
       ),
       body: switch (async) {
         AsyncData(value: final n?) => _NoteBody(note: n),
-        AsyncData() => const EmptyState(
+        AsyncData() => const ForgeEmptyState(
           icon: WedgeGlyph(size: 28),
           title: 'This note is gone',
           aside: 'Deleted elsewhere, presumably on purpose.',
         ),
         AsyncError() => const Padding(
           padding: EdgeInsets.all(24),
-          child: ErrorCard(message: "Couldn't open this note."),
+          child: ForgeErrorCard(message: "Couldn't open this note."),
         ),
-        _ => const Padding(padding: EdgeInsets.all(24), child: SkeletonList()),
+        _ => const Padding(
+          padding: EdgeInsets.all(24),
+          child: ForgeSkeletonList(),
+        ),
       },
     );
   }
@@ -79,7 +82,7 @@ class _NoteBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    final x = context.scribe;
+    final x = context.forge;
     final styleName = note.cheeseStyleId == null
         ? null
         : ref
@@ -108,14 +111,14 @@ class _NoteBody extends ConsumerWidget {
         32,
       ).withNavBarInset(context),
       children: [
-        MonoLabel(
+        ForgeMonoLabel(
           'Tasted ${formatTastingDate(note.tastedAt)}${price == null ? '' : ' · $price'}',
           size: 9.5,
         ),
         const SizedBox(height: 6),
         Text(
           note.cheeseName,
-          style: ScribeTheme.serif(
+          style: ForgeType.serif(
             size: 27,
             weight: FontWeight.w600,
             height: 1.2,
@@ -124,16 +127,13 @@ class _NoteBody extends ConsumerWidget {
         ),
         if (makerLine.isNotEmpty) ...[
           const SizedBox(height: 6),
-          Text(
-            makerLine,
-            style: ScribeTheme.ui(size: 13, color: x.textTertiary),
-          ),
+          Text(makerLine, style: ForgeType.ui(size: 13, color: x.textTertiary)),
         ],
         if (note.verdict != null) ...[
           const SizedBox(height: 10),
           Text(
             note.verdict!,
-            style: ScribeTheme.serif(
+            style: ForgeType.serif(
               size: 13.5,
               italic: true,
               color: x.textTertiary,
@@ -149,20 +149,27 @@ class _NoteBody extends ConsumerWidget {
           spacing: 6,
           runSpacing: 6,
           children: [
-            TagCapsule(
+            ForgeTagCapsule(
               note.milk == MilkType.other
                   ? (note.milkOther ?? 'Other milk')
                   : note.milk.label,
-              tone: CapsuleTone.emphasis,
+              tone: ForgeCapsuleTone.emphasis,
             ),
-            if (note.isRaw) const TagCapsule('Raw', tone: CapsuleTone.emphasis),
+            if (note.isRaw)
+              const ForgeTagCapsule('Raw', tone: ForgeCapsuleTone.emphasis),
             if (note.isGrassfed)
-              const TagCapsule('Grassfed', tone: CapsuleTone.emphasis),
+              const ForgeTagCapsule(
+                'Grassfed',
+                tone: ForgeCapsuleTone.emphasis,
+              ),
             if (note.attributeOther != null)
-              TagCapsule(note.attributeOther!, tone: CapsuleTone.emphasis),
-            TagCapsule(note.texture.label),
-            if (price != null) TagCapsule(price),
-            if (styleName != null) TagCapsule(styleName),
+              ForgeTagCapsule(
+                note.attributeOther!,
+                tone: ForgeCapsuleTone.emphasis,
+              ),
+            ForgeTagCapsule(note.texture.label),
+            if (price != null) ForgeTagCapsule(price),
+            if (styleName != null) ForgeTagCapsule(styleName),
           ],
         ),
         if (note.notes.isNotEmpty) ...[
@@ -198,7 +205,7 @@ class _DetailCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [MonoLabel(label), const SizedBox(height: 8), child],
+        children: [ForgeMonoLabel(label), const SizedBox(height: 8), child],
       ),
     ),
   );

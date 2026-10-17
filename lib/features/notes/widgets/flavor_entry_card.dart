@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:forge_ui/forge_ui.dart';
 
-import '../../../app/theme/scribe_theme.dart';
-import '../../../app/widgets/widgets.dart';
 import '../../../data/models/models.dart';
 import 'flavor_list.dart';
 import 'flavor_wheel.dart';
@@ -11,18 +10,22 @@ enum FlavorEntryMode { wheel, list }
 /// The FLAVOR WHEEL card: mono title, Wheel/List toggle, helper line and
 /// the chosen entry widget. Both modes edit the same map, so switching
 /// keeps every score. With [onChanged] null it is the detail screen's
-/// read-only wheel card (no toggle, no helper).
+/// read-only wheel card (no toggle, no helper, no [help]).
 class FlavorEntryCard extends StatefulWidget {
   const FlavorEntryCard({
     super.key,
     required this.values,
     this.onChanged,
     this.initialMode = FlavorEntryMode.wheel,
+    this.help,
   });
 
   final Map<FlavorNote, int> values;
   final ValueChanged<Map<FlavorNote, int>>? onChanged;
   final FlavorEntryMode initialMode;
+
+  /// Shown after the title while editing: the form's glossary `?`.
+  final Widget? help;
 
   @override
   State<FlavorEntryCard> createState() => _FlavorEntryCardState();
@@ -50,7 +53,9 @@ class _FlavorEntryCardState extends State<FlavorEntryCard> {
           children: [
             Row(
               children: [
-                const Expanded(child: MonoLabel('Flavor wheel')),
+                const Flexible(child: ForgeMonoLabel('Flavor wheel')),
+                if (editable && widget.help != null) widget.help!,
+                const Spacer(),
                 if (editable)
                   SegmentedButton<FlavorEntryMode>(
                     showSelectedIcon: false,

@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 
 import '../features/about/about_screen.dart';
 import '../features/about/licenses_screen.dart';
+import '../features/feedback/feedback_screen.dart';
+import '../features/glossary/glossary_screen.dart';
+import '../features/glossary/glossary_terms.dart';
 import '../features/account/account_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/style_detail_screen.dart';
@@ -107,6 +110,29 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
         path: '/licenses',
         pageBuilder: (context, state) =>
             _pushedPage(state, const LicensesScreen()),
+      ),
+      // CHEESE-45: the index from the drawer; a section from the index or
+      // straight from the note form's `?`. Siblings rather than nested, so
+      // pushing a section from the form pushes that page alone.
+      GoRoute(
+        path: '/glossary',
+        pageBuilder: (context, state) =>
+            _pushedPage(state, const GlossaryScreen()),
+      ),
+      GoRoute(
+        path: '/glossary/:section',
+        pageBuilder: (context, state) => _pushedPage(
+          state,
+          GlossarySectionScreen(
+            section: GlossarySection.values
+                .asNameMap()[state.pathParameters['section']],
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/feedback',
+        pageBuilder: (context, state) =>
+            _pushedPage(state, const FeedbackScreen()),
       ),
     ],
   );

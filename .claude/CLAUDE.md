@@ -3,7 +3,8 @@
 ## What this is
 
 Cheese-tasting notes app modeled on the 33Books tasting notebook: track,
-record, and look back at cheeses tasted. **No app code yet**; the plan is
+record, and look back at cheeses tasted. **v0.1.0 is released** (2026-10-12;
+GitHub release + Play internal testing). The original plan is
 `docs/CHEESE-1-decomposition.md` (inventory of the design handoff, decisions,
 architecture, and the ticket list mirrored in Jira epics CHEESE-3..12). The
 design handoff itself lives in `docs/design_handoff_cheesy_scribe/`
@@ -12,7 +13,7 @@ HTML mockups). Keep this file in sync as decisions land.
 
 ## Stack & commands
 
-Flutter 3.47.2 / Material 3, **Android only** (no desktop, iOS or web
+Flutter 3.47.5 / Material 3, **Android only** (no desktop, iOS or web
 targets). Dart package `cheesy_scribe`, application id
 `com.tkforgeworks.cheesy_scribe`. Android platform only; portrait-only via the
 manifest and `SystemChrome`.
@@ -28,7 +29,7 @@ Layout so far:
   DESIGN_SPEC §6/§7's "back app bar"), plus
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
   fullscreen dialog), `/notes/:id`, `/library/:styleId`,
-  `/licenses` (`_pushedPage` = Flutter's `MaterialPage`: Android
+  `/licenses`, `/feedback`, `/glossary`, `/glossary/:section` (`_pushedPage` = Flutter's `MaterialPage`: Android
   slide-and-fade + predictive back). No `/login`. `new` is declared before
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
   `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
@@ -52,14 +53,20 @@ Layout so far:
   maintained, and `test/data/models_test.dart` validates emitted JSON
   against them with `json_schema`. `tastedAt` is a local-midnight date
   (`YYYY-MM-DD` in JSON); `createdAt` is UTC date-time.
-- `lib/data/db/app_database.dart` — drift schema v1: `notes` (16 `fl_*`
+- `lib/data/db/app_database.dart` — drift schema v2 (v2 changed no
+  table; CHEESE-45): `notes` (16 `fl_*`
   flavor int columns, ISO text dates, enums by name, a normalised
   `search_text` haystack), `recent_searches`, `settings` (key/value).
   `app_database.g.dart` is generated and committed: after any table change
   run `dart run build_runner build --delete-conflicting-outputs` **then
   `dart format .`** (the generator's output is not format-clean and CI
   checks it). Schema bumps: raise `schemaVersion`, add a `case` to
-  `_upgradeTo`; never edit a released case. `search_text.dart` holds
+  `_upgradeTo`; never edit a released case. The haystack stores flavor
+  **labels**, so relabelling one means raising `schemaVersion` and
+  `AppDatabase.searchTextVersion` together: upgrading from below it
+  rebuilds every note's `search_text` after all schema steps
+  (`test/data/migration_test.dart`). Enum names are what's stored and
+  never change; `FlavorNote.lemon` is labelled CITRUS since CHEESE-45. `search_text.dart` holds
   `normalizeForSearch` (lower-case, diacritics folded, `[a-z0-9 ]` only),
   applied to both the stored haystack and the typed query.
 - `lib/data/repositories/` — `NotesRepository` (`NotesQuery` = search +
@@ -85,29 +92,67 @@ Layout so far:
   (`/account`, CHEESE-34): local profile — 72 px initial avatar, name
   (default "You"), mono `MEMBER SINCE <year> · N NOTES` (year = earliest
   note, else `AppSettings.memberSince`, which the screen stamps on first
-  visit), DISPLAY NAME `BoxedField` saved on blur / Done. The drawer and
+  visit), DISPLAY NAME `ForgeBoxedField` saved on blur / Done. The drawer and
   search-bar avatar read the same `displayNameProvider`.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
-  CHEESE-33): badge, name, version, `AboutScreen.blurb` (TKFW voice; Tim
-  owns the copy), maker line (`ForgeWorksMark`, tinted `textTertiary`),
+  CHEESE-33): a thin wrapper over forge_ui's `ForgeAboutScreen` (layout
+  and the maker line with the tinted mark live in the package; pass
+  `tintMark: true`, this palette has no purple). The app supplies the
+  badge, version, `AboutScreen.blurb` (TKFW voice; Tim owns the copy),
+  `privacyLine`, the menu-icon `leading`, and the link callbacks:
   tkforgeworks.com and the privacy policy (`privacyUri`,
   `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`,
-  a link to `/licenses`, `privacyLine`.
+  licences via `context.push('/licenses')`, Send feedback via
+  `context.push('/feedback')` (`onSendFeedback`, forge_ui since rc.3). Rows are
+  found in tests by the package's keys (`ForgeAboutScreen.licensesKey`,
+  `feedbackKey`, …).
+- `lib/features/feedback/` (CHEESE-51) — `FeedbackScreen` (`/feedback`):
+  topic chips (`FeedbackTopic`), optional 1-5 `StarRating`, required
+  comments (≤ 4,000), optional reply email, a "Sent with your feedback"
+  card showing app version, Android version and device model
+  (`feedbackDeviceProvider`, `device_info_plus`), discard sheet,
+  `ForgeErrorCard` with retry on failure, snackbar + pop on success.
+  `FeedbackClient` POSTs JSON to `https://tkforgeworks.com/api/feedback`,
+  the relay in the TKForgeWorks_website repo (`functions/api/feedback.ts`,
+  TKFW-82) that holds the Resend key and emails
+  `support@tkforgeworks.com` from `feedback+cheesy-scribe@`. The JSON
+  shape and the `cheesy-scribe` app id must match that function. This is
+  the app's only network call; it is why the release manifest declares
+  `INTERNET`, and the privacy policy describes it.
 - `lib/features/about/licenses_screen.dart` — `LicensesScreen`
-  (`/licenses`, CHEESE-41), opened from About and Settings: short summary
-  (app Apache-2.0 + GitHub `sourceUri`, Flutter/packages, OFL fonts,
-  all-rights-reserved brand line) with "View all notices" →
-  `showLicensePage`. Don't trim that full list: the engine and packages
-  compiled into the APK need their notices shipped. Flutter's generated
-  `NOTICES` also lists dev_dependencies (build_runner, drift_dev, …; ~2 %
-  of it) and there is no supported way to drop them. The bundled fonts
-  aren't in `NOTICES`, so `main()` calls `registerBundledFontLicenses()`
-  to add `assets/fonts/licenses/*` to `LicenseRegistry`.
+  (`/licenses`, CHEESE-41), opened from About and Settings: a wrapper
+  over `ForgeLicensesScreen` (app Apache-2.0 + GitHub `sourceUri`,
+  Flutter/packages, OFL fonts, all-rights-reserved brand line) with
+  "View all notices" → `showLicensePage`
+  (`ForgeLicensesScreen.allNoticesKey`). It takes the app bar's automatic
+  back button, so it only has one when pushed. Don't trim that full list:
+  the engine and packages compiled into the APK need their notices
+  shipped. Flutter's generated `NOTICES` also lists dev_dependencies
+  (build_runner, drift_dev, …; ~2 % of it) and there is no supported way
+  to drop them. The fonts aren't in `NOTICES`, so `main()` calls
+  forge_ui's `registerForgeFontLicenses()` to add them to
+  `LicenseRegistry`.
+- `lib/features/glossary/` (CHEESE-45) — `GlossaryScreen` (`/glossary`,
+  pushed; "Tasting terms" in the drawer, a `pushes` entry like New tasting
+  note) is the index: one row per `GlossarySection` (title, `summary`, term
+  count) pushing `GlossarySectionScreen` (`/glossary/:section`, the enum
+  `name`; unknown → "No such section"). The two routes are top-level
+  siblings, not nested, so the note form's `?` (`GlossaryButton(section:)`:
+  Rind field trailing, Milk and Texture card labels, `FlavorEntryCard.help`)
+  pushes the section page alone and back returns straight to the form,
+  which stays mounted with its draft. `glossary_terms.dart` holds all the
+  copy (`glossaryTerms(section)`, exhaustive `definition` switches on the
+  enums, so a new term doesn't compile without one); Tim owns the prose,
+  edit in place. Keys: `GlossaryScreen.rowKey`,
+  `GlossarySectionScreen.termKey`; tooltips `GlossaryButton.tooltipFor`
+  ("Texture terms").
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
-  (`/settings`, CHEESE-31): `SettingsGroup` cards (APPEARANCE theme +
+  (`/settings`, CHEESE-31): `ForgeSettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
-  NOTIFICATIONS reminder and DATA export rows disabled at 45 % until
-  CHEESE-12 / 32; ABOUT version, `showLicensePage`, link to `/about`).
+  NOTIFICATIONS reminder row disabled at 45 % until CHEESE-12; ABOUT
+  version, `showLicensePage`, link to `/about`). No DATA group: CSV export
+  (CHEESE-32) was dropped on 2026-10-14 and its placeholder removed in
+  CHEESE-55; account backup (CHEESE-11) will bring its own section.
 - `lib/features/library/` — `LibraryScreen` (`/library`, CHEESE-29):
   `ScribeSearchBar` with a controller filters the 2-col `StyleCard` grid
   inline via `LibraryRepository.search`; counts from `styleCountsProvider`.
@@ -167,18 +212,32 @@ Layout so far:
   `FlavorEntryCard` (Wheel/List toggle, helper line; read-only card when
   `onChanged` is null). Both modes edit one `Map<FlavorNote,int>`; zeros
   are removed from the map, never stored.
-- `lib/app/theme/scribe_theme.dart` — tokens, `ScribeColors` extension
-  (incl. `wheelGrid`), `ScribeTheme.light()/dark()`,
-  `ScribeTheme.ui/serif/mono` helpers, `context.colors/text/scribe`
-  shorthands, component themes (drawer, segmented button, chips, …).
-- `lib/app/widgets/` — the DESIGN_SPEC §5 atoms (`MonoLabel`, `TagCapsule`,
-  `StatusCapsule`, `StarRating`, `JournalField`, `BoxedField`, `ForgeFab`,
-  `ForgeLogoBadge`/`WedgeGlyph`, `ForgeWorksMark` (the TKFW hammer/anvil,
-  About only, tinted), `SkeletonRow`, `ErrorCard`, `EmptyState`,
-  `showConfirmSheet`, and the `EdgeInsets.withNavBarInset(context)`
-  extension); import the `widgets.dart` barrel. Android draws edge-to-edge
-  and a scroll view with an explicit `padding` drops the MediaQuery inset,
-  so every bottom-reaching scroll padding uses `withNavBarInset` (CHEESE-44).
+- **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
+  (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
+  `v0.1.0`, its first stable release; local checkout `~/Projects/forge-ui`). It owns the theme
+  builder, type, radii, the forge gradient, every component theme, the
+  bundled fonts and the shared atoms. A defect in any of that is fixed in
+  forge-ui and the pin moved to the tag that carries the fix, never
+  patched here. Import `package:forge_ui/forge_ui.dart`.
+- `lib/app/theme/scribe_theme.dart` — this app's palette only:
+  `ScribeTokens` (raw colours), `ScribeTheme.light()/dark()`, which call
+  `forgeTheme(colorScheme:, tokens:, extensions:)` with the hand-tuned
+  schemes and `ForgeTokens`, and the `ScribeColors` extension for the four
+  roles forge_ui has no slot for (`dottedLine`, `starActive`,
+  `starInactive`, `wheelGrid`). Read colours through `context.colors`,
+  `context.forge` (`textTertiary`, `rowDivider`, …) and `context.scribe`;
+  text styles through `context.text` and `ForgeType.ui/serif/mono`.
+- `lib/app/widgets/` — the atoms that are this app's own: `StarRating`,
+  `JournalField`, `ForgeLogoBadge`/`WedgeGlyph`; import the `widgets.dart`
+  barrel. The rest of DESIGN_SPEC §5 comes from forge_ui:
+  `ForgeMonoLabel`, `ForgeTagCapsule`, `ForgeStatusCapsule`,
+  `ForgeBoxedField`, `ForgeFab` (needs a `label`), `ForgeSkeletonList`,
+  `ForgeErrorCard`, `ForgeEmptyState`, `ForgeSettingsGroup`,
+  `showForgeConfirmSheet`, `ForgeWorksMark`, and the
+  `EdgeInsets.withNavBarInset(context)` extension. Android draws
+  edge-to-edge and a scroll view with an explicit `padding` drops the
+  MediaQuery inset, so every bottom-reaching scroll padding uses
+  `withNavBarInset` (CHEESE-44).
 - `assets/brand/` (CHEESE-18; all rights reserved via `NOTICE`, not
   bundled): `wedge.svg`, `tkforgeworks-mark.svg` (verbatim from the parent
   design system), `launcher/*.png` (512² adaptive foreground / monochrome /
@@ -194,7 +253,9 @@ Layout so far:
 - Tests: `test/support.dart` — `wrap()` (themed MaterialApp for atoms),
   `openTestDatabase()` (in-memory drift, closed on teardown), `pumpApp()`
   (real app on an in-memory DB, optional seeded `AppSettings`, mocked
-  package info) and **`testApp()`**, which must replace `testWidgets` for
+  package info, `testDevice` for the feedback form, and `feedbackHttp:` a
+  `MockClient` for the relay; without one any network call fails the
+  test) and **`testApp()`**, which must replace `testWidgets` for
   any test that calls `pumpApp`: it unmounts the tree and pumps 1 ms so
   drift's stream-cancel timer fires before flutter_test's pending-timer
   check (otherwise the test fails and `db.close()` hangs the runner).
@@ -210,9 +271,20 @@ Layout so far:
   `libraryRepositoryProvider`; `LibraryRepository.load()` answers from
   memory once loaded so providers resolve under `pumpAndSettle`. Form tests
   set a tall viewport (`tallScreen`) so the whole `ListView` is built.
+- `tool/visual/render_screens_test.dart` (CHEESE-48) — renders every
+  screen of the real app, seeded, in light and dark, to PNG with the real
+  fonts (134 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
+  test --concurrency=4 tool/visual/render_screens_test.dart`, default
+  `tool/visual/out/` (gitignored). Runs are deterministic within a day
+  (the new-note form defaults to today's date, so it and the rind dialog
+  over it differ between days), so render before and after a change and
+  compare with ImageMagick `compare -metric
+  AE`: zero means pixel-identical. Use it for any change meant to leave
+  the look alone, and add a scene when a screen is added.
 
 Local toolchain (Tim's machine, reinstalled 2026-09-26): Flutter 3.47.5
-(CI pins 3.47.2) at `~/flutter`, on PATH only through `.bashrc` — agent
+(Dart 3.13.4; the same version CI and release builds pin since CHEESE-54)
+at `~/flutter`, on PATH only through `.bashrc` — agent
 shells must `export PATH="$HOME/flutter/bin:$PATH"` first. Android SDK 37
 in `~/Android/Sdk`; Java 25 (system Corretto, and Android Studio's bundled
 JBR runs Gradle). One AVD, `Medium_Phone` (API 37, Play Store image,
@@ -230,7 +302,11 @@ transitions under SwiftShader, and a crash rolls back to the boot snapshot
 renders for motion and Tim's phone for the device pass. `flutter emulators --launch` never returns.
 Emulator screenshots look soft from display scaling; that is not an app
 bug. Emulation is slow on this hardware — prefer widget-test PNG renders
-for routine visual checks and the emulator for confirmation. **Never run
+for routine visual checks and the emulator for confirmation. **Run tests
+with `flutter test --concurrency=4` on this machine**: the default (one
+runner per core, 20) peaks at 4.4 GB against 2.3 GB, and on 2026-10-13
+that pushed RAM and the 4 GB zram swap past 90 %, so `systemd-oomd`
+killed the whole desktop session. **Never run
 a Gradle build and the emulator at the same time** (15 GB box; both get
 OOM-killed): build, `pkill -f "[G]radleDaemon"`, then launch. Release
 APKs are debug-signed until the CHEESE-38 keystore exists, so
@@ -284,12 +360,14 @@ else refers to it).
 
 - Branching (`tkforgeworks/.github/docs/branching-and-release.md`): `main` is
   the released state; work accumulates on the current release branch
-  `vX.Y.Z/main` (currently **`v0.1.0/main`**); topic branches PR **into the
-  release branch**, never into `main`; the release branch reaches `main` via
-  a release PR. `main` is empty apart from the repo baseline until the first
-  release PR.
-- Branch names: `v0.1.0/CHEESE-N-short-topic`, cut from and PR'd into
-  `v0.1.0/main`. Delete after merge.
+  `vX.Y.Z/main` (currently **`v0.2.0/main`**, cut from `main` after the
+  v0.1.0 release PR, #34); topic branches PR **into the release branch**,
+  never into `main`; the release branch reaches `main` via a release PR.
+- Branch names: `v0.2.0/CHEESE-N-short-topic`, cut from and PR'd into
+  `v0.2.0/main`. GitHub deletes the remote branch when its PR merges (repo
+  setting `delete_branch_on_merge`, on since 2026-10-12; it is a repository
+  setting, not a ruleset rule). A branch whose PR was closed unmerged is
+  still deleted by hand, as is the local copy.
 - **Two repository rulesets** (`tkforgeworks/.github/docs/branch-protection-ruleset.md`):
   - `main` (ruleset id 20916528): PR-only (0 approvals, self-merge allowed),
     no force-push or deletion, **no bypass actors** (not even admins).
@@ -306,7 +384,10 @@ else refers to it).
     `gh api repos/tkforgeworks/cheesy-scribe/rules/branches/<branch>`.
 - CI: `.github/workflows/ci.yml` consumes
   `tkforgeworks/.github/.github/workflows/ci-flutter.yml@main`
-  (`flutter-version: '3.47.2'`) with the canonical envelope — `push` on every
+  (`flutter-version: '3.47.5'`, as does `release.yml`; it matches the local
+  toolchain and forge-ui's CI, whose goldens are pinned to it, so move all
+  three together. `environment.sdk` stays `^3.13.2`: nothing needs a newer
+  floor, and a lower floor costs nothing) with the canonical envelope — `push` on every
   branch but `main`, `pull_request` into `main` and `'v*/main'`. Contract from
   the repo root: `dart format --output=none --set-exit-if-changed .`,
   `flutter analyze`, `flutter test`. Don't hand-roll steps that belong in the
@@ -340,7 +421,9 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - **Local-first v0.1.0: no login, no backend.** Notes in SQLite (`drift`) on
   the device; app opens on `/notes`. Auth, cloud backup, delete-account are
   deferred (CHEESE-11) because the handoff names no backend and identity adds
-  a project's worth of scope.
+  a project's worth of scope. The one exception (CHEESE-51, 2026-10-14): the
+  feedback form posts what the user writes, on Send only, to the website's
+  relay.
 - **State: `flutter_riverpod` 3 without codegen; routing `go_router` with a
   `ShellRoute` for the four top-level destinations.** lazy-sleeper-app
   precedent.
@@ -353,11 +436,16 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   "N TASTED", style-detail notes and Home style chips depend on it.
 - **Cheese library is a bundled JSON asset** (~25–35 styles drafted by Claude,
   reviewed by Tim). Read-only reference data, no DB table.
-- **Fonts bundled as static instances** (`assets/fonts/`, OFL, licences in
-  `LICENSES.md` there): Poppins 400/500/600/700, Source Serif 4 400/600 +
-  italics, JetBrains Mono 400/500. Static rather than variable so
-  `FontWeight` selects the face directly (lazy-sleeper-app went variable +
+- **Fonts bundled as static instances**, since CHEESE-48 by forge_ui
+  rather than this repo (families resolve as `packages/forge_ui/Poppins`
+  and so on; the files are byte-identical to the ones this repo carried):
+  Poppins 400/500/600/700, Source Serif 4 400/600 + italics, JetBrains
+  Mono 400/500, all OFL. Static rather than variable so `FontWeight`
+  selects the face directly (lazy-sleeper-app went variable +
   `FontVariation`; this repo does not). Icons via the `heroicons` package.
+- **The look comes from forge_ui, pinned to an exact tag** (CHEESE-48,
+  2026-10-13). The app keeps its palette and the widgets only it has;
+  shared code is changed upstream and released, then the pin moves.
 - **Weekly reminder deferred** (CHEESE-12); Settings row shown disabled.
 - **Portrait-only phone UI**; English only.
 - Tests are behaviour-level widget tests with an in-memory drift DB.
@@ -414,4 +502,77 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   35/36/37 and epics 5–8 + 10 closed (3 and 4 left for Tim). CSV
   export (CHEESE-32) is an orphan task now, no epic or fix version.
   Testers are on rc.4.
-  CHEESE-41 (licences summary screen) is the only open v0.1.0 code work.
+- 2026-09-27 to 2026-10-08: rc.5 (CHEESE-41 licences summary, CHEESE-42 Play
+  upload job), rc.6 (CHEESE-43 page transitions, CHEESE-44 nav-bar inset),
+  rc.7 (CHEESE-47 Account/About in the shell + system back).
+- 2026-10-12: **v0.1.0 released** (CHEESE-40). `bump-version.sh final` →
+  `0.1.0+9` (`e326eb7`), release PR #34 merged into `main` (`ff34cc6`), the
+  first stable release through the pipeline (run 38333242641: GitHub
+  release with APK + AAB, Play internal upload); same code as rc.7. The
+  generated notes read "No notable changes": with no earlier stable tag the
+  org generator diffed against rc.7. The release body was corrected by hand
+  and the generator fixed in org PR #18; Play's "What's new" for build 9
+  is the upload job's fallback, "Bug fixes and improvements."
+  `v0.2.0/main` cut from `main`. `v0.1.0/main` was deleted the same day:
+  the `release-branches` ruleset blocks deletion and has no bypass, so it
+  was disabled, the branch deleted, and the ruleset re-enabled at once (the
+  runbook is in the org `branch-protection-ruleset.md`). Whether that rule
+  also stops the release PR's head from being auto-deleted on merge is
+  unobserved until the 0.2.0 release PR. Scope agreed the same day. **0.2.0** (the closed-testing release): CHEESE-45 glossary of tasting
+  terms, CHEESE-32 CSV export (pulled forward from 1.0.0; dropped
+  2026-10-14, placeholder removed in CHEESE-55), CHEESE-51 "Send
+  feedback" link in About, CHEESE-48 forge_ui adoption, CHEESE-50 opening
+  the Play closed testing track (Console work; promoted from internal by
+  hand), CHEESE-53 the Dependabot updates in one bundled change plus a pub
+  `groups` entry, done last before the final bump (Dependabot PRs target
+  `main` and are never merged there directly). **1.0.0** (the public store release): CHEESE-46 production track,
+  CHEESE-49 guided first-use tour, CHEESE-52 choosing the Play track from
+  the pipeline, CHEESE-11 account + sync, CHEESE-12 weekly reminder.
+- 2026-10-13: forge_ui adopted (CHEESE-48): theme, fonts, shared atoms,
+  About and licences now come from `forge_ui`; 26 files and
+  `assets/fonts/` deleted. Pinned to `v0.1.0-rc.2`: rc.1 required Dart
+  `^3.13.4`, which CI's Flutter 3.47.2 (Dart 3.13.2) could not resolve and
+  the local 3.47.5 could, so a green local run does not prove `pub get`
+  works in CI. forge-ui lowered its floor (forge-ui PR #9); moving this
+  repo's own Flutter pin is CHEESE-54. Checked with `tool/visual` renders against the
+  pre-adoption build, 94 per run: 90 pixel-identical, 4 intended (the date
+  picker's headline is now Poppins instead of the platform font, and
+  Flutter's licence page gets the Heroicons back arrow). `v0.2.0-rc.1`
+  shipped it; Tim's device pass on rc.1 found it matching (2026-10-14).
+- 2026-10-14: CHEESE-51 rescoped by Tim from a mailto link to an in-app
+  form that submits itself. forge-ui PR #10 added
+  `ForgeAboutScreen.onSendFeedback` (released as `v0.1.0-rc.3`); TKFW-82 adds the website relay (PR #26, Resend key in the Pages
+  secret `RESEND_API_KEY`, WAF rate limit 3 per 10 s per IP on
+  `/api/feedback`) and the privacy-policy update (PR #27, a draft to merge
+  when the RC with the form is cut). Preview deploys sit behind
+  Cloudflare Access, so the relay is tested from a logged-in browser.
+  The Play Data safety form must be updated in the Console before that RC
+  reaches testers.
+- 2026-10-14: CHEESE-45 glossary. Tim reviewed the terms first: no change
+  to the set of flavors, textures, rinds or milks; LEMON relabelled CITRUS
+  (search text rebuilt by the v2 migration); CRUMBLY / CRYSTALLINE stay on
+  the wheel and are defined as textures; STINKY stays informal (definition
+  says pungent); ROBUST = savory with richness and depth; GRASSY = the farm
+  and barnyard, HERBAL = its more floral cousin. Claude drafted the copy in
+  Tim's voice; Tim kept it. Shipped in rc.3 as one long page; after the
+  device pass Tim asked for an index plus a page per section, with the
+  form's `?` going straight to its section (PR #45, rc.4); Tim passed it
+  on rc.4.
+- 2026-10-14: CSV export (CHEESE-32) dropped by Tim in favour of
+  account-based cloud backup (CHEESE-11); it may return only if a web or
+  desktop app is spun off. CHEESE-55 removes the Settings placeholder.
+- 2026-10-16: Flutter pin moved 3.47.2 → 3.47.5 in CI and release
+  (CHEESE-54; Tim chose 3.47.5 over the newer 3.47.7 so local, CI and
+  forge-ui stay on one version). Local renders were already on 3.47.5, so
+  the first build on the new engine to check is the next RC on a device.
+- 2026-10-16: Dependabot's five pub PRs (#35–39, against `main`) taken
+  as one change on `v0.2.0/main` (CHEESE-53): build_runner 2.16.2, drift
+  2.35.2, drift_dev 2.35.1, url_launcher 6.3.3, go_router 18.1.0 (one minor
+  past the PR's 18.0.2). Regenerated drift code was identical; renders
+  pixel-identical. `.github/dependabot.yml`'s pub block now has a
+  `pub-minor-patch` group, effective once it reaches `main` with the 0.2.0
+  release PR. Future Dependabot PRs still target `main` and are handled
+  the same way: bundled on the release branch, never merged into `main`.
+- 2026-10-14: forge_ui `v0.1.0` released (forge-ui PRs #11 status, #12
+  release; the package code is identical to rc.3) and re-pinned here under
+  CHEESE-48. No RC was cut for the re-pin; it ships with the next one.
