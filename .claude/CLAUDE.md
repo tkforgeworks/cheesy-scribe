@@ -3,8 +3,8 @@
 ## What this is
 
 Cheese-tasting notes app modeled on the 33Books tasting notebook: track,
-record, and look back at cheeses tasted. **v0.1.0 is released** (2026-10-12;
-GitHub release + Play internal testing). The original plan is
+record, and look back at cheeses tasted. **v0.2.0 is released** (2026-10-16;
+v0.1.0 on 2026-10-12; GitHub release + Play internal testing). The original plan is
 `docs/CHEESE-1-decomposition.md` (inventory of the design handoff, decisions,
 architecture, and the ticket list mirrored in Jira epics CHEESE-3..12). The
 design handoff itself lives in `docs/design_handoff_cheesy_scribe/`
@@ -360,14 +360,20 @@ else refers to it).
 
 - Branching (`tkforgeworks/.github/docs/branching-and-release.md`): `main` is
   the released state; work accumulates on the current release branch
-  `vX.Y.Z/main` (currently **`v0.2.0/main`**, cut from `main` after the
-  v0.1.0 release PR, #34); topic branches PR **into the release branch**,
+  `vX.Y.Z/main` (currently **`v0.3.0/main`**, cut from `main` after the
+  v0.2.0 release PR, #50); topic branches PR **into the release branch**,
   never into `main`; the release branch reaches `main` via a release PR.
-- Branch names: `v0.2.0/CHEESE-N-short-topic`, cut from and PR'd into
-  `v0.2.0/main`. GitHub deletes the remote branch when its PR merges (repo
+  The release branch does not start on the new version: the first
+  `bump-version.sh rc` takes it from the branch name.
+- Branch names: `v0.3.0/CHEESE-N-short-topic`, cut from and PR'd into
+  `v0.3.0/main`. GitHub deletes the remote branch when its PR merges (repo
   setting `delete_branch_on_merge`, on since 2026-10-12; it is a repository
   setting, not a ruleset rule). A branch whose PR was closed unmerged is
-  still deleted by hand, as is the local copy.
+  still deleted by hand, as is the local copy. The exception is a release
+  PR's head: the `release-branches` ruleset blocks its deletion, so a
+  finished `vX.Y.Z/main` stays until it is removed with the ruleset-toggle
+  runbook in the org `branch-protection-ruleset.md` (disable, delete,
+  re-enable at once, verify).
 - **Two repository rulesets** (`tkforgeworks/.github/docs/branch-protection-ruleset.md`):
   - `main` (ruleset id 20916528): PR-only (0 approvals, self-merge allowed),
     no force-push or deletion, **no bypass actors** (not even admins).
@@ -516,9 +522,9 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   `v0.2.0/main` cut from `main`. `v0.1.0/main` was deleted the same day:
   the `release-branches` ruleset blocks deletion and has no bypass, so it
   was disabled, the branch deleted, and the ruleset re-enabled at once (the
-  runbook is in the org `branch-protection-ruleset.md`). Whether that rule
-  also stops the release PR's head from being auto-deleted on merge is
-  unobserved until the 0.2.0 release PR. Scope agreed the same day. **0.2.0** (the closed-testing release): CHEESE-45 glossary of tasting
+  runbook is in the org `branch-protection-ruleset.md`). That rule also
+  stops the release PR's head being auto-deleted on merge (seen with the
+  0.2.0 release PR). Scope agreed the same day. **0.2.0** (the closed-testing release): CHEESE-45 glossary of tasting
   terms, CHEESE-32 CSV export (pulled forward from 1.0.0; dropped
   2026-10-14, placeholder removed in CHEESE-55), CHEESE-51 "Send
   feedback" link in About, CHEESE-48 forge_ui adoption, CHEESE-50 opening
@@ -527,7 +533,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   `groups` entry, done last before the final bump (Dependabot PRs target
   `main` and are never merged there directly). **1.0.0** (the public store release): CHEESE-46 production track,
   CHEESE-49 guided first-use tour, CHEESE-52 choosing the Play track from
-  the pipeline, CHEESE-11 account + sync, CHEESE-12 weekly reminder.
+  the pipeline, CHEESE-11 account + sync, CHEESE-12 weekly reminder
+  (CHEESE-11 moved to its own 0.3.0 on 2026-10-16).
 - 2026-10-13: forge_ui adopted (CHEESE-48): theme, fonts, shared atoms,
   About and licences now come from `forge_ui`; 26 files and
   `assets/fonts/` deleted. Pinned to `v0.1.0-rc.2`: rc.1 required Dart
@@ -576,3 +583,20 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - 2026-10-14: forge_ui `v0.1.0` released (forge-ui PRs #11 status, #12
   release; the package code is identical to rc.3) and re-pinned here under
   CHEESE-48. No RC was cut for the re-pin; it ships with the next one.
+- 2026-10-16: rc.5 (CHEESE-53, 54, 55 and the forge_ui re-pin) passed
+  Tim's device pass; the Play Data safety form was updated for the
+  feedback form and sent for review. **v0.2.0 released**:
+  `bump-version.sh final` → `0.2.0+15` (`8c2a531`), release PR #50 merged
+  into `main` (`dd39d21`), run 38987356589 (GitHub release with APK + AAB,
+  Play internal upload); same code as rc.5. The notes diffed against
+  v0.1.0 as intended (org PR #18). Dependabot's grouping took effect at
+  once: one grouped PR, #51 (package_info_plus 10.2.2), against `main`,
+  left open and bundled on the release branch before the 0.3.0 final, as
+  CHEESE-53 did. Old branches cleared with the runbook: here
+  `v0.2.0/main`; in forge-ui `v0.0.1/main`, `v0.1.0/main` and six merged
+  `v0.1.0/*` topic branches (forge-ui now has only `main`).
+- 2026-10-16: **0.3.0 split out** by Tim: account and cloud sync
+  (CHEESE-11) is big enough to test on the closed track by itself before
+  the store release, so it is the whole of 0.3.0. 1.0.0 keeps CHEESE-46,
+  49, 52 and 12. `v0.3.0/main` cut from `main` at `dd39d21` (CHEESE-56).
+  CHEESE-50 (closed track) is still Tim's to open.
