@@ -26,7 +26,7 @@ void main() {
     expect(find.text('MEMBER SINCE $year · 0 NOTES'), findsOneWidget);
     expect(find.text('DISPLAY NAME'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField), 'Tim');
+    await tester.enterText(find.byType(TextField).first, 'Tim');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     expect(find.text('Tim'), findsWidgets); // header + field
@@ -79,7 +79,7 @@ void main() {
     await pumpApp(tester, at: '/account', db: db);
     expect(find.text('MEMBER SINCE 2024 · 2 NOTES'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField), '   ');
+    await tester.enterText(find.byType(TextField).first, '   ');
     // Blur by focusing nothing: tap outside the field.
     await tester.tap(find.text('Account'));
     FocusManager.instance.primaryFocus?.unfocus();
@@ -98,7 +98,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     final db = await pumpApp(tester, at: '/account');
-    await tester.enterText(find.byType(TextField), 'Tim');
+    await tester.enterText(find.byType(TextField).first, 'Tim');
     await tester.pump();
     await tester.tap(find.byTooltip('Open menu'));
     await tester.pumpAndSettle();

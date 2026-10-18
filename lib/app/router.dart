@@ -7,6 +7,8 @@ import '../features/feedback/feedback_screen.dart';
 import '../features/glossary/glossary_screen.dart';
 import '../features/glossary/glossary_terms.dart';
 import '../features/account/account_screen.dart';
+import '../features/account/check_email_screen.dart';
+import '../features/account/set_password_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/style_detail_screen.dart';
 import '../features/notes/note_detail_screen.dart';
@@ -16,7 +18,8 @@ import '../features/settings/settings_screen.dart';
 import '../features/stats/stats_screen.dart';
 import 'shell/scribe_shell.dart';
 
-/// Builds the app router (DESIGN_SPEC §7, minus `/login`: local-first).
+/// Builds the app router (DESIGN_SPEC §7, minus `/login`: sign-in lives on
+/// `/account`, CHEESE-61).
 ///
 /// The `ShellRoute` owns the drawer for the drawer's destinations
 /// (`/notes`, `/library`, `/stats`, `/settings`, `/account`, `/about`;
@@ -98,6 +101,23 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
             path: '/account',
             pageBuilder: (context, state) =>
                 _shellPage(state, const AccountScreen()),
+            routes: [
+              // CHEESE-61: the waiting state after a sign-up or reset
+              // request, pushed over Account.
+              GoRoute(
+                path: 'check-email',
+                parentNavigatorKey: rootKey,
+                pageBuilder: (context, state) => _pushedPage(
+                  state,
+                  CheckEmailScreen(
+                    email: state.uri.queryParameters['email'] ?? '',
+                    purpose: CheckEmailScreen.purposeOf(
+                      state.uri.queryParameters['purpose'],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: '/about',
@@ -128,6 +148,12 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
                 .asNameMap()[state.pathParameters['section']],
           ),
         ),
+      ),
+      // CHEESE-61: opened by ScribeApp when a password-reset link lands.
+      GoRoute(
+        path: SetPasswordScreen.path,
+        pageBuilder: (context, state) =>
+            _pushedPage(state, const SetPasswordScreen()),
       ),
       GoRoute(
         path: '/feedback',

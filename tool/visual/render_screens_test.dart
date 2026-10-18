@@ -10,6 +10,9 @@ import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_core/forge_core.dart';
+import 'package:forge_core/testing.dart';
+import 'package:forge_ui/forge_ui.dart';
 
 import '../../test/support.dart';
 
@@ -124,6 +127,30 @@ Future<void> _shot(WidgetTester tester, String name) async {
 
 typedef _Scene = Future<void> Function(WidgetTester tester, String prefix);
 
+/// The account a signed-in scene shows (CHEESE-61): email and Google.
+const _session = ForgeSession(
+  userId: 'tim',
+  email: 'tim@example.com',
+  emailConfirmed: true,
+  identities: [
+    ForgeIdentity(
+      id: 'tim@example.com',
+      identityId: 'link-email',
+      provider: ForgeIdentityProvider.email,
+      email: 'tim@example.com',
+    ),
+    ForgeIdentity(
+      id: '1234',
+      identityId: 'link-google',
+      provider: ForgeIdentityProvider.google,
+      email: 'tim@example.com',
+    ),
+  ],
+);
+
+/// The fake backend of the scene being rendered, for bodies that drive it.
+late FakeForgeAuth _auth;
+
 void main() {
   for (final mode in [ThemeMode.light, ThemeMode.dark]) {
     final m = mode.name;
@@ -132,10 +159,15 @@ void main() {
       WidgetTester tester, {
       required String at,
       bool seeded = true,
+      bool signedIn = false,
+      bool backup = true,
     }) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.625;
       addTearDown(tester.view.reset);
+      _auth = FakeForgeAuth();
+      addTearDown(_auth.dispose);
+      if (signedIn) _auth.signIn(_session);
       final db = openTestDatabase();
       if (seeded) {
         await tester.runAsync(() async {
@@ -154,6 +186,8 @@ void main() {
           themeMode: mode,
           memberSince: DateTime(2026, 6, 1),
         ),
+        auth: _auth,
+        backup: backup,
       );
     }
 
@@ -166,9 +200,22 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    void scene(String name, String at, _Scene body, {bool seeded = true}) {
+    void scene(
+      String name,
+      String at,
+      _Scene body, {
+      bool seeded = true,
+      bool signedIn = false,
+      bool backup = true,
+    }) {
       testApp('$m $name', (tester) async {
-        await boot(tester, at: at, seeded: seeded);
+        await boot(
+          tester,
+          at: at,
+          seeded: seeded,
+          signedIn: signedIn,
+          backup: backup,
+        );
         await body(tester, '$m-$name');
       });
     }
@@ -227,7 +274,59 @@ void main() {
     scene('stats', '/stats', scrolled);
     scene('stats-empty', '/stats', plain, seeded: false);
     scene('settings', '/settings', plain);
-    scene('account', '/account', plain);
+    // CHEESE-61: signed out (the sign-in panel under the profile), a build
+    // with no backend, signed in, the sign-out sheet, a failed attempt,
+    // the two check-email states and the set-password screen.
+    scene('account', '/account', scrolled);
+    scene('account-unavailable', '/account', plain, backup: false);
+    scene('account-signed-in', '/account', scrolled, signedIn: true);
+    scene('account-sign-out', '/account', (tester, p) async {
+      await tester.ensureVisible(find.byKey(ForgeAccountSettings.signOutKey));
+      await tester.tap(find.byKey(ForgeAccountSettings.signOutKey));
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    }, signedIn: true);
+    scene('account-sign-in-error', '/account', (tester, p) async {
+      _auth.googleResult = const ForgeAuthFailure(
+        ForgeAuthError.noGoogleAccount,
+        'No credential available',
+      );
+      await tester.tap(find.byType(ForgeSignInButton));
+      await tester.pumpAndSettle();
+      await scroll(tester, 700);
+      await _shot(tester, p);
+    });
+    scene('check-email', '/account', (tester, p) async {
+      await tester.tap(find.byKey(ForgeSignInPanel.switchModeKey));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(ForgeSignInPanel.emailFieldKey),
+        'tim@example.com',
+      );
+      await tester.enterText(
+        find.byKey(ForgeSignInPanel.passwordFieldKey),
+        'hunter2222',
+      );
+      await tester.tap(find.byKey(ForgeSignInPanel.submitKey));
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    });
+    scene('check-email-reset', '/account', (tester, p) async {
+      await tester.tap(find.byKey(ForgeSignInPanel.forgotKey));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(ForgeSignInPanel.emailFieldKey),
+        'tim@example.com',
+      );
+      await tester.tap(find.byKey(ForgeSignInPanel.submitKey));
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    });
+    scene('set-password', '/notes', (tester, p) async {
+      _auth.startPasswordRecovery(_session);
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    });
     scene('about', '/about', scrolled);
     // Pushed from About, as in the app, so the app bar has its back button.
     scene('licenses', '/about', (tester, p) async {
