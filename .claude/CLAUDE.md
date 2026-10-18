@@ -131,6 +131,22 @@ Layout so far:
   `DART_DEFINES_JSON` repo secret (TKFW-84) and `build-android.sh` passes
   when present. A build without them runs local-only; CI and tests never
   have them, and initialising opens no connection until a sign-in.
+- `supabase/` (CHEESE-60; `docs/supabase.md` is the runbook) — forge_core's
+  migrations, functions and templates copied by `dart run
+  forge_core:sync_supabase` with `forge_core.lock` (re-run when the pin
+  moves; `test/supabase_drift_test.dart` fails on drift; never edit the
+  copies), plus the app's own `migrations/20261018150000_cheesy_scribe_
+  tables.sql`: dedicated `notes` (one row per note) and `profiles` (one row
+  per user, `id = user_id`) tables in the entries-template shape with a
+  constant `kind`, so `core.entries<T>(table:)` reads them. `data` =
+  `TastingNote.toJson()` minus search text plus integer `schemaVersion`;
+  server checks (object ≤ 64 KB, schemaVersion unless tombstone,
+  `updated_at` ≤ now + 1 day), server-stamped immutable
+  `created_at`/`id`/`user_id`, RLS own-row + `forge_account_active()`, DML
+  grants only. `smoke/cheesy_scribe_tables.sql` proves all of it and rolls
+  back. Applied to the live project through the Management API and
+  recorded in `schema_migrations`. Dashboard-only settings are listed in
+  the runbook; the project-scoped token cannot change them.
 - `lib/data/providers.dart` — `appDatabaseProvider` (drift_flutter
   `driftDatabase(name: 'cheesy_scribe')`; tests override it), the
   repository providers, `appSettingsProvider` (StreamProvider),
@@ -741,3 +757,12 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (values from Tim) and a debug build on his phone, whose debug SHA-1 has
   an Android OAuth client. CHEESE-65 (deletion) must ship in the same RC
   as sign-in before any tester build.
+- 2026-10-18 (later): rc.1 → rc.4 device passes with Tim fixed three
+  sign-in issues in turn: the redirect scheme (underscore; CHEESE-61,
+  forge-core rc.11 asserts), the deep link reaching go_router as a route
+  (top-level `redirect`), and set-password leaving the user signed in when
+  abandoned (sign out on leave; forge-ui rc.6 made the reset copy
+  conditional, Tim chose no email-existence check). App Links for the mail
+  redirect are CHEESE-68 + TKFW-85, later in 0.3.0. Schema decided
+  question by question (CHEESE-60 comment) and the `notes` + `profiles`
+  tables applied live.
