@@ -2,6 +2,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'db/app_database.dart';
+import 'forge_providers.dart';
 import 'models/models.dart';
 import 'repositories/library_repository.dart';
 import 'repositories/notes_repository.dart';
@@ -18,8 +19,20 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
+/// Scoped to the signed-in account, or to the unowned notes when signed out
+/// (CHEESE-62): the repository is rebuilt when the session changes, and
+/// every stream below restarts under the new scope.
 final notesRepositoryProvider = Provider<NotesRepository>(
-  (ref) => NotesRepository(ref.watch(appDatabaseProvider)),
+  (ref) => NotesRepository(
+    ref.watch(appDatabaseProvider),
+    owner: ref.watch(currentOwnerProvider),
+  ),
+);
+
+/// How many notes were made while signed out; the Account page offers to
+/// attach them to the account (CHEESE-62).
+final unownedNotesCountProvider = StreamProvider<int>(
+  (ref) => ref.watch(notesRepositoryProvider).watchUnownedCount(),
 );
 
 final settingsRepositoryProvider = Provider<SettingsRepository>(

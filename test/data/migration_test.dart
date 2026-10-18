@@ -145,14 +145,35 @@ void main() {
       1,
     );
 
-    // The new tables work.
-    await repo.delete('fog');
-    expect((await repo.tombstones()).map((t) => t.id), ['fog']);
+    // The new tables work (deleting an owned note leaves a tombstone;
+    // 'fog' is unowned after the upgrade, so attach it first).
+    final tim = NotesRepository(db, owner: 'tim');
+    await tim.attachUnownedTo('tim');
+    await tim.delete('fog');
+    expect((await tim.tombstones()).map((t) => t.id), ['fog']);
     final meta = SyncMetaRepository(db);
     await meta.set('last_sync_at', 'never');
     expect(await meta.get('last_sync_at'), 'never');
 
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.single, 3);
+    expect(version.data.values.single, 4);
+  });
+
+  test('upgrading from v2 leaves existing notes unowned (CHEESE-62)', () async {
+    final db = await upgradedFrom(2);
+    // Signed out, the notebook still shows them; an account sees nothing
+    // until the user attaches them.
+    final anon = NotesRepository(db);
+    final tim = NotesRepository(db, owner: 'tim');
+    expect((await anon.watchAll().first).map((n) => n.id), ['fog']);
+    expect(await tim.watchAll().first, isEmpty);
+    expect(await tim.watchUnownedCount().first, 1);
+    expect(await tim.attachUnownedTo('tim'), 1);
+    expect((await tim.watchAll().first).map((n) => n.id), ['fog']);
+    expect(await anon.watchAll().first, isEmpty);
+    // Tombstones carry the owner too.
+    await tim.delete('fog');
+    expect((await tim.tombstones()).map((t) => t.id), ['fog']);
+    expect(await anon.tombstones(), isEmpty);
   });
 }

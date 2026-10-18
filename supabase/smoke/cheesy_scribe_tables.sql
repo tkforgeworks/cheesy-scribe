@@ -1,4 +1,5 @@
--- Smoke test for 20261018150000_cheesy_scribe_tables.sql. Run inside one
+-- Smoke test for 20261018150000_cheesy_scribe_tables.sql and
+-- 20261018160000_cheesy_scribe_keep_newer.sql. Run inside one
 -- transaction that rolls back, with the migration prepended on a project
 -- that does not have it yet, or alone afterwards:
 --   { echo 'begin;'; cat supabase/smoke/cheesy_scribe_tables.sql; echo 'rollback;'; } | <run on the project>
@@ -33,6 +34,27 @@ begin
   if r.data->>'cheeseName' <> 'Comté 24' then raise exception 'upsert did not replace'; end if;
   if r.created_at < now() - interval '1 minute' then raise exception 'client created_at was accepted: %', r.created_at; end if;
   if r.kind <> 'tasting_note' then raise exception 'kind default missing'; end if;
+end $$;
+-- An older write never replaces a newer row (keep_newer trigger): the
+-- upsert below carries 10:30, the row holds 11:00, so nothing changes.
+insert into public.notes (id, user_id, data, updated_at)
+values ('20000000-0000-4000-8000-000000000001', auth.uid(),
+        '{"schemaVersion":1,"cheeseName":"Stale"}', '2026-10-18T10:30:00Z')
+on conflict (id) do update set data = excluded.data, updated_at = excluded.updated_at, deleted_at = excluded.deleted_at;
+do $$
+begin
+  if (select data->>'cheeseName' from public.notes where id = '20000000-0000-4000-8000-000000000001') <> 'Comté 24' then
+    raise exception 'an older write replaced a newer row';
+  end if;
+end $$;
+-- An older deletion loses the same way.
+update public.notes set data = '{}', deleted_at = '2026-10-18T10:45:00Z', updated_at = '2026-10-18T10:45:00Z'
+  where id = '20000000-0000-4000-8000-000000000001';
+do $$
+begin
+  if (select deleted_at from public.notes where id = '20000000-0000-4000-8000-000000000001') is not null then
+    raise exception 'an older deletion replaced a newer row';
+  end if;
 end $$;
 -- id and user_id cannot be rewritten (the trigger keeps the old values).
 update public.notes set user_id = '00000000-0000-4000-8000-0000000000c2', id = '20000000-0000-4000-8000-0000000000ff'

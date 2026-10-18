@@ -88,7 +88,7 @@ void main() {
 
       await tester.tap(find.byKey(ForgeAccountSettings.signOutKey));
       await tester.pumpAndSettle();
-      expect(find.text('Your notes stay on this phone.'), findsOneWidget);
+      expect(find.text(AccountScreen.signOutAside), findsOneWidget);
       expect(find.byKey(ForgeSignOutSheet.eraseKey), findsNothing);
       await tester.tap(find.byKey(ForgeSignOutSheet.confirmKey));
       await tester.pumpAndSettle();

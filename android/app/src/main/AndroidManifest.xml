@@ -3,10 +3,15 @@
          the optional account features talk to the Supabase project once the
          user signs in (CHEESE-11); nothing else uses the network. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- No Android backup of the app's data (CHEESE-62): the account is
+         the backup once the user signs in, and an OS restore could put a
+         stale database over a synced one on a new phone. Signed-out notes
+         live only on the phone, as the app has always said. -->
     <application
         android:label="Cheesy Scribe"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

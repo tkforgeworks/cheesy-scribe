@@ -64,12 +64,14 @@ Layout so far:
   save, and is **sync metadata excluded from `==`/`hashCode`** so the
   form's dirty check and "stored equals draft" tests are unaffected.
   `NoteTombstone` (id + `deletedAt`) is the deletion marker type.
-- `lib/data/db/app_database.dart` — drift schema v3 (v2 changed no
-  table, CHEESE-45; v3 added the sync bookkeeping, CHEESE-58): `notes`
-  (16 `fl_*` flavor int columns, ISO text dates, enums by name, a
-  normalised `search_text` haystack, plus `updated_at` and `dirty`),
-  `recent_searches`, `settings` (key/value), `note_tombstones` (id +
-  `deleted_at`, kept until sync has pushed the deletion), `sync_meta`
+- `lib/data/db/app_database.dart` — drift schema v4 (v2 changed no
+  table, CHEESE-45; v3 added the sync bookkeeping, CHEESE-58; v4 the
+  ownership model, CHEESE-62): `notes` (16 `fl_*` flavor int columns, ISO
+  text dates, enums by name, a normalised `search_text` haystack, plus
+  `updated_at`, `dirty` and `owner_user_id`, null = made while signed
+  out), `recent_searches`, `settings` (key/value), `note_tombstones` (id +
+  `deleted_at` + `owner_user_id`, kept until sync has pushed the
+  deletion; only owned notes leave one), `sync_meta`
   (key/value for the sync engine; separate from `settings` because
   `SettingsRepository.save` rewrites every row).
   `app_database.g.dart` is generated and committed: after any table change
@@ -84,15 +86,25 @@ Layout so far:
   frozen in the test**, not from `createAll`: a subclass with a lower
   `schemaVersion` would create today's columns and make `addColumn` fail).
   The v3 step backfills `updated_at = created_at` and leaves every existing
-  note dirty so a first sign-in uploads it. Enum names are what's stored and
+  note dirty; it creates `note_tombstones` from **frozen v3 DDL** (a
+  `createTable` would build today's columns and v4's `addColumn` would
+  fail). v4 leaves existing notes unowned: the first sign-in offers to
+  attach them. Enum names are what's stored and
   never change; `FlavorNote.lemon` is labelled CITRUS since CHEESE-45. `search_text.dart` holds
   `normalizeForSearch` (lower-case, diacritics folded, `[a-z0-9 ]` only),
   applied to both the stored haystack and the typed query.
-- `lib/data/repositories/` — `NotesRepository` (`NotesQuery` = search +
+- `lib/data/repositories/` — `NotesRepository` (**scoped to one `owner`**,
+  CHEESE-62: an account id or null for unowned; `notesRepositoryProvider`
+  passes `currentOwnerProvider`, so every stream restarts under the new
+  scope when the session changes; `NotesQuery` = search +
   minRating + styleId + paging; `watchPage/watchCount/watchNote/
   watchNewest/watchAll/watchStyleCounts/watchTopStyleIds`, `newId()`;
-  **`save` stamps `updatedAt` with the injectable `now` and marks the row
-  dirty**, returning the stamped note; `delete` leaves a tombstone. Sync
+  **`save` stamps `updatedAt` with the injectable `now`, files the row
+  under `owner` and marks it dirty**, returning the stamped note; `delete`
+  leaves a tombstone only for an owned note. Cross-scope calls:
+  `watchUnownedCount`, `attachUnownedTo(userId)` (dirty, stamps kept),
+  `removeOwned(userId)` (sign-out / deletion), `syncStamps(ids)`,
+  `watchTombstoneCount`. Sync
   bookkeeping (CHEESE-58): `watchDirty/dirtyNotes`, `markClean(pushed)`
   (clears only rows whose `updated_at` still matches, so an edit during a
   push stays dirty), `applyRemote(notes)` (keeps the remote stamp, clean),
@@ -147,6 +159,27 @@ Layout so far:
   back. Applied to the live project through the Management API and
   recorded in `schema_migrations`. Dashboard-only settings are listed in
   the runbook; the project-scoped token cannot change them.
+- `lib/data/sync/` (CHEESE-62) — `sync_payload.dart` (`noteToPayload` =
+  `toJson()` + `schemaVersion` 1, `noteFromPayload` strips/migrates it),
+  `sync_status.dart` (`SyncPhase` signedOut/idle/syncing/offline/error,
+  `SyncStatus` with `lastSyncAt`, `pending`, `message`),
+  `sync_service.dart` (`SyncService(notes: owner-scoped, meta, remote)`;
+  `sync()` is single-flight and **compares before pushing**: list server
+  keys since `last_sync_at` minus a 1-day `overlap` for clock skew, push
+  dirty notes and tombstones only when newer than the server's copy (older
+  ones are dropped and the server's version pulled), apply remote
+  deletions newer than the local note, fetch remote notes newer than the
+  local copy, record the high-water mark; network → `offline`, else
+  `error` remembered in `sync_meta`), `sync_coordinator.dart`
+  (`SyncCoordinator`: first sync on creation, resume via
+  `WidgetsBindingObserver`, 3 s debounce after `watchDirty`/tombstone
+  changes, retry with backoff 30 s doubling to 15 min; `syncNow()` for
+  Sync now and the sign-out flush), `sync_providers.dart`
+  (`remoteNotesProvider` = `core.entries<TastingNote>(table: 'notes', kind:
+  'tasting_note')`, `syncServiceProvider`, `syncCoordinatorProvider` kept
+  alive by `ScribeApp`, `syncStatusProvider`). The server's `keep_newer`
+  trigger enforces the same rule against racing phones.
+  `android:allowBackup="false"`: the account is the backup.
 - `lib/data/providers.dart` — `appDatabaseProvider` (drift_flutter
   `driftDatabase(name: 'cheesy_scribe')`; tests override it), the
   repository providers, `appSettingsProvider` (StreamProvider),
@@ -166,9 +199,15 @@ Layout so far:
   `emailNotConfirmed` push check-email, failures show
   `authErrorCopy(error)` from `auth_copy.dart`, Tim's prose); signed in →
   `ForgeAccountSettings` with the email and linked methods and Sign out
-  (`offerLocalErase: false`, plain `signOut()`; the erase option, the
-  sync-state reset and Delete account are CHEESE-65, username/linking/set
-  password CHEESE-64, the status slot CHEESE-63).
+  (`offerLocalErase: false`; CHEESE-62 sign-out = `syncNow()`, a
+  `showForgeConfirmSheet` warning (`unsyncedTitle`) when something is
+  still unpushed, `signOut()`, `removeOwned(userId)`, `sync_meta.clear()`;
+  Delete account is CHEESE-65, username/linking/set password CHEESE-64,
+  the status slot CHEESE-63). Ownership UI (CHEESE-62): on a `signedIn`
+  event with unowned notes present, `_offerAttach` shows a confirm sheet
+  (`attachTitle(n)`, "Add them" / "Not now") → `attachUnownedTo`;
+  declined notes stay hidden while signed in and a "Signed-out notes"
+  group (`unownedRowKey`, `attachKey`) re-offers them.
   `check_email_screen.dart` — `CheckEmailScreen` (`/account/check-email?
   email=&purpose=confirm|reset`, `CheckEmailScreen.location()`), a
   `ForgeCheckEmailScreen` whose Send again calls `resendConfirmation` /
@@ -357,9 +396,12 @@ Layout so far:
   (real app on an in-memory DB, optional seeded `AppSettings`, mocked
   package info, `testDevice` for the feedback form, and `feedbackHttp:` a
   `MockClient` for the relay; without one any network call fails the
-  test; `auth:` / `accounts:` a `FakeForgeAuth` / `FakeForgeAccounts`,
-  fresh signed-out ones by default, and `backup: false` for a build with
-  no backend) and **`testApp()`**, which must replace `testWidgets` for
+  test; `auth:` / `accounts:` / `remote:` a `FakeForgeAuth` /
+  `FakeForgeAccounts` / `FakeForgeEntriesRepository<TastingNote>`, fresh
+  signed-out ones by default, and `backup: false` for a build with no
+  backend; a pre-signed-in test should use `FakeForgeAuth(initial:)` with
+  event `initial`, since a `signedIn` event triggers the attach offer) and
+  **`testApp()`**, which must replace `testWidgets` for
   any test that calls `pumpApp`: it unmounts the tree and pumps 1 ms so
   drift's stream-cancel timer fires before flutter_test's pending-timer
   check (otherwise the test fails and `db.close()` hangs the runner).
@@ -549,7 +591,21 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   deletion types DELETE; sign-out and deletion keep local notes with an
   "also erase this phone" option; the web deletion form is a website Pages
   Function at `/privacy/cheesy-scribe/delete-account/`. Sign-in and
-  deletion ship in the same build (Play). Supabase URL, publishable key and
+  deletion ship in the same build (Play). **Revised 2026-10-18 (CHEESE-62):
+  the ownership model replaces "keep local notes + erase option".** Every
+  note has an owner (an account, or nobody for notes made while signed
+  out); the notebook shows one owner at a time. Sign-out pushes what it
+  can, warns if that failed, removes the account's notes from the phone
+  (the server keeps them) and leaves the signed-out notes. Sign-in
+  downloads the account's notes and offers to attach the signed-out ones;
+  declined ones stay hidden while signed in and are re-offered from
+  Account. Deletion has the same local effect plus the server purge.
+  Schema decisions (CHEESE-60): payload = `toJson()` + integer
+  `schemaVersion`; dedicated `notes` + `profiles` tables; last write wins
+  per whole note on device stamps with a 1-day listing overlap; Android OS
+  backup off; everything but theme and units syncs (display name via
+  `accounts.username`, memberSince + recent searches in `profiles`, still
+  to build). Supabase URL, publishable key and
   Google web client ID arrive as `--dart-define`s (release-pipeline input,
   gitignored local define file), never committed; CI's `-debugsigned`
   builds can never sign in (no OAuth client for their key). Theme and units
@@ -765,4 +821,9 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   conditional, Tim chose no email-existence check). App Links for the mail
   redirect are CHEESE-68 + TKFW-85, later in 0.3.0. Schema decided
   question by question (CHEESE-60 comment) and the `notes` + `profiles`
-  tables applied live.
+  tables applied live. CHEESE-62: Tim replaced the "keep local notes"
+  decision with the ownership model (schema v4, scoped repository, attach
+  offer, sign-out removal) and the sync engine shipped with it (compare-
+  before-push LWW, coordinator, server `keep_newer` trigger as migration
+  20261018160000). Profile sync (memberSince, recent searches) is still
+  to build; the status row is CHEESE-63.

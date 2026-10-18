@@ -1,4 +1,5 @@
 import 'package:cheesy_scribe/data/db/search_text.dart';
+import 'package:cheesy_scribe/data/db/app_database.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
 import 'package:cheesy_scribe/data/repositories/recent_searches_repository.dart';
@@ -213,7 +214,9 @@ void main() {
 
     setUp(() {
       now = DateTime.utc(2026, 10, 18, 12);
-      repo = NotesRepository(openTestDatabase(), now: () => now);
+      // Sync bookkeeping belongs to an account's scope (CHEESE-62): unowned
+      // notes leave no tombstones.
+      repo = NotesRepository(openTestDatabase(), now: () => now, owner: 'tim');
     });
 
     test('save stamps updatedAt and marks the note dirty', () async {
@@ -258,6 +261,122 @@ void main() {
       expect((await repo.tombstones()).map((t) => t.id), ['a']);
       await repo.clearTombstones(['a']);
       expect(await repo.tombstones(), isEmpty);
+    });
+  });
+
+  group('NotesRepository ownership (CHEESE-62)', () {
+    late DateTime now;
+    late AppDatabase db;
+    late NotesRepository anon;
+    late NotesRepository tim;
+    late NotesRepository ann;
+
+    setUp(() {
+      now = DateTime.utc(2026, 10, 18, 12);
+      db = openTestDatabase();
+      anon = NotesRepository(db, now: () => now);
+      tim = NotesRepository(db, now: () => now, owner: 'tim');
+      ann = NotesRepository(db, now: () => now, owner: 'ann');
+    });
+
+    test('each scope sees, counts and pages only its own notes', () async {
+      await anon.save(note('a', 'Anon'));
+      await tim.save(note('t', 'Tim'));
+      await ann.save(note('n', 'Ann'));
+      Future<List<String>> ids(NotesRepository r) async =>
+          (await r.watchAll().first).map((n) => n.id).toList();
+      expect(await ids(anon), ['a']);
+      expect(await ids(tim), ['t']);
+      expect(await ids(ann), ['n']);
+      expect(await tim.watchCount(const NotesQuery()).first, 1);
+      expect((await tim.watchPage(const NotesQuery()).first).single.id, 't');
+      expect((await tim.watchNewest().first)!.id, 't');
+      expect(await tim.getNote('a'), isNull);
+      expect(await tim.watchNote('n').first, isNull);
+      expect(await anon.dirtyNotes(), hasLength(1));
+      expect(await tim.dirtyNotes(), hasLength(1));
+      // Style counts follow the scope too.
+      await tim.save(note('t2', 'Tim 2').copyWith(cheeseStyleId: 'blue'));
+      await anon.save(note('a2', 'Anon 2').copyWith(cheeseStyleId: 'blue'));
+      expect(await tim.watchStyleCounts().first, {'blue': 1});
+    });
+
+    test('a scope cannot delete or overwrite another scope\'s note', () async {
+      await tim.save(note('t', 'Tim'));
+      await anon.delete('t');
+      expect(await tim.getNote('t'), isNotNull);
+      await anon.applyRemoteDeletions(['t']);
+      expect(await tim.getNote('t'), isNotNull);
+    });
+
+    test(
+      'only owned deletions leave tombstones, tagged with the owner',
+      () async {
+        await anon.save(note('a', 'Anon'));
+        await tim.save(note('t', 'Tim'));
+        await anon.delete('a');
+        await tim.delete('t');
+        expect(await anon.tombstones(), isEmpty);
+        expect((await tim.tombstones()).map((t) => t.id), ['t']);
+        expect(await ann.tombstones(), isEmpty);
+        expect(await tim.watchTombstoneCount().first, 1);
+        expect(await anon.watchTombstoneCount().first, 0);
+      },
+    );
+
+    test(
+      'attachUnownedTo moves every unowned note, dirty, stamps kept',
+      () async {
+        final a = await anon.save(note('a', 'A'));
+        now = now.add(const Duration(minutes: 5));
+        await anon.save(note('b', 'B'));
+        await tim.save(note('t', 'T'));
+        await tim.markClean(await tim.dirtyNotes());
+        expect(await tim.watchUnownedCount().first, 2);
+        expect(await tim.attachUnownedTo('tim'), 2);
+        expect(await tim.watchUnownedCount().first, 0);
+        expect(await anon.watchAll().first, isEmpty);
+        expect(
+          (await tim.watchAll().first).map((n) => n.id),
+          unorderedEquals(['t', 'b', 'a']),
+        );
+        expect((await tim.dirtyNotes()).map((n) => n.id), ['a', 'b']);
+        expect((await tim.getNote('a'))!.updatedAt, a.updatedAt);
+      },
+    );
+
+    test(
+      'removeOwned forgets one account\'s notes and tombstones only',
+      () async {
+        await anon.save(note('a', 'A'));
+        await tim.save(note('t', 'T'));
+        await tim.save(note('t2', 'T2'));
+        await tim.delete('t2');
+        await ann.save(note('n', 'N'));
+        await tim.removeOwned('tim');
+        expect(await tim.watchAll().first, isEmpty);
+        expect(await tim.tombstones(), isEmpty);
+        expect((await anon.watchAll().first).map((n) => n.id), ['a']);
+        expect((await ann.watchAll().first).map((n) => n.id), ['n']);
+      },
+    );
+
+    test('syncStamps reports stamp and dirty flag within the scope', () async {
+      final t = await tim.save(note('t', 'T'));
+      await anon.save(note('a', 'A'));
+      final stamps = await tim.syncStamps(['t', 'a', 'missing']);
+      expect(stamps.keys, ['t']);
+      expect(stamps['t']!.updatedAt, t.updatedAt);
+      expect(stamps['t']!.dirty, isTrue);
+      await tim.markClean([t]);
+      expect((await tim.syncStamps(['t']))['t']!.dirty, isFalse);
+    });
+
+    test('applyRemote files rows under the scope\'s owner', () async {
+      await tim.applyRemote([note('r', 'Remote')]);
+      expect((await tim.getNote('r'))!.cheeseName, 'Remote');
+      expect(await anon.getNote('r'), isNull);
+      expect(await ann.getNote('r'), isNull);
     });
   });
 

@@ -9,13 +9,21 @@ part 'app_database.g.dart';
 /// is `YYYY-MM-DD` (local calendar day), [createdAt] a UTC date-time.
 /// Enums store their `name`. The 16 flavor spokes are integer columns
 /// (`fl_*`, 0 = unset) so stats and filters can stay in SQL. [updatedAt]
-/// and [dirty] are sync bookkeeping (schema v3, CHEESE-58).
+/// and [dirty] are sync bookkeeping (schema v3, CHEESE-58); [ownerUserId]
+/// is the ownership model (schema v4, CHEESE-62).
 @DataClassName('NoteRow')
 @TableIndex(name: 'notes_by_date', columns: {#tastedAt, #createdAt})
 @TableIndex(name: 'notes_by_style', columns: {#cheeseStyleId})
 @TableIndex(name: 'notes_dirty', columns: {#dirty})
+@TableIndex(name: 'notes_owner', columns: {#ownerUserId})
 class Notes extends Table {
   TextColumn get id => text()();
+
+  /// The account this note belongs to (`auth.users.id`), or null for a
+  /// note made while signed out. The notebook shows one owner at a time:
+  /// the signed-in account's notes, or the unowned ones when signed out
+  /// (`NotesRepository.owner`). Set by the repository, never by the model.
+  TextColumn get ownerUserId => text().nullable()();
   TextColumn get cheeseName => text()();
   TextColumn get tastedAt => text()();
   TextColumn get createdAt => text()();
@@ -91,11 +99,13 @@ class Settings extends Table {
 }
 
 /// Ids of locally deleted notes, kept until sync has deleted them from the
-/// account (CHEESE-58).
+/// account (CHEESE-58). Only owned notes leave one: nothing on the server
+/// knows an unowned note. [ownerUserId] says whose (schema v4).
 @DataClassName('NoteTombstoneRow')
 class NoteTombstones extends Table {
   TextColumn get id => text()();
   TextColumn get deletedAt => text()();
+  TextColumn get ownerUserId => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -121,7 +131,7 @@ class AppDatabase extends _$AppDatabase {
   /// Bump with every table change and add a case to [_upgradeTo]. Never
   /// edit a released case; users upgrade through each step in order.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// The schema version that last changed what [searchTextFor] produces
   /// (2: LEMON relabelled CITRUS, CHEESE-45). Raise it, and the schema
@@ -153,8 +163,21 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(notes, notes.dirty);
         await customStatement('UPDATE notes SET updated_at = created_at');
         await m.createIndex(notesDirty);
-        await m.createTable(noteTombstones);
+        // The v3 shape of the table, frozen: `m.createTable` would build
+        // today's columns and the v4 step's addColumn would then fail.
+        await customStatement(
+          'CREATE TABLE IF NOT EXISTS "note_tombstones" ("id" TEXT NOT NULL, '
+          '"deleted_at" TEXT NOT NULL, PRIMARY KEY ("id"))',
+        );
         await m.createTable(syncMeta);
+        break;
+      case 4:
+        // Ownership (CHEESE-62). Existing notes were made before accounts
+        // existed, so they are unowned: the notebook keeps showing them
+        // while signed out, and the first sign-in offers to attach them.
+        await m.addColumn(notes, notes.ownerUserId);
+        await m.addColumn(noteTombstones, noteTombstones.ownerUserId);
+        await m.createIndex(notesOwner);
         break;
       default:
         throw StateError('No migration to schema version $version');
@@ -219,8 +242,9 @@ TastingNote noteFromRow(NoteRow row) => TastingNote(
   photoUrl: row.photoUrl,
 );
 
-/// Domain → row (every column but [Notes.dirty], which the repository
-/// sets: true for a local edit, false for a row received from the account).
+/// Domain → row (every column but [Notes.dirty] and [Notes.ownerUserId],
+/// which the repository sets: dirty is true for a local edit and false for
+/// a row received from the account; the owner is the repository's scope).
 NotesCompanion noteToCompanion(TastingNote note) => NotesCompanion(
   id: Value(note.id),
   cheeseName: Value(note.cheeseName),
