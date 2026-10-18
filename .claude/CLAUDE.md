@@ -35,6 +35,12 @@ Layout so far:
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
   `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
   routes a `NoTransitionPage` (CHEESE-43; `test/app_test.dart` pins it).
+  A top-level `redirect` sends the auth-callback URI
+  (`com.tkforgeworks.cheesyscribe://auth-callback/?code=…`, which Android
+  hands the router whole, cold or warm) to `/account`; supabase_flutter
+  reads the code from the same link itself (CHEESE-61, found on rc.2 as
+  "no routes for location"). `test/support.dart`'s `openLink()` sends the
+  engine's `pushRouteInformation` for the warm case.
 - `lib/app/shell/` — `ScribeShell` (Scaffold owning the drawer; screens are
   their own Scaffolds and call `ScribeShell.openDrawer(context)`, not
   `Scaffold.of`. Its `PopScope(canPop: false)` makes system back on a

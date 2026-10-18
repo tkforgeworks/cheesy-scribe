@@ -129,6 +129,24 @@ void testApp(
 Future<T> onDb<T>(WidgetTester tester, Future<T> Function() op) async =>
     (await tester.runAsync(op)) as T;
 
+/// A deep link arriving while the app runs: the engine's
+/// `pushRouteInformation`, which is how Android hands an opened
+/// `com.tkforgeworks.cheesyscribe://auth-callback/?code=…` link to the
+/// router (a cold start passes it as the initial location instead).
+Future<void> openLink(WidgetTester tester, String location) async {
+  await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+    SystemChannels.navigation.name,
+    SystemChannels.navigation.codec.encodeMethodCall(
+      MethodCall('pushRouteInformation', <String, dynamic>{
+        'location': location,
+        'state': null,
+      }),
+    ),
+    (_) {},
+  );
+  await tester.pumpAndSettle();
+}
+
 /// The Android system back button/gesture: the engine's `popRoute`, which
 /// go_router's delegate answers (unlike `tester.pageBack()`, which taps the
 /// app bar's back button).
