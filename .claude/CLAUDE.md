@@ -276,7 +276,7 @@ Layout so far:
   `onChanged` is null). Both modes edit one `Map<FlavorNote,int>`; zeros
   are removed from the map, never stored.
 - **`forge_core`** (CHEESE-59) — the shared tkforgeworks Supabase package
-  (`tkforgeworks/forge-core`, git dependency pinned to `v0.1.0-rc.10`;
+  (`tkforgeworks/forge-core`, git dependency pinned to `v0.1.0-rc.11`;
   local checkout `~/Projects/forge-core`; Jira `FC`): config, `ForgeAuth`
   (Google + email/password, linking, sign-out), `ForgeAccounts`,
   `ForgeEntriesRepository`, the Supabase SQL/functions/templates and
