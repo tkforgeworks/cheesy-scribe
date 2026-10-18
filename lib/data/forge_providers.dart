@@ -50,7 +50,18 @@ final authStateProvider = StreamProvider<ForgeAuthState>((ref) {
   return auth?.changes ?? Stream.value(ForgeAuthState.signedOut);
 });
 
-/// Convenience: the current session, or null while loading or signed out.
-final sessionProvider = Provider<ForgeSession?>(
-  (ref) => ref.watch(authStateProvider).asData?.value.session,
+/// Convenience: the current session, or null when signed out. While the
+/// stream is still loading it answers from `ForgeAuth.current`, which is
+/// synchronous, so a signed-in app never flashes the signed-out notebook
+/// at start.
+final sessionProvider = Provider<ForgeSession?>((ref) {
+  final state = ref.watch(authStateProvider);
+  if (state case AsyncData(:final value)) return value.session;
+  return ref.watch(forgeAuthProvider)?.current.session;
+});
+
+/// Whose notes the notebook shows (CHEESE-62): the signed-in account's id,
+/// or null for the notes made while signed out.
+final currentOwnerProvider = Provider<String?>(
+  (ref) => ref.watch(sessionProvider)?.userId,
 );

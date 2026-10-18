@@ -5,8 +5,10 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:cheesy_scribe/data/db/app_database.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
+import 'package:cheesy_scribe/features/account/account_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -150,6 +152,8 @@ const _session = ForgeSession(
 
 /// The fake backend of the scene being rendered, for bodies that drive it.
 late FakeForgeAuth _auth;
+late FakeForgeEntriesRepository<TastingNote> _remote;
+late AppDatabase _db;
 
 void main() {
   for (final mode in [ThemeMode.light, ThemeMode.dark]) {
@@ -165,13 +169,26 @@ void main() {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.625;
       addTearDown(tester.view.reset);
-      _auth = FakeForgeAuth();
+      // A signed-in scene starts the way a real relaunch does: the session
+      // is already there (event `initial`), so no attach offer fires; the
+      // seeded notes belong to that account (CHEESE-62).
+      _auth = FakeForgeAuth(
+        initial: signedIn
+            ? const ForgeAuthState(
+                event: ForgeAuthEvent.initial,
+                session: _session,
+              )
+            : ForgeAuthState.signedOut,
+      );
       addTearDown(_auth.dispose);
-      if (signedIn) _auth.signIn(_session);
-      final db = openTestDatabase();
+      _remote = FakeForgeEntriesRepository<TastingNote>(_auth);
+      final db = _db = openTestDatabase();
       if (seeded) {
         await tester.runAsync(() async {
-          final repo = NotesRepository(db);
+          final repo = NotesRepository(
+            db,
+            owner: signedIn ? _session.userId : null,
+          );
           for (final n in _notes) {
             await repo.save(n);
           }
@@ -187,6 +204,7 @@ void main() {
           memberSince: DateTime(2026, 6, 1),
         ),
         auth: _auth,
+        remote: _remote,
         backup: backup,
       );
     }
@@ -296,6 +314,40 @@ void main() {
       await scroll(tester, 700);
       await _shot(tester, p);
     });
+    // CHEESE-62: the attach offer after signing in with signed-out notes,
+    // the row that re-offers them, and the unsynced warning at sign-out.
+    scene('account-attach', '/account', (tester, p) async {
+      await tester.tap(find.byType(ForgeSignInButton));
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    });
+    scene('account-unowned-row', '/account', (tester, p) async {
+      await tester.tap(find.byType(ForgeSignInButton));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AccountScreen.notNowLabel));
+      await tester.pumpAndSettle();
+      await scroll(tester, 700);
+      await _shot(tester, p);
+    });
+    scene('account-sign-out-unsynced', '/account', (tester, p) async {
+      // An edit the engine could not deliver, then sign out while offline.
+      _remote.nextError = ForgeDataError.network;
+      await tester.runAsync(
+        () => NotesRepository(
+          _db,
+          owner: _session.userId,
+        ).save(_notes.first.copyWith(cheeseName: 'Edited offline')),
+      );
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(ForgeAccountSettings.signOutKey));
+      await tester.tap(find.byKey(ForgeAccountSettings.signOutKey));
+      await tester.pumpAndSettle();
+      _remote.nextError = ForgeDataError.network;
+      await tester.tap(find.byKey(ForgeSignOutSheet.confirmKey));
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    }, signedIn: true);
     scene('check-email', '/account', (tester, p) async {
       await tester.tap(find.byKey(ForgeSignInPanel.switchModeKey));
       await tester.pumpAndSettle();

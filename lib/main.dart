@@ -9,6 +9,7 @@ import 'app/router.dart';
 import 'app/theme/scribe_theme.dart';
 import 'data/forge_providers.dart';
 import 'data/providers.dart';
+import 'data/sync/sync_providers.dart';
 import 'features/account/check_email_screen.dart';
 import 'features/account/set_password_screen.dart';
 
@@ -75,6 +76,9 @@ class _ScribeAppState extends ConsumerState<ScribeApp> {
   @override
   Widget build(BuildContext context) {
     ref.listen(authStateProvider, _onAuthState);
+    // Keeps the sync engine alive for the app's lifetime while signed in
+    // (CHEESE-62); null when signed out or without a backend.
+    ref.watch(syncCoordinatorProvider);
     final settings = ref.watch(appSettingsProvider).asData?.value;
     return MaterialApp.router(
       title: 'Cheesy Scribe',

@@ -5,6 +5,7 @@ import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/providers.dart';
 import 'package:cheesy_scribe/data/repositories/library_repository.dart';
 import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
+import 'package:cheesy_scribe/data/sync/sync_providers.dart';
 import 'package:cheesy_scribe/features/feedback/feedback_client.dart';
 import 'package:cheesy_scribe/main.dart';
 import 'package:drift/native.dart';
@@ -45,10 +46,11 @@ const testDevice = FeedbackDevice(
 /// fake clock) so style pickers and counts resolve under `pumpAndSettle`.
 ///
 /// The backend is always a fake (CHEESE-59): [auth] drives sign-in state
-/// (a fresh signed-out `FakeForgeAuth` by default) and [accounts] the
-/// account row (a `FakeForgeAccounts` over [auth] by default). Pass
-/// `backup: false` for a build with no configuration, where both are null
-/// and the app says backup isn't available.
+/// (a fresh signed-out `FakeForgeAuth` by default), [accounts] the
+/// account row (a `FakeForgeAccounts` over [auth] by default) and [remote]
+/// the server's notes table (a `FakeForgeEntriesRepository`, CHEESE-62).
+/// Pass `backup: false` for a build with no configuration, where all three
+/// are null and the app says backup isn't available.
 /// Returns the database so tests can seed or inspect it.
 Future<AppDatabase> pumpApp(
   WidgetTester tester, {
@@ -58,6 +60,7 @@ Future<AppDatabase> pumpApp(
   http.Client? feedbackHttp,
   FakeForgeAuth? auth,
   FakeForgeAccounts? accounts,
+  FakeForgeEntriesRepository<TastingNote>? remote,
   bool backup = true,
 }) async {
   final database = db ?? openTestDatabase();
@@ -65,6 +68,8 @@ Future<AppDatabase> pumpApp(
   final fakeAuth = auth ?? FakeForgeAuth();
   if (auth == null) addTearDown(fakeAuth.dispose);
   final fakeAccounts = accounts ?? FakeForgeAccounts(fakeAuth);
+  final fakeRemote =
+      remote ?? FakeForgeEntriesRepository<TastingNote>(fakeAuth);
   await tester.runAsync(() async {
     if (settings != null) await SettingsRepository(database).save(settings);
     await library.load();
@@ -94,6 +99,7 @@ Future<AppDatabase> pumpApp(
         feedbackDeviceProvider.overrideWith((ref) async => testDevice),
         forgeAuthProvider.overrideWithValue(backup ? fakeAuth : null),
         forgeAccountsProvider.overrideWithValue(backup ? fakeAccounts : null),
+        remoteNotesProvider.overrideWithValue(backup ? fakeRemote : null),
       ],
       child: ScribeApp(key: ValueKey(restart), initialLocation: at),
     ),
@@ -116,8 +122,12 @@ void testApp(
       await body(tester);
     } finally {
       await tester.pumpWidget(const SizedBox.shrink());
-      // A zero-length timer only fires when the fake clock advances.
-      await tester.pump(const Duration(milliseconds: 1));
+      // A zero-length timer only fires when the fake clock advances; a few
+      // ticks, since a cancel can queue another (the sync coordinator's
+      // subscriptions, CHEESE-62).
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(milliseconds: 1));
+      }
     }
   });
 }

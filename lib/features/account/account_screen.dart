@@ -11,6 +11,8 @@ import '../../data/forge_providers.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/notes_repository.dart';
+import '../../data/sync/sync_providers.dart';
+import '../../data/sync/sync_status.dart';
 import 'auth_copy.dart';
 import 'check_email_screen.dart';
 
@@ -34,6 +36,34 @@ class AccountScreen extends ConsumerStatefulWidget {
   static const signInBlurb =
       'Optional. Sign in and your tastings get a copy in the cloud, ready '
       'for a new phone. Nothing changes if you never do.';
+
+  /// The row offering to attach notes made while signed out (CHEESE-62).
+  static const unownedRowKey = Key('account-unowned-notes');
+  static const attachKey = Key('account-attach-unowned');
+
+  static String attachTitle(int n) =>
+      'Add your $n ${n == 1 ? 'note' : 'notes'} to this account?';
+  static const attachAside =
+      'They were written while signed out. Adding them backs them up with '
+      'everything else; leaving them out keeps them on this phone, out of '
+      'sight until you sign out.';
+  static const attachLabel = 'Add them';
+  static const notNowLabel = 'Not now';
+
+  static String unownedRowTitle(int n) =>
+      '$n ${n == 1 ? 'note' : 'notes'} from when you were signed out';
+  static const unownedRowSubtitle = 'Add them to this account to back them up.';
+
+  static String unsyncedTitle(int n) =>
+      '$n ${n == 1 ? "change hasn't" : "changes haven't"} been backed up yet';
+  static const unsyncedAside =
+      "Signing out removes this account's notes from the phone; anything "
+      'not backed up would be lost. Try again with a connection, or sign '
+      'out anyway.';
+  static const signOutAnywayLabel = 'Sign out anyway';
+  static const signOutAside =
+      "This account's notes leave the phone; the account keeps them. "
+      'Notes made while signed out stay.';
 
   @override
   ConsumerState<AccountScreen> createState() => _AccountScreenState();
@@ -126,21 +156,82 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   void _openCheckEmail(String email, ForgeEmailPurpose purpose) =>
       context.push(CheckEmailScreen.location(email, purpose));
 
+  /// Sign-out under the ownership model (CHEESE-62): push what is still
+  /// dirty, warn if that failed, end the session, then forget the
+  /// account's notes on this phone (the server keeps them). Notes made
+  /// while signed out are untouched and become the notebook again.
   Future<void> _signOut({required bool eraseLocal}) async {
-    // CHEESE-65 adds the erase option and the sync-state reset; until then
-    // signing out only ends the session and the notes stay as they are.
     final auth = ref.read(forgeAuthProvider);
-    if (auth == null) return;
+    final userId = ref.read(sessionProvider)?.userId;
+    if (auth == null || userId == null) return;
     setState(() {
       _busy = true;
       _error = null;
     });
+    final notes = ref.read(notesRepositoryProvider);
+    final meta = ref.read(syncMetaRepositoryProvider);
+    final coordinator = ref.read(syncCoordinatorProvider);
+    if (coordinator != null) {
+      final status = await coordinator.syncNow();
+      if (!mounted) return;
+      // Only what would be lost counts: dirty notes and unpushed
+      // deletions. A failed sync with nothing pending has nothing to warn
+      // about.
+      final unsynced = status.phase == SyncPhase.idle
+          ? 0
+          : status.pending + (await notes.tombstones()).length;
+      if (!mounted) return;
+      if (unsynced > 0) {
+        final anyway = await showForgeConfirmSheet(
+          context,
+          title: AccountScreen.unsyncedTitle(unsynced),
+          aside: AccountScreen.unsyncedAside,
+          confirmLabel: AccountScreen.signOutAnywayLabel,
+        );
+        if (!anyway) {
+          if (mounted) setState(() => _busy = false);
+          return;
+        }
+      }
+    }
     await auth.signOut();
+    await notes.removeOwned(userId);
+    await meta.clear();
     if (mounted) setState(() => _busy = false);
+  }
+
+  /// Right after a sign-in, offer the notes made while signed out
+  /// (CHEESE-62). Declining keeps them on the phone, hidden until sign-out;
+  /// the Account row re-offers them meanwhile.
+  Future<void> _offerAttach(String userId) async {
+    final notes = ref.read(notesRepositoryProvider);
+    final count = await notes.unownedCount();
+    if (count == 0 || !mounted) return;
+    final yes = await showForgeConfirmSheet(
+      context,
+      title: AccountScreen.attachTitle(count),
+      aside: AccountScreen.attachAside,
+      confirmLabel: AccountScreen.attachLabel,
+      cancelLabel: AccountScreen.notNowLabel,
+      destructive: false,
+    );
+    if (yes && mounted) await notes.attachUnownedTo(userId);
+  }
+
+  Future<void> _attachNow() async {
+    final userId = ref.read(sessionProvider)?.userId;
+    if (userId == null) return;
+    await ref.read(notesRepositoryProvider).attachUnownedTo(userId);
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authStateProvider, (_, next) {
+      final state = next.asData?.value;
+      if (state?.event == ForgeAuthEvent.signedIn && state?.session != null) {
+        _offerAttach(state!.session!.userId);
+      }
+    });
     final c = context.colors;
     final x = context.forge;
     final settingsAsync = ref.watch(appSettingsProvider);
@@ -277,18 +368,46 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             _run((auth) => auth.sendPasswordReset(email), email: email),
       );
     }
-    return ForgeAccountSettings(
-      email: session.email ?? 'Signed in',
-      linked: [
-        for (final identity in session.identities)
-          if (_providerOf(identity) case final provider?)
-            ForgeLinkedSignIn(provider: provider, email: identity.email),
+    final unowned = ref.watch(unownedNotesCountProvider).asData?.value ?? 0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ForgeAccountSettings(
+          email: session.email ?? 'Signed in',
+          linked: [
+            for (final identity in session.identities)
+              if (_providerOf(identity) case final provider?)
+                ForgeLinkedSignIn(provider: provider, email: identity.email),
+          ],
+          busy: _busy,
+          errorText: _error,
+          offerLocalErase: false,
+          signOutAside: AccountScreen.signOutAside,
+          onSignOut: _signOut,
+        ),
+        if (unowned > 0) ...[
+          const SizedBox(height: 20),
+          ForgeSettingsGroup(
+            label: 'Signed-out notes',
+            children: [
+              ListTile(
+                key: AccountScreen.unownedRowKey,
+                leading: HeroIcon(
+                  HeroIcons.documentPlus,
+                  color: context.forge.textTertiary,
+                ),
+                title: Text(AccountScreen.unownedRowTitle(unowned)),
+                subtitle: const Text(AccountScreen.unownedRowSubtitle),
+                trailing: TextButton(
+                  key: AccountScreen.attachKey,
+                  onPressed: _busy ? null : _attachNow,
+                  child: const Text('Add'),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
-      busy: _busy,
-      errorText: _error,
-      offerLocalErase: false,
-      signOutAside: 'Your notes stay on this phone.',
-      onSignOut: _signOut,
     );
   }
 
