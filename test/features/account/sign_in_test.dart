@@ -192,7 +192,8 @@ void main() {
     await tester.tap(find.byKey(ForgeSignInPanel.submitKey));
     await tester.pumpAndSettle();
     expect(auth.resets, ['a@b.co']);
-    expect(find.text('Reset link sent'), findsOneWidget);
+    expect(find.text('Check your inbox'), findsOneWidget);
+    expect(find.textContaining('If there is an account for'), findsOneWidget);
     await tester.pump(const Duration(seconds: 31));
     await tester.tap(find.byKey(ForgeCheckEmailScreen.resendKey));
     await tester.pumpAndSettle();
@@ -200,7 +201,7 @@ void main() {
 
     auth.startPasswordRecovery(emailSession);
     await tester.pumpAndSettle();
-    expect(find.text('Reset link sent'), findsNothing);
+    expect(find.text('Check your inbox'), findsNothing);
     expect(find.text('Choose a new password'), findsOneWidget);
     await tester.enterText(
       find.byKey(ForgeSetPasswordScreen.passwordFieldKey),
@@ -216,6 +217,7 @@ void main() {
     expect(find.text(SetPasswordScreen.savedMessage), findsOneWidget);
     expect(find.text('Choose a new password'), findsNothing);
     expect(find.text('Signed in'), findsOneWidget);
+    expect(auth.signOutCalls, isEmpty);
   });
 
   testApp(
@@ -246,10 +248,29 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('too easy to guess'), findsOneWidget);
       expect(find.text('Choose a new password'), findsOneWidget);
-      // Back leaves it; the user stays signed in with the recovery session.
+      expect(find.text(SetPasswordScreen.blurb), findsOneWidget);
+      // Backing out without a saved password ends the recovery session: the
+      // link alone must not leave the user signed in (rc.3).
+      expect(auth.current.isSignedIn, isTrue);
       await tester.pageBack();
       await tester.pumpAndSettle();
       expect(find.text('Your tastings'), findsOneWidget);
+      expect(auth.signOutCalls, [false]);
+      expect(auth.current.isSignedIn, isFalse);
+      expect(find.text(SetPasswordScreen.leftMessage), findsOneWidget);
     },
   );
+
+  testApp('system back on set-password signs the recovery session out too', (
+    tester,
+  ) async {
+    final auth = await boot(tester);
+    auth.startPasswordRecovery(emailSession);
+    await tester.pumpAndSettle();
+    expect(find.text('Choose a new password'), findsOneWidget);
+    await systemBack(tester);
+    expect(find.text('Choose a new password'), findsNothing);
+    expect(auth.signOutCalls, [false]);
+    expect(find.byType(ForgeSignInPanel), findsOneWidget);
+  });
 }
