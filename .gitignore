@@ -51,5 +51,9 @@ app.*.map.json
 # Release artifacts built by scripts/release/*
 /release/
 
+# Supabase / Google build defines (CHEESE-59): see config/README.md
+/config/dev.json
+/config/release.json
+
 # Screen renders from tool/visual/render_screens_test.dart
 /tool/visual/out/

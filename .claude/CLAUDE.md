@@ -101,6 +101,24 @@ Layout so far:
   `search()` folds diacritics. The six mocked styles keep the mockup's
   example strings (asserted in `test/data/library_test.dart`, which also
   schema-validates every entry). Tim owns the prose; edit in place.
+- `lib/data/forge_providers.dart` (CHEESE-59) — the backend handle:
+  `scribeSupabaseConfig` (`ForgeSupabaseConfig.fromEnvironment` with
+  `authRedirectUrl: scribeAuthRedirectUrl` =
+  `com.tkforgeworks.cheesy_scribe://auth-callback`), `forgeCoreProvider`
+  (`ForgeCore?`, null by default; `main()` overrides it with
+  `ForgeCore.initialize` when `isConfigured`), `forgeAuthProvider` /
+  `forgeAccountsProvider` (derived, null without a backend; tests override
+  these two with the fakes), `backupAvailableProvider`,
+  `authStateProvider` (StreamProvider over `ForgeAuth.changes`; a
+  StreamProvider nobody watches reads as loading, so hold a listener in
+  tests) and `sessionProvider`. The three defines (`FORGE_SUPABASE_URL`,
+  `FORGE_SUPABASE_PUBLISHABLE_KEY`, `FORGE_GOOGLE_WEB_CLIENT_ID`) come
+  from `--dart-define-from-file=config/dev.json` (gitignored; shape in
+  `config/dev.example.json`, notes in `config/README.md`); release builds
+  from `config/release.json`, which the pipeline writes from the
+  `DART_DEFINES_JSON` repo secret (TKFW-84) and `build-android.sh` passes
+  when present. A build without them runs local-only; CI and tests never
+  have them, and initialising opens no connection until a sign-in.
 - `lib/data/providers.dart` — `appDatabaseProvider` (drift_flutter
   `driftDatabase(name: 'cheesy_scribe')`; tests override it), the
   repository providers, `appSettingsProvider` (StreamProvider),
@@ -231,9 +249,19 @@ Layout so far:
   `FlavorEntryCard` (Wheel/List toggle, helper line; read-only card when
   `onChanged` is null). Both modes edit one `Map<FlavorNote,int>`; zeros
   are removed from the map, never stored.
+- **`forge_core`** (CHEESE-59) — the shared tkforgeworks Supabase package
+  (`tkforgeworks/forge-core`, git dependency pinned to `v0.1.0-rc.10`;
+  local checkout `~/Projects/forge-core`; Jira `FC`): config, `ForgeAuth`
+  (Google + email/password, linking, sign-out), `ForgeAccounts`,
+  `ForgeEntriesRepository`, the Supabase SQL/functions/templates and
+  `dart run forge_core:sync_supabase`. Fakes in
+  `package:forge_core/testing.dart`. Same rule as forge_ui: defects are
+  fixed upstream and the pin moves.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.1.0`, its first stable release; local checkout `~/Projects/forge-ui`;
+  `v0.2.0-rc.5` since CHEESE-59 (v0.2 adds the sign-in panel and screens,
+  check-email and set-password screens, typed confirm sheet,
+  `ForgeAccountSettings`, sign-out sheet); local checkout `~/Projects/forge-ui`;
   Jira project `FU` since 2026-10-17, forge-core's is `FC`). It owns the theme
   builder, type, radii, the forge gradient, every component theme, the
   bundled fonts and the shared atoms. A defect in any of that is fixed in
@@ -275,7 +303,9 @@ Layout so far:
   (real app on an in-memory DB, optional seeded `AppSettings`, mocked
   package info, `testDevice` for the feedback form, and `feedbackHttp:` a
   `MockClient` for the relay; without one any network call fails the
-  test) and **`testApp()`**, which must replace `testWidgets` for
+  test; `auth:` / `accounts:` a `FakeForgeAuth` / `FakeForgeAccounts`,
+  fresh signed-out ones by default, and `backup: false` for a build with
+  no backend) and **`testApp()`**, which must replace `testWidgets` for
   any test that calls `pumpApp`: it unmounts the tree and pumps 1 ms so
   drift's stream-cancel timer fires before flutter_test's pending-timer
   check (otherwise the test fails and `db.close()` hangs the runner).
@@ -658,3 +688,11 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   calls, `TastingNote.updatedAt`; migration test rebuilt on frozen released
   DDL. Renders pixel-identical. The sync engine (CHEESE-62) builds on it
   once forge-core FC-8 exists.
+- 2026-10-18: forge-core v0.1.0 (rc.10) and forge-ui v0.2.0 (rc.5) complete
+  (FC-1..12, FU-1..6); the Supabase project has the forge migrations,
+  three Edge Functions, cron jobs, Vault entries and function secrets, and
+  purge, web deletion and the Resend deletion mail are verified live.
+  CHEESE-59 adopted both pins and the define plumbing
+  (`lib/data/forge_providers.dart`, `config/`, `build-android.sh`); Tim
+  chose to wire sign-in (CHEESE-61) next and discuss the `entries` schema
+  (CHEESE-60) before any sync work.

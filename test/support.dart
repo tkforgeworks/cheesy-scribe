@@ -1,5 +1,6 @@
 import 'package:cheesy_scribe/app/theme/scribe_theme.dart';
 import 'package:cheesy_scribe/data/db/app_database.dart';
+import 'package:cheesy_scribe/data/forge_providers.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/providers.dart';
 import 'package:cheesy_scribe/data/repositories/library_repository.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_core/testing.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -41,6 +43,12 @@ const testDevice = FeedbackDevice(
 /// feedback relay; without one, any network call fails the test. The bundled cheese library
 /// is pre-loaded on the real event loop (asset I/O never completes on the
 /// fake clock) so style pickers and counts resolve under `pumpAndSettle`.
+///
+/// The backend is always a fake (CHEESE-59): [auth] drives sign-in state
+/// (a fresh signed-out `FakeForgeAuth` by default) and [accounts] the
+/// account row (a `FakeForgeAccounts` over [auth] by default). Pass
+/// `backup: false` for a build with no configuration, where both are null
+/// and the app says backup isn't available.
 /// Returns the database so tests can seed or inspect it.
 Future<AppDatabase> pumpApp(
   WidgetTester tester, {
@@ -48,9 +56,15 @@ Future<AppDatabase> pumpApp(
   AppDatabase? db,
   AppSettings? settings,
   http.Client? feedbackHttp,
+  FakeForgeAuth? auth,
+  FakeForgeAccounts? accounts,
+  bool backup = true,
 }) async {
   final database = db ?? openTestDatabase();
   final library = LibraryRepository();
+  final fakeAuth = auth ?? FakeForgeAuth();
+  if (auth == null) addTearDown(fakeAuth.dispose);
+  final fakeAccounts = accounts ?? FakeForgeAccounts(fakeAuth);
   await tester.runAsync(() async {
     if (settings != null) await SettingsRepository(database).save(settings);
     await library.load();
@@ -78,6 +92,8 @@ Future<AppDatabase> pumpApp(
               }),
         ),
         feedbackDeviceProvider.overrideWith((ref) async => testDevice),
+        forgeAuthProvider.overrideWithValue(backup ? fakeAuth : null),
+        forgeAccountsProvider.overrideWithValue(backup ? fakeAccounts : null),
       ],
       child: ScribeApp(key: ValueKey(restart), initialLocation: at),
     ),

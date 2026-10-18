@@ -22,6 +22,13 @@ flutter analyze
 flutter test
 ```
 
+Sign-in and backup (0.3.0) need the Supabase project's URL and publishable key and the Google Web OAuth client
+ID, passed as `--dart-define`s and never committed: copy `config/dev.example.json` to the gitignored
+`config/dev.json`, fill it in and run with `flutter run --dart-define-from-file=config/dev.json`
+([`config/README.md`](config/README.md)). Without the file the app runs local-only and Account says backup isn't
+available in this build; that is what CI and tests see. Release builds get the same values from the pipeline
+(the `DART_DEFINES_JSON` repository secret, written to `config/release.json` before `build-android.sh` runs).
+
 CI consumes the org's reusable [`ci-flutter.yml`](https://github.com/tkforgeworks/.github/blob/main/.github/workflows/ci-flutter.yml);
 the check reports as `ci / ci`. Note that `dart format` checks every `.dart` file in the repo, which is why the
 handoff's reference Dart files carry a `.txt` suffix.

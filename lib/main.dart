@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:forge_core/forge_core.dart';
 import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app/router.dart';
 import 'app/theme/scribe_theme.dart';
+import 'data/forge_providers.dart';
 import 'data/providers.dart';
 
 Future<void> main() async {
@@ -13,7 +15,18 @@ Future<void> main() async {
   // Phone-portrait UI only (CHEESE-1 §3 C); the manifest also pins it.
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   registerForgeFontLicenses();
-  runApp(const ProviderScope(child: ScribeApp()));
+  // The backend, when this build has one (CHEESE-59). Initialising opens no
+  // connection: the first request happens when the user signs in (or at
+  // start-up to refresh a session they created earlier).
+  final core = scribeSupabaseConfig.isConfigured
+      ? await ForgeCore.initialize(scribeSupabaseConfig)
+      : null;
+  runApp(
+    ProviderScope(
+      overrides: [forgeCoreProvider.overrideWithValue(core)],
+      child: const ScribeApp(),
+    ),
+  );
 }
 
 /// Root widget: themes + router. Needs a [ProviderScope] above it; the
