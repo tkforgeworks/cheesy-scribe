@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- The in-app feedback form posts to tkforgeworks.com (CHEESE-51); the
-         app makes no other network calls. -->
+    <!-- The in-app feedback form posts to tkforgeworks.com (CHEESE-51), and
+         the optional account features talk to the Supabase project once the
+         user signs in (CHEESE-11); nothing else uses the network. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="Cheesy Scribe"
@@ -27,6 +28,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Confirmation and password-reset mails send the user back here
+                 (CHEESE-61): the application id as a custom scheme, also on
+                 the Supabase project's redirect allow list. supabase_flutter
+                 reads the link; the app never parses it. -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="com.tkforgeworks.cheesy_scribe" android:host="auth-callback"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

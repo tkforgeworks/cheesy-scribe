@@ -29,6 +29,7 @@ Layout so far:
   DESIGN_SPEC §6/§7's "back app bar"), plus
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
   fullscreen dialog), `/notes/:id`, `/library/:styleId`,
+  `/account/check-email`, `/auth/set-password` (CHEESE-61),
   `/licenses`, `/feedback`, `/glossary`, `/glossary/:section` (`_pushedPage` = Flutter's `MaterialPage`: Android
   slide-and-fade + predictive back). No `/login`. `new` is declared before
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
@@ -130,7 +131,27 @@ Layout so far:
   (default "You"), mono `MEMBER SINCE <year> · N NOTES` (year = earliest
   note, else `AppSettings.memberSince`, which the screen stamps on first
   visit), DISPLAY NAME `ForgeBoxedField` saved on blur / Done. The drawer and
-  search-bar avatar read the same `displayNameProvider`.
+  search-bar avatar read the same `displayNameProvider`; the name stays
+  local even when signed in. Beneath it (CHEESE-61): no backend →
+  `AccountScreen.backupUnavailable`; signed out → `ForgeSignInPanel`
+  (`signInHeading`/`signInBlurb`; Google, sign in, create, forgot) whose
+  callbacks run through `_run` (busy flag, `ForgeAuthEmailSent` and
+  `emailNotConfirmed` push check-email, failures show
+  `authErrorCopy(error)` from `auth_copy.dart`, Tim's prose); signed in →
+  `ForgeAccountSettings` with the email and linked methods and Sign out
+  (`offerLocalErase: false`, plain `signOut()`; the erase option, the
+  sync-state reset and Delete account are CHEESE-65, username/linking/set
+  password CHEESE-64, the status slot CHEESE-63).
+  `check_email_screen.dart` — `CheckEmailScreen` (`/account/check-email?
+  email=&purpose=confirm|reset`, `CheckEmailScreen.location()`), a
+  `ForgeCheckEmailScreen` whose Send again calls `resendConfirmation` /
+  `sendPasswordReset` and which pops itself when `signedIn` arrives.
+  `set_password_screen.dart` — `SetPasswordScreen` (`/auth/set-password`),
+  pushed by `ScribeApp`'s `ref.listen(authStateProvider)` on
+  `passwordRecovery` (`pushReplacement` when check-email is showing, so the
+  two never stack); success snackbars `savedMessage` and pops. The manifest
+  declares the `com.tkforgeworks.cheesy_scribe://auth-callback` intent
+  filter; supabase_flutter consumes the link, nothing here parses it.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
   CHEESE-33): a thin wrapper over forge_ui's `ForgeAboutScreen` (layout
   and the maker line with the tinted mark live in the package; pass
@@ -693,6 +714,13 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   three Edge Functions, cron jobs, Vault entries and function secrets, and
   purge, web deletion and the Resend deletion mail are verified live.
   CHEESE-59 adopted both pins and the define plumbing
-  (`lib/data/forge_providers.dart`, `config/`, `build-android.sh`); Tim
-  chose to wire sign-in (CHEESE-61) next and discuss the `entries` schema
-  (CHEESE-60) before any sync work.
+  (`lib/data/forge_providers.dart`, `config/`, `build-android.sh`;
+  TKFW-84 adds the `DART_DEFINES_JSON` secret to the org workflow). Tim
+  chose to wire sign-in (CHEESE-61: the Account page's signed-out and
+  signed-in states, check-email and set-password, the auth-callback intent
+  filter, plain Sign out) next and to discuss the `entries` schema
+  (CHEESE-60) before any sync work. Sign-in has not yet run on a device:
+  the first real Google and email round trip needs `config/dev.json`
+  (values from Tim) and a debug build on his phone, whose debug SHA-1 has
+  an Android OAuth client. CHEESE-65 (deletion) must ship in the same RC
+  as sign-in before any tester build.

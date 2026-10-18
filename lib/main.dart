@@ -9,6 +9,8 @@ import 'app/router.dart';
 import 'app/theme/scribe_theme.dart';
 import 'data/forge_providers.dart';
 import 'data/providers.dart';
+import 'features/account/check_email_screen.dart';
+import 'features/account/set_password_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,8 +55,26 @@ class _ScribeAppState extends ConsumerState<ScribeApp> {
     super.dispose();
   }
 
+  /// A password-reset link opened on this phone signs the user in with a
+  /// `passwordRecovery` state (CHEESE-61): show the set-password screen,
+  /// in place of the check-email screen when that is what is showing.
+  void _onAuthState(
+    AsyncValue<ForgeAuthState>? _,
+    AsyncValue<ForgeAuthState> next,
+  ) {
+    if (next.asData?.value.isPasswordRecovery != true) return;
+    final here = _router.state.uri.path;
+    if (here == SetPasswordScreen.path) return;
+    if (here == CheckEmailScreen.path) {
+      _router.pushReplacement(SetPasswordScreen.path);
+    } else {
+      _router.push(SetPasswordScreen.path);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(authStateProvider, _onAuthState);
     final settings = ref.watch(appSettingsProvider).asData?.value;
     return MaterialApp.router(
       title: 'Cheesy Scribe',
