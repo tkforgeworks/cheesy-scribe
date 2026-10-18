@@ -3,6 +3,7 @@ import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
 import 'package:cheesy_scribe/data/repositories/recent_searches_repository.dart';
 import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
+import 'package:cheesy_scribe/data/repositories/sync_meta_repository.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -203,6 +204,75 @@ void main() {
       await pumpEventQueue();
       await sub.cancel();
       expect(events, ['Watched', 'Renamed', null]);
+    });
+  });
+
+  group('NotesRepository sync bookkeeping', () {
+    late DateTime now;
+    late NotesRepository repo;
+
+    setUp(() {
+      now = DateTime.utc(2026, 10, 18, 12);
+      repo = NotesRepository(openTestDatabase(), now: () => now);
+    });
+
+    test('save stamps updatedAt and marks the note dirty', () async {
+      final saved = await repo.save(note('a', 'A'));
+      expect(saved.updatedAt, now);
+      expect((await repo.getNote('a'))!.updatedAt, now);
+      expect((await repo.dirtyNotes()).map((n) => n.id), ['a']);
+      expect((await repo.watchDirty().first).map((n) => n.id), ['a']);
+      // updatedAt is metadata: the stored note still equals the draft.
+      expect(await repo.getNote('a'), note('a', 'A'));
+    });
+
+    test('markClean clears only rows unchanged since the push', () async {
+      final a = await repo.save(note('a', 'A'));
+      final b = await repo.save(note('b', 'B'));
+      now = now.add(const Duration(minutes: 1));
+      await repo.save(b.copyWith(rating: 5)); // edited while pushing
+      await repo.markClean([a, b]);
+      expect((await repo.dirtyNotes()).map((n) => n.id), ['b']);
+      expect((await repo.getNote('b'))!.updatedAt, now);
+    });
+
+    test('applyRemote keeps the remote stamp and stays clean', () async {
+      final stamp = DateTime.utc(2026, 1, 1);
+      final remote = note('r', 'Remote').copyWith(updatedAt: stamp);
+      await repo.applyRemote([remote]);
+      expect((await repo.getNote('r'))!.updatedAt, stamp);
+      expect(await repo.dirtyNotes(), isEmpty);
+      await repo.applyRemote([remote.copyWith(cheeseName: 'Renamed')]);
+      expect((await repo.getNote('r'))!.cheeseName, 'Renamed');
+      expect(await repo.dirtyNotes(), isEmpty);
+    });
+
+    test('delete leaves a tombstone; remote deletions do not', () async {
+      await repo.save(note('a', 'A'));
+      await repo.save(note('b', 'B'));
+      await repo.delete('a');
+      expect(await repo.getNote('a'), isNull);
+      expect(await repo.tombstones(), [NoteTombstone(id: 'a', deletedAt: now)]);
+      await repo.applyRemoteDeletions(['b']);
+      expect(await repo.getNote('b'), isNull);
+      expect((await repo.tombstones()).map((t) => t.id), ['a']);
+      await repo.clearTombstones(['a']);
+      expect(await repo.tombstones(), isEmpty);
+    });
+  });
+
+  group('SyncMetaRepository', () {
+    test('get, set, watch, remove, clear', () async {
+      final repo = SyncMetaRepository(openTestDatabase());
+      expect(await repo.get('last_sync_at'), isNull);
+      await repo.set('last_sync_at', '2026-10-18T12:00:00Z');
+      expect(await repo.get('last_sync_at'), '2026-10-18T12:00:00Z');
+      expect(await repo.watch('last_sync_at').first, '2026-10-18T12:00:00Z');
+      await repo.set('last_sync_at', null);
+      expect(await repo.get('last_sync_at'), isNull);
+      await repo.set('a', '1');
+      await repo.clear();
+      expect(await repo.get('a'), isNull);
     });
   });
 

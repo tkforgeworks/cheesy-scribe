@@ -52,11 +52,19 @@ Layout so far:
   `docs/design_handoff_cheesy_scribe/schema/*.schema.json` — the schemas are
   maintained, and `test/data/models_test.dart` validates emitted JSON
   against them with `json_schema`. `tastedAt` is a local-midnight date
-  (`YYYY-MM-DD` in JSON); `createdAt` is UTC date-time.
-- `lib/data/db/app_database.dart` — drift schema v2 (v2 changed no
-  table; CHEESE-45): `notes` (16 `fl_*`
-  flavor int columns, ISO text dates, enums by name, a normalised
-  `search_text` haystack), `recent_searches`, `settings` (key/value).
+  (`YYYY-MM-DD` in JSON); `createdAt` is UTC date-time; `updatedAt`
+  (CHEESE-58) defaults to `createdAt`, is stamped by the repository on
+  save, and is **sync metadata excluded from `==`/`hashCode`** so the
+  form's dirty check and "stored equals draft" tests are unaffected.
+  `NoteTombstone` (id + `deletedAt`) is the deletion marker type.
+- `lib/data/db/app_database.dart` — drift schema v3 (v2 changed no
+  table, CHEESE-45; v3 added the sync bookkeeping, CHEESE-58): `notes`
+  (16 `fl_*` flavor int columns, ISO text dates, enums by name, a
+  normalised `search_text` haystack, plus `updated_at` and `dirty`),
+  `recent_searches`, `settings` (key/value), `note_tombstones` (id +
+  `deleted_at`, kept until sync has pushed the deletion), `sync_meta`
+  (key/value for the sync engine; separate from `settings` because
+  `SettingsRepository.save` rewrites every row).
   `app_database.g.dart` is generated and committed: after any table change
   run `dart run build_runner build --delete-conflicting-outputs` **then
   `dart format .`** (the generator's output is not format-clean and CI
@@ -65,16 +73,27 @@ Layout so far:
   **labels**, so relabelling one means raising `schemaVersion` and
   `AppDatabase.searchTextVersion` together: upgrading from below it
   rebuilds every note's `search_text` after all schema steps
-  (`test/data/migration_test.dart`). Enum names are what's stored and
+  (`test/data/migration_test.dart`, which starts from the **released DDL
+  frozen in the test**, not from `createAll`: a subclass with a lower
+  `schemaVersion` would create today's columns and make `addColumn` fail).
+  The v3 step backfills `updated_at = created_at` and leaves every existing
+  note dirty so a first sign-in uploads it. Enum names are what's stored and
   never change; `FlavorNote.lemon` is labelled CITRUS since CHEESE-45. `search_text.dart` holds
   `normalizeForSearch` (lower-case, diacritics folded, `[a-z0-9 ]` only),
   applied to both the stored haystack and the typed query.
 - `lib/data/repositories/` — `NotesRepository` (`NotesQuery` = search +
   minRating + styleId + paging; `watchPage/watchCount/watchNote/
-  watchNewest/watchAll/watchStyleCounts/watchTopStyleIds`, `save` is an
-  upsert, `newId()`), `SettingsRepository` (`watch/load/save/update`),
-  `RecentSearchesRepository` (cap 10). Domain types in, domain types out;
-  drift row classes (`NoteRow` etc.) never leave `lib/data`.
+  watchNewest/watchAll/watchStyleCounts/watchTopStyleIds`, `newId()`;
+  **`save` stamps `updatedAt` with the injectable `now` and marks the row
+  dirty**, returning the stamped note; `delete` leaves a tombstone. Sync
+  bookkeeping (CHEESE-58): `watchDirty/dirtyNotes`, `markClean(pushed)`
+  (clears only rows whose `updated_at` still matches, so an edit during a
+  push stays dirty), `applyRemote(notes)` (keeps the remote stamp, clean),
+  `applyRemoteDeletions(ids)` (no tombstone), `tombstones()`,
+  `clearTombstones(ids)`), `SyncMetaRepository` (`get/set/watch/clear`;
+  `set(key, null)` removes), `SettingsRepository` (`watch/load/save/
+  update`), `RecentSearchesRepository` (cap 10). Domain types in, domain
+  types out; drift row classes (`NoteRow` etc.) never leave `lib/data`.
 - `lib/data/repositories/library_repository.dart` + `assets/data/
   cheese_styles.json` — the bundled read-only library (27 styles, curated
   file order, ids are stable slugs: never rename one after release; add
@@ -629,6 +648,13 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   Spec revised in forge-core FC-1 (PR #7 into its `v0.1.0/main`), forge-ui's
   copy replaced by a pointer in FU-1 (PR #13; `v0.2.0/main` cut there).
   CHEESE-11 retitled "Account and cloud sync (0.3.0)" with the agreed scope.
-  Next: the 0.3.0 ticket breakdown (cheese children under CHEESE-11, FC and
-  FU tickets, a TKFW ticket for the website page, an org ticket for the
-  dart-define pipeline input); schema v3 sync bookkeeping can start first.
+  Tickets created 2026-10-18 (CHEESE-57 comment has the map and order):
+  FC-2..12, FU-2..6, CHEESE-58..67 under CHEESE-11, TKFW-83 (website
+  deletion page) and TKFW-84 (`release-flutter.yml` dart-define input).
+  Tim authorised merging own PRs once CI passes, except any cheesy-scribe
+  PR that preps an RC.
+- 2026-10-18: schema v3 sync bookkeeping (CHEESE-58): `updated_at` +
+  `dirty` on notes, `note_tombstones`, `sync_meta`, the repository's sync
+  calls, `TastingNote.updatedAt`; migration test rebuilt on frozen released
+  DDL. Renders pixel-identical. The sync engine (CHEESE-62) builds on it
+  once forge-core FC-8 exists.
