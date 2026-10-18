@@ -214,7 +214,8 @@ Layout so far:
   are removed from the map, never stored.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.1.0`, its first stable release; local checkout `~/Projects/forge-ui`). It owns the theme
+  `v0.1.0`, its first stable release; local checkout `~/Projects/forge-ui`;
+  Jira project `FU` since 2026-10-17, forge-core's is `FC`). It owns the theme
   builder, type, radii, the forge gradient, every component theme, the
   bundled fonts and the shared atoms. A defect in any of that is fixed in
   forge-ui and the pin moved to the tag that carries the fix, never
@@ -430,6 +431,28 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   a project's worth of scope. The one exception (CHEESE-51, 2026-10-14): the
   feedback form posts what the user writes, on Send only, to the website's
   relay.
+- **0.3.0 account and sync** (Tim, 2026-10-17, CHEESE-57; spec revised in
+  forge-core FC-1, the canonical copy at
+  `forge-core/docs/forge-ui_forge-core_Shared_Flutter_Packages_Spec.md`):
+  Supabase through **`forge_core`** (git dependency like forge_ui), on a Pro
+  org, us-east-1; Tim created the project. **Google and email/password**
+  sign-in (confirmation required, forgot-password, Resend as Supabase SMTP,
+  Google + email linking); Apple waits for an iOS app. **Sign-in stays
+  optional**, reached from Account, and only turns on backup. Sync is
+  app-side: last-write-wins per note with tombstones as a manifest diff,
+  needing schema v3 first (`updated_at`, `dirty`, a tombstones table, a
+  `sync_meta` table — not `settings`, whose save rewrites every row). Note
+  ids are already UUID v4 and become the server `entries.id`. In-app
+  deletion types DELETE; sign-out and deletion keep local notes with an
+  "also erase this phone" option; the web deletion form is a website Pages
+  Function at `/privacy/cheesy-scribe/delete-account/`. Sign-in and
+  deletion ship in the same build (Play). Supabase URL, publishable key and
+  Google web client ID arrive as `--dart-define`s (release-pipeline input,
+  gitignored local define file), never committed; CI's `-debugsigned`
+  builds can never sign in (no OAuth client for their key). Theme and units
+  stay per device; the display name is not prefilled and is stored as
+  `accounts.username` once entered. forge-ui builds the sign-in and account
+  screens first (v0.2), high-reuse screens are shared-first now.
 - **State: `flutter_riverpod` 3 without codegen; routing `go_router` with a
   `ShellRoute` for the four top-level destinations.** lazy-sleeper-app
   precedent.
@@ -600,3 +623,12 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   the store release, so it is the whole of 0.3.0. 1.0.0 keeps CHEESE-46,
   49, 52 and 12. `v0.3.0/main` cut from `main` at `dd39d21` (CHEESE-56).
   CHEESE-50 (closed track) is still Tim's to open.
+- 2026-10-17: **0.3.0 plan settled** (CHEESE-57). Tim answered the ten
+  decisions (recorded as a comment there; summary under "Architecture
+  decisions"). Jira projects `FC` (forge-core) and `FU` (forge-ui) created.
+  Spec revised in forge-core FC-1 (PR #7 into its `v0.1.0/main`), forge-ui's
+  copy replaced by a pointer in FU-1 (PR #13; `v0.2.0/main` cut there).
+  CHEESE-11 retitled "Account and cloud sync (0.3.0)" with the agreed scope.
+  Next: the 0.3.0 ticket breakdown (cheese children under CHEESE-11, FC and
+  FU tickets, a TKFW ticket for the website page, an org ticket for the
+  dart-define pipeline input); schema v3 sync bookkeeping can start first.
