@@ -160,7 +160,13 @@ Layout so far:
   `set_password_screen.dart` — `SetPasswordScreen` (`/auth/set-password`),
   pushed by `ScribeApp`'s `ref.listen(authStateProvider)` on
   `passwordRecovery` (`pushReplacement` when check-email is showing, so the
-  two never stack); success snackbars `savedMessage` and pops. The manifest
+  two never stack); success snackbars `savedMessage` and pops. The reset
+  link is itself a sign-in (Supabase opens the recovery session on
+  verification), so leaving set-password without saving signs out again
+  (`PopScope` → `signOut()`, `leftMessage` snackbar; rc.3 left the user
+  signed in). Forgot password for an unknown address reports success by
+  Supabase design (no account enumeration); forge_ui rc.6's check-email
+  reset copy is conditional ("If there is an account for …"). The manifest
   declares the `com.tkforgeworks.cheesyscribe://auth-callback` intent
   filter; supabase_flutter consumes the link, nothing here parses it.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
@@ -291,7 +297,7 @@ Layout so far:
   fixed upstream and the pin moves.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.2.0-rc.5` since CHEESE-59 (v0.2 adds the sign-in panel and screens,
+  `v0.2.0-rc.6` since CHEESE-61 (v0.2 adds the sign-in panel and screens,
   check-email and set-password screens, typed confirm sheet,
   `ForgeAccountSettings`, sign-out sheet); local checkout `~/Projects/forge-ui`;
   Jira project `FU` since 2026-10-17, forge-core's is `FC`). It owns the theme

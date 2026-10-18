@@ -370,11 +370,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.2.0-rc.5"
-      resolved-ref: "674435cea4f2b447fafee63021fa7b1ec54d865a"
+      ref: "v0.2.0-rc.6"
+      resolved-ref: b034e7f2ebe8f1d601c226f07e9f492adb210f2b
       url: "https://github.com/tkforgeworks/forge-ui.git"
     source: git
-    version: "0.2.0-rc.5+10"
+    version: "0.2.0-rc.6+11"
   functions_client:
     dependency: transitive
     description:
