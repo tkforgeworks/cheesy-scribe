@@ -30,14 +30,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <!-- Confirmation and password-reset mails send the user back here
-                 (CHEESE-61): the application id as a custom scheme, also on
-                 the Supabase project's redirect allow list. supabase_flutter
-                 reads the link; the app never parses it. -->
+                 (CHEESE-61): the application id minus its underscore as a
+                 custom scheme (a URL scheme cannot contain one), also on the
+                 Supabase project's redirect allow list. Must equal
+                 scribeAuthRedirectUrl in lib/data/forge_providers.dart.
+                 supabase_flutter reads the link; the app never parses it. -->
             <intent-filter android:autoVerify="false">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="com.tkforgeworks.cheesy_scribe" android:host="auth-callback"/>
+                <data android:scheme="com.tkforgeworks.cheesyscribe" android:host="auth-callback"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

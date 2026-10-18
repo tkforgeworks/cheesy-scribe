@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cheesy_scribe/data/forge_providers.dart';
 import 'package:cheesy_scribe/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +26,24 @@ void main() {
     expect(scribeSupabaseConfig.hasGoogle, isFalse);
     expect(
       scribeSupabaseConfig.authRedirectUrl,
-      'com.tkforgeworks.cheesy_scribe://auth-callback',
+      'com.tkforgeworks.cheesyscribe://auth-callback',
+    );
+  });
+
+  test('the redirect is a URL both Dart and GoTrue can parse', () {
+    // rc.1 used the application id verbatim; its underscore is not a scheme
+    // character, so GoTrue replaced the redirect with the Site URL in every
+    // mail and Uri.parse threw on the link. Keep the scheme underscore-free
+    // and identical to the manifest's intent filter.
+    final uri = Uri.parse(scribeAuthRedirectUrl);
+    expect(uri.scheme, 'com.tkforgeworks.cheesyscribe');
+    expect(uri.host, 'auth-callback');
+    expect(scribeAuthRedirectUrl, isNot(contains('_')));
+    final manifest = File('android/app/src/main/AndroidManifest.xml')
+        .readAsStringSync();
+    expect(
+      manifest,
+      contains('android:scheme="${uri.scheme}" android:host="${uri.host}"'),
     );
   });
 

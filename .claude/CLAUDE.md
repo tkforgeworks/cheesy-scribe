@@ -105,7 +105,12 @@ Layout so far:
 - `lib/data/forge_providers.dart` (CHEESE-59) — the backend handle:
   `scribeSupabaseConfig` (`ForgeSupabaseConfig.fromEnvironment` with
   `authRedirectUrl: scribeAuthRedirectUrl` =
-  `com.tkforgeworks.cheesy_scribe://auth-callback`), `forgeCoreProvider`
+  `com.tkforgeworks.cheesyscribe://auth-callback`: the application id
+  **minus its underscore**, since a URL scheme cannot contain one; rc.1
+  used `cheesy_scribe://` and GoTrue, which validates `redirect_to` with
+  Go's URL parser before the allow list, sent every mail link to the Site
+  URL instead; the test pins that it parses and matches the manifest),
+  `forgeCoreProvider`
   (`ForgeCore?`, null by default; `main()` overrides it with
   `ForgeCore.initialize` when `isConfigured`), `forgeAuthProvider` /
   `forgeAccountsProvider` (derived, null without a backend; tests override
@@ -150,7 +155,7 @@ Layout so far:
   pushed by `ScribeApp`'s `ref.listen(authStateProvider)` on
   `passwordRecovery` (`pushReplacement` when check-email is showing, so the
   two never stack); success snackbars `savedMessage` and pops. The manifest
-  declares the `com.tkforgeworks.cheesy_scribe://auth-callback` intent
+  declares the `com.tkforgeworks.cheesyscribe://auth-callback` intent
   filter; supabase_flutter consumes the link, nothing here parses it.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
   CHEESE-33): a thin wrapper over forge_ui's `ForgeAboutScreen` (layout

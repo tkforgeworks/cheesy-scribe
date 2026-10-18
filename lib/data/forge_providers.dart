@@ -2,10 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forge_core/forge_core.dart';
 
 /// Where confirmation and password-reset mails send the user back to. App
-/// code rather than configuration: it is the application id as a custom
-/// scheme, declared as an intent filter in the Android manifest and on the
-/// Supabase project's redirect allow list.
-const scribeAuthRedirectUrl = 'com.tkforgeworks.cheesy_scribe://auth-callback';
+/// code rather than configuration: a custom scheme declared as an intent
+/// filter in the Android manifest and on the Supabase project's redirect
+/// allow list. It is the application id *without its underscore*: a URL
+/// scheme may only contain letters, digits, `+`, `-` and `.`, and GoTrue
+/// silently falls back to the Site URL for a redirect it cannot parse
+/// (rc.1 shipped `cheesy_scribe://` and every mail link went to the
+/// website). `test/data/forge_providers_test.dart` pins that it parses.
+const scribeAuthRedirectUrl = 'com.tkforgeworks.cheesyscribe://auth-callback';
 
 /// The Supabase project this build talks to, read from the three
 /// `--dart-define`s (`FORGE_SUPABASE_URL`, `FORGE_SUPABASE_PUBLISHABLE_KEY`,
