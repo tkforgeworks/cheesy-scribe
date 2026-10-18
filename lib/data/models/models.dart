@@ -5,5 +5,6 @@ library;
 export 'app_settings.dart';
 export 'cheese_style.dart';
 export 'enums.dart';
+export 'note_tombstone.dart';
 export 'tasting_note.dart';
 export 'tasting_stats.dart';

@@ -6,6 +6,7 @@ import 'models/models.dart';
 import 'repositories/library_repository.dart';
 import 'repositories/notes_repository.dart';
 import 'repositories/recent_searches_repository.dart';
+import 'repositories/sync_meta_repository.dart';
 import 'repositories/settings_repository.dart';
 
 /// The on-device SQLite database (`cheesy_scribe.sqlite` in the app's
@@ -27,6 +28,10 @@ final settingsRepositoryProvider = Provider<SettingsRepository>(
 
 final recentSearchesRepositoryProvider = Provider<RecentSearchesRepository>(
   (ref) => RecentSearchesRepository(ref.watch(appDatabaseProvider)),
+);
+
+final syncMetaRepositoryProvider = Provider<SyncMetaRepository>(
+  (ref) => SyncMetaRepository(ref.watch(appDatabaseProvider)),
 );
 
 /// One note, live; emits null once it is deleted.

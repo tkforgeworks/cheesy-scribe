@@ -75,6 +75,7 @@ void main() {
       final json = fullNote.toJson();
       expect(json['tastedAt'], '2026-08-12');
       expect(json['createdAt'], '2026-08-12T19:30:05.000Z');
+      expect(json['updatedAt'], '2026-08-12T19:30:05.000Z'); // = createdAt
       expect(json['price'], 28);
       expect(json.containsKey('pricePerLb'), isFalse);
       expect(minimalNote.toJson().containsKey('verdict'), isFalse);
@@ -86,6 +87,22 @@ void main() {
       expectValid(schema, roundTrip(minimalNote.toJson()));
       final bad = roundTrip(fullNote.toJson())..['pricePerLb'] = 3;
       expect(schema.validate(bad).errors, isNotEmpty);
+    });
+
+    test('updatedAt defaults to createdAt, round-trips, is not equality', () {
+      expect(minimalNote.updatedAt, minimalNote.createdAt);
+      final later = DateTime.utc(2026, 10, 18, 9, 30);
+      final stamped = minimalNote.copyWith(updatedAt: later);
+      expect(stamped.updatedAt, later);
+      expect(stamped, minimalNote); // metadata, not content
+      expect(stamped.hashCode, minimalNote.hashCode);
+      final json = roundTrip(stamped.toJson());
+      expect(json['updatedAt'], '2026-10-18T09:30:00.000Z');
+      expect(TastingNote.fromJson(json).updatedAt, later);
+      expectValid(loadSchema('tasting-note.schema.json'), json);
+      // Payloads older than schema v3 carry no updatedAt.
+      final legacy = TastingNote.fromJson(json..remove('updatedAt'));
+      expect(legacy.updatedAt, minimalNote.createdAt);
     });
 
     test('parses legacy date-time tastedAt and missing createdAt', () {

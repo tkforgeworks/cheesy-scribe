@@ -56,27 +56,112 @@ class NotesQuery {
 
 const _unset = Object();
 
-/// CRUD, paged listing, search and per-style counts over the `notes` table.
-/// Streams re-emit whenever the table changes (drift stream queries).
+/// CRUD, paged listing, search and per-style counts over the `notes` table,
+/// plus the sync bookkeeping the engine needs (CHEESE-58). Streams re-emit
+/// whenever the table changes (drift stream queries).
 class NotesRepository {
-  NotesRepository(this._db, {Uuid? uuid}) : _uuid = uuid ?? const Uuid();
+  NotesRepository(this._db, {Uuid? uuid, DateTime Function()? now})
+    : _uuid = uuid ?? const Uuid(),
+      _now = now ?? DateTime.now;
 
   final AppDatabase _db;
   final Uuid _uuid;
+  final DateTime Function() _now;
 
   $NotesTable get _t => _db.notes;
 
   /// Fresh id for a note about to be saved.
   String newId() => _uuid.v4();
 
-  /// Insert or replace.
+  /// Insert or replace a local edit: stamps [TastingNote.updatedAt] with
+  /// the current time and marks the row dirty for sync. Returns the note as
+  /// stored.
   Future<TastingNote> save(TastingNote note) async {
-    await _db.into(_t).insertOnConflictUpdate(noteToCompanion(note));
-    return note;
+    final stamped = note.copyWith(updatedAt: _now().toUtc());
+    await _db
+        .into(_t)
+        .insertOnConflictUpdate(
+          noteToCompanion(stamped).copyWith(dirty: const Value(true)),
+        );
+    return stamped;
   }
 
-  Future<void> delete(String id) =>
-      (_db.delete(_t)..where((n) => n.id.equals(id))).go();
+  /// Deletes a note locally and leaves a tombstone so sync can delete it
+  /// from the account (see [tombstones]).
+  Future<void> delete(String id) => _db.transaction(() async {
+    await _db
+        .into(_db.noteTombstones)
+        .insertOnConflictUpdate(
+          NoteTombstonesCompanion(
+            id: Value(id),
+            deletedAt: Value(_now().toUtc().toIso8601String()),
+          ),
+        );
+    await (_db.delete(_t)..where((n) => n.id.equals(id))).go();
+  });
+
+  // --- Sync bookkeeping -----------------------------------------------
+
+  /// Notes changed locally since they were last pushed, oldest change first.
+  Stream<List<TastingNote>> watchDirty() =>
+      _dirtyQuery().watch().map((rows) => rows.map(noteFromRow).toList());
+
+  /// One-shot [watchDirty].
+  Future<List<TastingNote>> dirtyNotes() async =>
+      (await _dirtyQuery().get()).map(noteFromRow).toList();
+
+  SimpleSelectStatement<$NotesTable, NoteRow> _dirtyQuery() => _db.select(_t)
+    ..where((n) => n.dirty.equals(true))
+    ..orderBy([
+      (n) => OrderingTerm.asc(n.updatedAt),
+      (n) => OrderingTerm.asc(n.id),
+    ]);
+
+  /// Clears the dirty flag on [pushed], but only where the row still carries
+  /// the same [TastingNote.updatedAt]: an edit made while the push was in
+  /// flight stays dirty for the next one.
+  Future<void> markClean(Iterable<TastingNote> pushed) => _db.batch((b) {
+    for (final n in pushed) {
+      b.update(
+        _t,
+        const NotesCompanion(dirty: Value(false)),
+        where: (t) =>
+            t.id.equals(n.id) &
+            t.updatedAt.equals(n.updatedAt.toUtc().toIso8601String()),
+      );
+    }
+  });
+
+  /// Writes notes received from the account as they are, keeping their own
+  /// [TastingNote.updatedAt] and leaving them clean. Never stamps.
+  Future<void> applyRemote(Iterable<TastingNote> notes) => _db.batch((b) {
+    b.insertAllOnConflictUpdate(_t, [
+      for (final n in notes)
+        noteToCompanion(n).copyWith(dirty: const Value(false)),
+    ]);
+  });
+
+  /// Removes notes the account says were deleted, without tombstones.
+  Future<void> applyRemoteDeletions(Iterable<String> ids) =>
+      (_db.delete(_t)..where((n) => n.id.isIn(ids))).go();
+
+  /// Local deletions not yet pushed, oldest first.
+  Future<List<NoteTombstone>> tombstones() async {
+    final rows =
+        await (_db.select(_db.noteTombstones)..orderBy([
+              (t) => OrderingTerm.asc(t.deletedAt),
+              (t) => OrderingTerm.asc(t.id),
+            ]))
+            .get();
+    return [
+      for (final r in rows)
+        NoteTombstone(id: r.id, deletedAt: DateTime.parse(r.deletedAt)),
+    ];
+  }
+
+  /// Forgets tombstones once their deletion reached the account.
+  Future<void> clearTombstones(Iterable<String> ids) =>
+      (_db.delete(_db.noteTombstones)..where((t) => t.id.isIn(ids))).go();
 
   Future<TastingNote?> getNote(String id) async {
     final row = await (_db.select(
