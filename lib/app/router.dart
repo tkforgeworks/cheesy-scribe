@@ -35,13 +35,12 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
     initialLocation: initialLocation,
     // CHEESE-61/68: a confirmation or reset link opens the app as a
     // platform route carrying the whole URI
-    // (`https://tkforgeworks.com/apps/cheesy-scribe/auth/?code=…`, or the
-    // legacy `com.tkforgeworks.cheesyscribe://auth-callback/?code=…`),
-    // whether the app was cold or warm. supabase_flutter reads the code
-    // from that same link on its own; the router only needs somewhere to
-    // go, and Account is where the resulting session (or set-password
-    // push) shows. Without this the location matches nothing and the error
-    // page appears (rc.2).
+    // (`https://tkforgeworks.com/apps/cheesy-scribe/auth/?token_hash=…`),
+    // whether the app was cold or warm. forge_core verifies the token from
+    // that same link on its own; the router only needs somewhere to go,
+    // and Account is where the resulting session (or set-password push,
+    // or the expired-link message) shows. Without this the location
+    // matches nothing and the error page appears (rc.2).
     redirect: (context, state) => isAuthCallback(state.uri) ? '/account' : null,
     routes: [
       ShellRoute(

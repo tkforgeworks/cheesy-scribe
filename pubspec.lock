@@ -361,11 +361,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.1.0-rc.11"
-      resolved-ref: "788e3f1198a08302f71c19ff5f3ed2364746f5a5"
+      ref: "v0.1.0-rc.12"
+      resolved-ref: "38c7b08105e355673865648e330e30e11e9c56d9"
       url: "https://github.com/tkforgeworks/forge-core.git"
     source: git
-    version: "0.1.0-rc.11+12"
+    version: "0.1.0-rc.12+13"
   forge_ui:
     dependency: "direct main"
     description:

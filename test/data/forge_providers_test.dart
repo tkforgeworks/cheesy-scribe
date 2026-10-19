@@ -51,23 +51,7 @@ void main() {
     final filter = manifest.indexOf('android:autoVerify="true"');
     expect(filter, greaterThan(-1));
     expect(manifest.indexOf('android:host="${uri.host}"'), greaterThan(filter));
-  });
-
-  test('the legacy scheme is still a URL GoTrue can parse and is claimed', () {
-    // rc.1 used the application id verbatim; its underscore is not a scheme
-    // character, so GoTrue replaced the redirect with the Site URL in every
-    // mail and Uri.parse threw on the link. Keep the scheme underscore-free
-    // and identical to the manifest's intent filter for as long as it stays.
-    final uri = Uri.parse(legacyAuthCallbackUrl);
-    expect(uri.scheme, 'com.tkforgeworks.cheesyscribe');
-    expect(uri.host, 'auth-callback');
-    expect(legacyAuthCallbackUrl, isNot(contains('_')));
-    final manifest = File('android/app/src/main/AndroidManifest.xml')
-        .readAsStringSync();
-    expect(
-      manifest,
-      contains('android:scheme="${uri.scheme}" android:host="${uri.host}"'),
-    );
+    expect(manifest, isNot(contains('com.tkforgeworks.cheesyscribe')));
   });
 
   test('isAuthCallback recognises both links with whatever GoTrue appends', () {
@@ -97,8 +81,17 @@ void main() {
       isFalse,
     );
     expect(
-      isAuthCallback(Uri.parse('$legacyAuthCallbackUrl/?code=abc')),
+      isAuthCallback(
+        Uri.parse('$scribeAuthRedirectUrl?token_hash=abc&type=signup'),
+      ),
       isTrue,
+    );
+    // The rc.2–rc.8 custom scheme is no longer claimed.
+    expect(
+      isAuthCallback(
+        Uri.parse('com.tkforgeworks.cheesyscribe://auth-callback/?code=abc'),
+      ),
+      isFalse,
     );
     expect(
       isAuthCallback(

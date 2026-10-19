@@ -11,6 +11,7 @@ import 'app/theme/scribe_theme.dart';
 import 'data/forge_providers.dart';
 import 'data/providers.dart';
 import 'data/sync/sync_providers.dart';
+import 'features/account/auth_copy.dart';
 import 'features/account/check_email_screen.dart';
 import 'features/account/set_password_screen.dart';
 
@@ -66,7 +67,25 @@ class _ScribeAppState extends ConsumerState<ScribeApp> {
     AsyncValue<ForgeAuthState>? _,
     AsyncValue<ForgeAuthState> next,
   ) {
-    if (next.asData?.value.isPasswordRecovery != true) return;
+    final state = next.asData?.value;
+    if (state == null) return;
+    // A confirmation or reset link that could not be verified (expired,
+    // already used; CHEESE-68): say so wherever the user is. The link
+    // itself already landed the router on Account, where Send again and
+    // Forgot password live.
+    if (state.isMailLinkFailed) {
+      _messenger.currentState
+        ?..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              authErrorCopy(state.error ?? ForgeAuthError.linkExpired),
+            ),
+          ),
+        );
+      return;
+    }
+    if (!state.isPasswordRecovery) return;
     final here = _router.state.uri.path;
     if (here == SetPasswordScreen.path) return;
     if (here == CheckEmailScreen.path) {
