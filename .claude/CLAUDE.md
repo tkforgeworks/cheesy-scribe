@@ -135,8 +135,11 @@ Layout so far:
   `?token_hash=…&type=…` instead of GoTrue's `/verify` redirect, whose 303
   body ("See Other") stayed behind as a tab in Gmail's browser on rc.3 and
   rc.9; forge_core verifies the token on arrival (`signedIn`,
-  `passwordRecovery`, or `mailLinkFailed`, which `ScribeApp` shows as a
-  snackbar with `authErrorCopy`). The trailing slash is part of the
+  `passwordRecovery`, or `mailLinkFailed`; `createScribeRouter`'s
+  `onMailLink` tells `ScribeApp` a link arrived, and `_onAuthState` greets
+  the state it produces with a snackbar: `emailConfirmedMessage`,
+  `resetLinkVerifiedMessage`, or `authErrorCopy` for a failed link,
+  copy in `auth_copy.dart`). The trailing slash is part of the
   allow-list entry, which `{{ .RedirectTo }}` is validated against. The
   rc.2–rc.8 custom scheme `com.tkforgeworks.cheesyscribe://auth-callback`
   (the application id **minus its underscore**; rc.1 used

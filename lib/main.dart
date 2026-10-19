@@ -50,7 +50,12 @@ class ScribeApp extends ConsumerStatefulWidget {
 class _ScribeAppState extends ConsumerState<ScribeApp> {
   late final GoRouter _router = createScribeRouter(
     initialLocation: widget.initialLocation,
+    onMailLink: (link) => _pendingLink = link,
   );
+
+  /// The mail link that just opened the app, until the auth state it
+  /// produces arrives (CHEESE-68): what [_onAuthState] greets.
+  ForgeMailLink? _pendingLink;
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   late final _guard = SessionGuard(ref, _messenger);
 
@@ -60,39 +65,48 @@ class _ScribeAppState extends ConsumerState<ScribeApp> {
     super.dispose();
   }
 
-  /// A password-reset link opened on this phone signs the user in with a
-  /// `passwordRecovery` state (CHEESE-61): show the set-password screen,
-  /// in place of the check-email screen when that is what is showing.
+  /// Mail links (CHEESE-61/68): forge_core verifies the token the link
+  /// carries and the result arrives here. A reset link gives
+  /// `passwordRecovery`: show the set-password screen, in place of the
+  /// check-email screen when that is what is showing. A confirmation link
+  /// gives `signedIn`. Either way the user would otherwise just find
+  /// themselves in the app, so the link that [_router] saw arrive is
+  /// greeted with a line at the bottom; a link that could not be verified
+  /// (expired, already used) gets the error copy in the same place.
   void _onAuthState(
     AsyncValue<ForgeAuthState>? _,
     AsyncValue<ForgeAuthState> next,
   ) {
     final state = next.asData?.value;
     if (state == null) return;
-    // A confirmation or reset link that could not be verified (expired,
-    // already used; CHEESE-68): say so wherever the user is. The link
-    // itself already landed the router on Account, where Send again and
-    // Forgot password live.
+    final link = _pendingLink;
     if (state.isMailLinkFailed) {
-      _messenger.currentState
-        ?..clearSnackBars()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              authErrorCopy(state.error ?? ForgeAuthError.linkExpired),
-            ),
-          ),
-        );
+      _pendingLink = null;
+      _notify(authErrorCopy(state.error ?? ForgeAuthError.linkExpired));
       return;
     }
-    if (!state.isPasswordRecovery) return;
-    final here = _router.state.uri.path;
-    if (here == SetPasswordScreen.path) return;
-    if (here == CheckEmailScreen.path) {
-      _router.pushReplacement(SetPasswordScreen.path);
-    } else {
-      _router.push(SetPasswordScreen.path);
+    if (state.isPasswordRecovery) {
+      _pendingLink = null;
+      if (link?.isPasswordReset == true) _notify(resetLinkVerifiedMessage);
+      final here = _router.state.uri.path;
+      if (here == SetPasswordScreen.path) return;
+      if (here == CheckEmailScreen.path) {
+        _router.pushReplacement(SetPasswordScreen.path);
+      } else {
+        _router.push(SetPasswordScreen.path);
+      }
+      return;
     }
+    if (state.event == ForgeAuthEvent.signedIn) {
+      _pendingLink = null;
+      if (link != null && !link.isPasswordReset) _notify(emailConfirmedMessage);
+    }
+  }
+
+  void _notify(String message) {
+    _messenger.currentState
+      ?..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
