@@ -4,6 +4,7 @@ import 'package:forge_core/forge_core.dart';
 import '../forge_providers.dart';
 import '../models/models.dart';
 import '../providers.dart';
+import 'profile_payload.dart';
 import 'sync_coordinator.dart';
 import 'sync_payload.dart';
 import 'sync_service.dart';
@@ -22,6 +23,19 @@ final remoteNotesProvider = Provider<ForgeEntriesRepository<TastingNote>?>(
       ),
 );
 
+/// The account's `profiles` row on the server (member since, recent
+/// searches), or null in a build with no backend.
+final remoteProfileProvider = Provider<ForgeEntriesRepository<ProfilePayload>?>(
+  (ref) => ref
+      .watch(forgeCoreProvider)
+      ?.entries<ProfilePayload>(
+        table: 'profiles',
+        kind: 'profile',
+        fromJson: ProfilePayload.fromJson,
+        toJson: (p) => p.toJson(),
+      ),
+);
+
 /// The engine for the signed-in session, or null when signed out or without
 /// a backend. A new session gets a new service (and the repository it
 /// wraps is already scoped to that owner).
@@ -33,6 +47,9 @@ final syncServiceProvider = Provider<SyncService?>((ref) {
     notes: notes,
     meta: ref.watch(syncMetaRepositoryProvider),
     remote: remote,
+    profile: ref.watch(remoteProfileProvider),
+    settings: ref.watch(settingsRepositoryProvider),
+    searches: ref.watch(recentSearchesRepositoryProvider),
   );
 });
 

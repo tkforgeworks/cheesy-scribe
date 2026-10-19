@@ -5,6 +5,7 @@ import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/providers.dart';
 import 'package:cheesy_scribe/data/repositories/library_repository.dart';
 import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
+import 'package:cheesy_scribe/data/sync/profile_payload.dart';
 import 'package:cheesy_scribe/data/sync/sync_providers.dart';
 import 'package:cheesy_scribe/features/feedback/feedback_client.dart';
 import 'package:cheesy_scribe/main.dart';
@@ -61,6 +62,7 @@ Future<AppDatabase> pumpApp(
   FakeForgeAuth? auth,
   FakeForgeAccounts? accounts,
   FakeForgeEntriesRepository<TastingNote>? remote,
+  FakeForgeEntriesRepository<ProfilePayload>? remoteProfile,
   bool backup = true,
 }) async {
   final database = db ?? openTestDatabase();
@@ -70,6 +72,8 @@ Future<AppDatabase> pumpApp(
   final fakeAccounts = accounts ?? FakeForgeAccounts(fakeAuth);
   final fakeRemote =
       remote ?? FakeForgeEntriesRepository<TastingNote>(fakeAuth);
+  final fakeProfile =
+      remoteProfile ?? FakeForgeEntriesRepository<ProfilePayload>(fakeAuth);
   await tester.runAsync(() async {
     if (settings != null) await SettingsRepository(database).save(settings);
     await library.load();
@@ -100,6 +104,7 @@ Future<AppDatabase> pumpApp(
         forgeAuthProvider.overrideWithValue(backup ? fakeAuth : null),
         forgeAccountsProvider.overrideWithValue(backup ? fakeAccounts : null),
         remoteNotesProvider.overrideWithValue(backup ? fakeRemote : null),
+        remoteProfileProvider.overrideWithValue(backup ? fakeProfile : null),
       ],
       child: ScribeApp(key: ValueKey(restart), initialLocation: at),
     ),

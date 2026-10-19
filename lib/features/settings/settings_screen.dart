@@ -6,8 +6,11 @@ import 'package:heroicons/heroicons.dart';
 
 import '../../app/shell/scribe_shell.dart';
 import '../../app/shell/shell_providers.dart';
+import '../../data/forge_providers.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
+import '../account/account_screen.dart';
+import '../account/backup_status_row.dart';
 
 /// `/settings` (DESIGN_SPEC §6, CHEESE-31): mono-labelled groups of
 /// bordered cards. Theme and units persist through [AppSettings]; the
@@ -17,6 +20,13 @@ class SettingsScreen extends ConsumerWidget {
 
   static const disabledOpacity = 0.45;
 
+  /// BACKUP group copy (CHEESE-63).
+  static const signInRowKey = Key('settings-backup-sign-in');
+  static const accountRowKey = Key('settings-backup-account');
+  static const signInTitle = 'Sign in to back up your notes';
+  static const signInSubtitle =
+      'Optional. Your notes stay on this phone either way.';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings =
@@ -25,6 +35,13 @@ class SettingsScreen extends ConsumerWidget {
     final c = context.colors;
     final x = context.forge;
     final repo = ref.read(settingsRepositoryProvider);
+    final backup = ref.watch(backupAvailableProvider);
+    final session = ref.watch(sessionProvider);
+    final chevron = HeroIcon(
+      HeroIcons.chevronRight,
+      size: 18,
+      color: x.textTertiary,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -69,6 +86,47 @@ class SettingsScreen extends ConsumerWidget {
                 ],
                 onChanged: (u) => repo.update((s) => s.copyWith(units: u)),
               ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          // CHEESE-63: where backup stands, or how to turn it on.
+          ForgeSettingsGroup(
+            label: 'Backup',
+            children: [
+              if (!backup)
+                Opacity(
+                  opacity: disabledOpacity,
+                  child: const ListTile(
+                    enabled: false,
+                    title: Text(AccountScreen.backupUnavailable),
+                  ),
+                )
+              else if (session == null)
+                ListTile(
+                  key: signInRowKey,
+                  leading: HeroIcon(
+                    HeroIcons.cloudArrowUp,
+                    color: x.textTertiary,
+                  ),
+                  title: const Text(signInTitle),
+                  subtitle: const Text(signInSubtitle),
+                  trailing: chevron,
+                  onTap: () => context.go('/account'),
+                )
+              else ...[
+                const BackupStatusRow(),
+                ListTile(
+                  key: accountRowKey,
+                  leading: HeroIcon(
+                    HeroIcons.userCircle,
+                    color: x.textTertiary,
+                  ),
+                  title: Text(session.email ?? 'Account'),
+                  subtitle: const Text('Signed in'),
+                  trailing: chevron,
+                  onTap: () => context.go('/account'),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 18),
