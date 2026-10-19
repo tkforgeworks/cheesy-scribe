@@ -37,12 +37,12 @@ Layout so far:
   `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
   routes a `NoTransitionPage` (CHEESE-43; `test/app_test.dart` pins it).
   A top-level `redirect` sends the auth-callback URI (`isAuthCallback`:
-  the App Link `https://tkforgeworks.com/apps/cheesy-scribe/auth/?code=…`
-  matched by scheme, host and path prefix, since go_router drops the
-  trailing slash, or the legacy custom scheme; Android hands the router the
-  whole URI, cold or warm) to `/account`; supabase_flutter reads the code
+  the App Link `https://tkforgeworks.com/apps/cheesy-scribe/auth/` plus
+  whatever the mail appended, matched by scheme, host and path prefix
+  since go_router drops the trailing slash; Android hands the router the
+  whole URI, cold or warm) to `/account`; forge_core verifies the token
   from the same link itself (CHEESE-61, found on rc.2 as "no routes for
-  location"; CHEESE-68 for the App Link). `test/support.dart`'s `openLink()` sends the
+  location"; CHEESE-68 for the App Link and the token links). `test/support.dart`'s `openLink()` sends the
   engine's `pushRouteInformation` for the warm case.
 - `lib/app/shell/` — `ScribeShell` (Scaffold owning the drawer; screens are
   their own Scaffolds and call `ScribeShell.openDrawer(context)`, not
@@ -128,17 +128,21 @@ Layout so far:
   `authRedirectUrl: scribeAuthRedirectUrl` =
   `https://tkforgeworks.com/apps/cheesy-scribe/auth/`, an Android App Link
   since CHEESE-68 (rc.9): the website's `/.well-known/assetlinks.json`
-  names the Play app-signing and upload certificates, so a Play-signed
-  install opens the app for that path with nothing left in the mail
-  client, and its landing page catches everyone else (TKFW-85). The
-  trailing slash is part of the allow-list entry. `legacyAuthCallbackUrl`
-  = `com.tkforgeworks.cheesyscribe://auth-callback`, the rc.2–rc.8
-  scheme (the application id **minus its underscore**, since a URL scheme
-  cannot contain one; rc.1 used `cheesy_scribe://` and GoTrue, which
-  validates `redirect_to` with Go's URL parser before the allow list, sent
-  every mail link to the Site URL instead), still accepted by
-  `isAuthCallback` and the manifest one more RC; the tests pin both
-  against the manifest),
+  names every certificate Play signs the package with (four, from Play
+  Console → Grow → Deep links), so a Play-signed install opens the app
+  for that path, and its landing page catches everyone else (TKFW-85).
+  Since rc.10 the mail templates (forge-core FC-13) link to that URL with
+  `?token_hash=…&type=…` instead of GoTrue's `/verify` redirect, whose 303
+  body ("See Other") stayed behind as a tab in Gmail's browser on rc.3 and
+  rc.9; forge_core verifies the token on arrival (`signedIn`,
+  `passwordRecovery`, or `mailLinkFailed`, which `ScribeApp` shows as a
+  snackbar with `authErrorCopy`). The trailing slash is part of the
+  allow-list entry, which `{{ .RedirectTo }}` is validated against. The
+  rc.2–rc.8 custom scheme `com.tkforgeworks.cheesyscribe://auth-callback`
+  (the application id **minus its underscore**; rc.1 used
+  `cheesy_scribe://` and GoTrue sent every mail link to the Site URL) is
+  gone: GoTrue's `html/template` would rewrite it to `#ZgotmplZ` in the
+  token links anyway; the test pins the manifest against the constant),
   `forgeCoreProvider`
   (`ForgeCore?`, null by default; `main()` overrides it with
   `ForgeCore.initialize` when `isConfigured`), `forgeAuthProvider` /
@@ -257,12 +261,12 @@ Layout so far:
   Supabase design (no account enumeration); forge_ui rc.6's check-email
   reset copy is conditional ("If there is an account for …"). The manifest
   declares an `autoVerify` https intent filter for
-  `tkforgeworks.com` + `pathPrefix /apps/cheesy-scribe/auth` (CHEESE-68)
-  and, one more RC, the legacy custom-scheme filter; CI's `-debugsigned`
+  `tkforgeworks.com` + `pathPrefix /apps/cheesy-scribe/auth` (CHEESE-68),
+  the only link filter; CI's `-debugsigned`
   and local debug builds cannot verify the App Link (their key is not in
   the statement file), so there the mail link opens the website's landing
   page, whose "Open Cheesy Scribe" intent link still reaches the app.
-  supabase_flutter consumes the link, nothing here parses it.
+  forge_core consumes the link, nothing here parses it.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
   CHEESE-33): a thin wrapper over forge_ui's `ForgeAboutScreen` (layout
   and the maker line with the tinted mark live in the package; pass
@@ -395,7 +399,7 @@ Layout so far:
   `onChanged` is null). Both modes edit one `Map<FlavorNote,int>`; zeros
   are removed from the map, never stored.
 - **`forge_core`** (CHEESE-59) — the shared tkforgeworks Supabase package
-  (`tkforgeworks/forge-core`, git dependency pinned to `v0.1.0-rc.11`;
+  (`tkforgeworks/forge-core`, git dependency pinned to `v0.1.0-rc.12`;
   local checkout `~/Projects/forge-core`; Jira `FC`): config, `ForgeAuth`
   (Google + email/password, linking, sign-out), `ForgeAccounts`,
   `ForgeEntriesRepository`, the Supabase SQL/functions/templates and
@@ -905,5 +909,10 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   ready to close). CHEESE-68 + TKFW-85: the mail redirect became the
   Android App Link `https://tkforgeworks.com/apps/cheesy-scribe/auth/`
   (website PR #30 live: statement file with both Play fingerprints, landing
-  page, analytics off under `/apps/`); the legacy scheme stays one RC.
-  Supabase allow list entry for the new URL is Tim's (dashboard).
+  page, analytics off under `/apps/`). rc.9 showed the App Link verified
+  but Gmail still kept a tab with GoTrue's 303 body, so forge-core FC-13
+  (rc.12) moved the mail templates to token links
+  (`{{ .RedirectTo }}?token_hash=…&type=…`, verified in-app by forge_core)
+  and rc.10 took the pin, the re-synced templates, the `mailLinkFailed`
+  snackbar and dropped the legacy scheme. Tim pastes the four templates
+  into the dashboard and can remove the custom-scheme allow-list entry.

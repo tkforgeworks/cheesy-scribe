@@ -13,18 +13,13 @@ import 'package:forge_core/forge_core.dart';
 const scribeAuthRedirectUrl =
     'https://tkforgeworks.com/apps/cheesy-scribe/auth/';
 
-/// The custom scheme the mails redirected to from rc.2 to rc.8 (CHEESE-61):
-/// the application id *without its underscore*, since a URL scheme may only
-/// contain letters, digits, `+`, `-` and `.`, and GoTrue silently falls back
-/// to the Site URL for a redirect it cannot parse. Still opens the app one
-/// more RC so a mail sent before the switch keeps working; the manifest
-/// filter and this constant go together.
-const legacyAuthCallbackUrl = 'com.tkforgeworks.cheesyscribe://auth-callback';
-
-/// Whether [uri] is a mail link opening the app: the App Link (host and
-/// path prefix, so GoTrue's `?code=` or `#error=` may follow) or the legacy
-/// scheme. The router sends both to Account; supabase_flutter reads the
-/// code from the same link on its own.
+/// Whether [uri] is a mail link opening the app: the App Link by host and
+/// path prefix, so whatever the template appends (`?token_hash=…&type=…`,
+/// or GoTrue's `?code=` / `#error=` from the older redirect flow) may
+/// follow. The router sends it to Account; forge_core verifies the token
+/// (or supabase_flutter exchanges the code) from the same link on its own.
+/// The rc.2–rc.8 custom scheme `com.tkforgeworks.cheesyscribe://` is gone
+/// with rc.10: mails carrying it expired within the hour they were sent.
 bool isAuthCallback(Uri uri) {
   final current = Uri.parse(scribeAuthRedirectUrl);
   // go_router drops the trailing slash from a location, so the path is
@@ -32,13 +27,9 @@ bool isAuthCallback(Uri uri) {
   final prefix = current.path.endsWith('/')
       ? current.path.substring(0, current.path.length - 1)
       : current.path;
-  if (uri.scheme == current.scheme &&
+  return uri.scheme == current.scheme &&
       uri.host == current.host &&
-      (uri.path == prefix || uri.path.startsWith('$prefix/'))) {
-    return true;
-  }
-  final legacy = Uri.parse(legacyAuthCallbackUrl);
-  return uri.scheme == legacy.scheme && uri.host == legacy.host;
+      (uri.path == prefix || uri.path.startsWith('$prefix/'));
 }
 
 /// The Supabase project this build talks to, read from the three

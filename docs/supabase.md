@@ -76,11 +76,15 @@ list. The CLI is installed at `~/.supabase/bin` and reads the same token.
 - Authentication → URL configuration: Site URL
   `https://tkforgeworks.com/privacy/cheesy-scribe/`; Redirect URLs
   `https://tkforgeworks.com/apps/cheesy-scribe/auth/` (the App Link,
-  CHEESE-68, exactly as the app sends it, trailing slash included) and,
-  until the legacy filter goes, `com.tkforgeworks.cheesyscribe://auth-callback`
-  (the application id **without its underscore**: a URL scheme cannot
-  contain one, see CHEESE-61).
-- Authentication → Email templates: the files under `supabase/templates/`.
+  CHEESE-68, exactly as the app sends it, trailing slash included; the
+  mail templates build their links on `{{ .RedirectTo }}`, which GoTrue
+  validates against this list, so a missing entry sends every mail link
+  to the Site URL). The rc.2–rc.8 entry
+  `com.tkforgeworks.cheesyscribe://auth-callback` can go.
+- Authentication → Email templates: the files under `supabase/templates/`
+  (subjects in that folder's README). Re-paste all four whenever
+  `forge_core.lock` changes them; since forge-core rc.12 (FC-13) the
+  buttons carry `token_hash` + `type` and the app verifies them itself.
 
 The project-scoped token lacks `project_admin_write`, so these cannot be
 changed from here. Auth logs need `analytics_logs_read`, also absent;
