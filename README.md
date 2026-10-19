@@ -6,7 +6,8 @@ An app based on the tasting note book from [33Books](https://www.33books.com), s
 
 [v0.1.0](https://github.com/tkforgeworks/cheesy-scribe/releases/tag/v0.1.0) is the first release: a signed APK on
 [GitHub Releases](https://github.com/tkforgeworks/cheesy-scribe/releases/latest) and a Google Play testing build (not yet
-public on the store). Flutter / Material 3, **Android only**, local-first (notes stay on the device). The plan and
+public on the store). Flutter / Material 3, **Android only**, local-first (notes stay on the device; 0.3.0 adds an
+optional account for backup, see [`PRIVACY.md`](PRIVACY.md)). The plan and
 ticket map are in [`docs/CHEESE-1-decomposition.md`](docs/CHEESE-1-decomposition.md); the design handoff is
 in [`docs/design_handoff_cheesy_scribe/`](docs/design_handoff_cheesy_scribe/).
 

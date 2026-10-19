@@ -364,7 +364,10 @@ void main() {
     }, signedIn: true);
     // CHEESE-65: the typed confirmation for deleting the account.
     scene('account-delete', '/account', (tester, p) async {
+      // The row sits below the fold; ensureVisible alone left it off-screen.
+      await scroll(tester, 900);
       await tester.ensureVisible(find.byKey(ForgeAccountSettings.deleteKey));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(ForgeAccountSettings.deleteKey));
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(ForgeConfirmSheet.fieldKey), 'DEL');
