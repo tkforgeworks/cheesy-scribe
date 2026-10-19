@@ -69,6 +69,12 @@ class BackupStatusRow extends ConsumerWidget {
         HeroIcons.exclamationTriangle,
         c.error,
       ),
+      SyncPhase.accountGone => (
+        failed,
+        'This account is no longer available.',
+        HeroIcons.exclamationTriangle,
+        c.error,
+      ),
       SyncPhase.idle || SyncPhase.signedOut => (
         status.pending > 0 ? changesWaiting : upToDate,
         status.lastSyncAt == null

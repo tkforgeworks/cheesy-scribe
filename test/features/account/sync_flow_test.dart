@@ -1,10 +1,9 @@
 import 'package:cheesy_scribe/data/db/app_database.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
-import 'package:cheesy_scribe/data/forge_providers.dart';
+import 'package:cheesy_scribe/app/session_guard.dart';
 import 'package:cheesy_scribe/features/account/account_screen.dart';
 import 'package:cheesy_scribe/features/account/auth_copy.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:forge_core/forge_core.dart';
@@ -36,6 +35,8 @@ void main() {
     remote = FakeForgeEntriesRepository<TastingNote>(auth);
   });
 
+  late FakeForgeAccounts accounts;
+
   Future<AppDatabase> boot(
     WidgetTester tester, {
     required int anonNotes,
@@ -50,7 +51,15 @@ void main() {
         await anon.save(note('a$i', 'Anon $i'));
       }
     });
-    await pumpApp(tester, at: '/account', db: db, auth: auth, remote: remote);
+    accounts = FakeForgeAccounts(auth);
+    await pumpApp(
+      tester,
+      at: '/account',
+      db: db,
+      auth: auth,
+      accounts: accounts,
+      remote: remote,
+    );
     return db;
   }
 
@@ -130,6 +139,8 @@ void main() {
       expect(auth.signOutCalls, [false]);
       // Signed out: the account's note is gone from the phone, the
       // signed-out note is the notebook again, the server keeps its copy.
+      // The user asked for this, so the session guard says nothing.
+      expect(find.text(SessionGuard.sessionEnded), findsNothing);
       expect(find.byType(ForgeSignInPanel), findsOneWidget);
       expect(find.text('MEMBER SINCE 2026 · 1 NOTE'), findsOneWidget);
       expect(remote.rows.keys, ['r1']);
@@ -257,9 +268,6 @@ void main() {
   ) async {
     await boot(tester, anonNotes: 0);
     await signInWithGoogle(tester);
-    final accounts = ProviderScope.containerOf(
-      tester.element(find.byType(AccountScreen)),
-    ).read(forgeAccountsProvider) as FakeForgeAccounts;
     accounts.nextError = ForgeDataError.network;
     await tester.ensureVisible(find.byKey(ForgeAccountSettings.deleteKey));
     await tester.tap(find.byKey(ForgeAccountSettings.deleteKey));
@@ -272,5 +280,63 @@ void main() {
     expect(find.text(AccountScreen.deleteTitle), findsOneWidget);
     expect(auth.signOutCalls, isEmpty);
     expect(accounts.deleteCalls, 1);
+  });
+
+  testApp(
+    'an account deleted elsewhere signs this phone out on the next sync',
+    (tester) async {
+      final db = await boot(tester, anonNotes: 1);
+      await signInWithGoogle(tester);
+      await tester.tap(find.text(AccountScreen.notNowLabel));
+      await tester.pumpAndSettle();
+      await onDb(
+        tester,
+        () => NotesRepository(db, owner: owner).save(note('o1', 'Owned')),
+      );
+      await settleSync(tester);
+      expect(remote.rows.keys, ['o1']);
+
+      // The website form (or another phone) flagged the account.
+      accounts.deletionRequestedAt = DateTime.utc(2026, 10, 18, 12);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(auth.signOutCalls, [false]);
+      expect(find.text(SessionGuard.accountDeleted), findsOneWidget);
+      expect(find.byType(ForgeSignInPanel), findsOneWidget);
+      expect(find.text('MEMBER SINCE 2026 · 1 NOTE'), findsOneWidget);
+      expect(
+        await onDb(
+          tester,
+          () => NotesRepository(db, owner: owner).watchAll().first,
+        ),
+        isEmpty,
+      );
+    },
+  );
+
+  testApp("a session that ends on its own also clears the account's notes", (
+    tester,
+  ) async {
+    final db = await boot(tester, anonNotes: 0);
+    await signInWithGoogle(tester);
+    await onDb(
+      tester,
+      () => NotesRepository(db, owner: owner).save(note('o1', 'Owned')),
+    );
+    await settleSync(tester);
+    // The refresh token is gone (the user was purged): the auth stream
+    // signs out without the app asking.
+    auth.emit(const ForgeAuthState(event: ForgeAuthEvent.signedOut));
+    await tester.pumpAndSettle();
+    expect(find.text(SessionGuard.sessionEnded), findsOneWidget);
+    expect(find.byType(ForgeSignInPanel), findsOneWidget);
+    expect(
+      await onDb(
+        tester,
+        () => NotesRepository(db, owner: owner).watchAll().first,
+      ),
+      isEmpty,
+    );
   });
 }

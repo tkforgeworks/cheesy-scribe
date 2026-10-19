@@ -13,6 +13,11 @@ enum SyncPhase {
 
   /// The last attempt failed for another reason; [SyncStatus.message] says.
   error,
+
+  /// The server says this account is pending deletion or no longer exists
+  /// (deleted from another phone or the website). The app signs this
+  /// phone out when it sees this (CHEESE-65).
+  accountGone,
 }
 
 @immutable

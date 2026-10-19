@@ -6,6 +6,7 @@ import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 
 import 'app/router.dart';
+import 'app/session_guard.dart';
 import 'app/theme/scribe_theme.dart';
 import 'data/forge_providers.dart';
 import 'data/providers.dart';
@@ -49,6 +50,8 @@ class _ScribeAppState extends ConsumerState<ScribeApp> {
   late final GoRouter _router = createScribeRouter(
     initialLocation: widget.initialLocation,
   );
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
+  late final _guard = SessionGuard(ref, _messenger);
 
   @override
   void dispose() {
@@ -79,8 +82,10 @@ class _ScribeAppState extends ConsumerState<ScribeApp> {
     // Keeps the sync engine alive for the app's lifetime while signed in
     // (CHEESE-62); null when signed out or without a backend.
     ref.watch(syncCoordinatorProvider);
+    _guard.watch();
     final settings = ref.watch(appSettingsProvider).asData?.value;
     return MaterialApp.router(
+      scaffoldMessengerKey: _messenger,
       title: 'Cheesy Scribe',
       theme: ScribeTheme.light(),
       darkTheme: ScribeTheme.dark(),
