@@ -65,3 +65,17 @@ final sessionProvider = Provider<ForgeSession?>((ref) {
 final currentOwnerProvider = Provider<String?>(
   (ref) => ref.watch(sessionProvider)?.userId,
 );
+
+/// The signed-in user's `accounts` row (username, created date), live
+/// across sign-ins; null when signed out or without a backend. A write
+/// (`setUsername`) invalidates it so the row is re-read (CHEESE-64).
+final accountProvider = StreamProvider<ForgeAccount?>((ref) {
+  final accounts = ref.watch(forgeAccountsProvider);
+  if (accounts == null) return Stream.value(null);
+  return accounts.watchAccount().map(
+    (result) => switch (result) {
+      ForgeOk(:final value) => value,
+      ForgeFailed() => null,
+    },
+  );
+});

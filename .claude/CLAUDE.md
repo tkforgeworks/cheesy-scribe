@@ -30,6 +30,7 @@ Layout so far:
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
   fullscreen dialog), `/notes/:id`, `/library/:styleId`,
   `/account/check-email`, `/auth/set-password` (CHEESE-61),
+  `/account/add-password` (CHEESE-64),
   `/licenses`, `/feedback`, `/glossary`, `/glossary/:section` (`_pushedPage` = Flutter's `MaterialPage`: Android
   slide-and-fade + predictive back). No `/login`. `new` is declared before
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
@@ -211,8 +212,17 @@ Layout so far:
   (`offerLocalErase: false`; CHEESE-62 sign-out = `syncNow()`, a
   `showForgeConfirmSheet` warning (`unsyncedTitle`) when something is
   still unpushed, `signOut()`, `removeOwned(userId)`, `sync_meta.clear()`;
-  Delete account is CHEESE-65, username/linking/set password CHEESE-64,
-  the status slot CHEESE-63). Ownership UI (CHEESE-62): on a `signedIn`
+  Delete account is CHEESE-65). CHEESE-64 fills the rest: `username` from
+  `accountProvider` (`ForgeAccounts.watchAccount`, invalidated after a
+  write) saved through `setUsername` (`usernameSavedMessage`,
+  `dataErrorCopy` on failure), Link Google → `linkGoogle()` through `_run`
+  (copy for `identityAlreadyLinked`), Set a password →
+  `/account/add-password` (`AddPasswordScreen`, a `ForgeSetPasswordScreen`
+  over `setPassword()`; leaving it changes nothing, unlike the reset
+  flow). The DISPLAY NAME hint gains `displayNameSignedInHint` ("lives on
+  this phone; your account's username is below"). MEMBER SINCE keeps the
+  earliest-tasting rule (decision 3b) rather than the account's
+  `created_at`. Ownership UI (CHEESE-62): on a `signedIn`
   event with unowned notes present, `_offerAttach` shows a confirm sheet
   (`attachTitle(n)`, "Add them" / "Not now") → `attachUnownedTo`;
   declined notes stay hidden while signed in and a "Signed-out notes"
