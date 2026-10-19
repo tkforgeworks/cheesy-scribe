@@ -79,9 +79,10 @@ void main() {
       expect(find.text('Signed in'), findsOneWidget);
       expect(find.text('Google'), findsOneWidget);
       expect(find.text('CONNECTED'), findsOneWidget);
-      // Not yet: username, linking, set password, delete (CHEESE-64/65).
-      expect(find.byKey(ForgeAccountSettings.usernameFieldKey), findsNothing);
-      expect(find.byKey(ForgeAccountSettings.setPasswordKey), findsNothing);
+      // CHEESE-64: username and, for a Google-only account, Set a
+      // password; Delete account waits for CHEESE-65.
+      expect(find.byKey(ForgeAccountSettings.usernameFieldKey), findsOneWidget);
+      expect(find.byKey(ForgeAccountSettings.setPasswordKey), findsOneWidget);
       expect(find.byKey(ForgeAccountSettings.deleteKey), findsNothing);
       // The display name stays local and editable.
       expect(find.text('DISPLAY NAME'), findsOneWidget);
