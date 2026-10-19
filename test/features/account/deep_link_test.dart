@@ -7,8 +7,11 @@ import 'package:forge_core/testing.dart';
 import '../../support.dart';
 
 /// What GoTrue redirects to after verifying a mail link (PKCE flow): the
-/// app scheme, a trailing slash, and the one-time code.
-const link = '$scribeAuthRedirectUrl/?code=c69abc';
+/// App Link as sent plus the one-time code (CHEESE-68).
+const link = '$scribeAuthRedirectUrl?code=c69abc';
+
+/// The same for a mail sent before rc.9, which used the custom scheme.
+const legacyLink = '$legacyAuthCallbackUrl/?code=c69abc';
 
 const session = ForgeSession(userId: 'u1', email: 'tim@example.com');
 
@@ -40,6 +43,14 @@ void main() {
     auth.startPasswordRecovery(session);
     await tester.pumpAndSettle();
     expect(find.text('Choose a new password'), findsOneWidget);
+  });
+
+  testApp('a mail sent before the App Link switch still opens Account', (
+    tester,
+  ) async {
+    await pumpApp(tester, at: legacyLink);
+    expect(find.widgetWithText(AppBar, 'Account'), findsOneWidget);
+    expect(find.textContaining('no routes'), findsNothing);
   });
 
   testApp('a confirmation link signs in and Account shows the account', (

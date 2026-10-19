@@ -21,30 +21,98 @@ Future<ProviderContainer> containerOf(WidgetTester tester) async {
 }
 
 void main() {
-  test('the test build has no defines; the redirect is the app scheme', () {
+  test('the test build has no defines; the redirect is the App Link', () {
     expect(scribeSupabaseConfig.isConfigured, isFalse);
     expect(scribeSupabaseConfig.hasGoogle, isFalse);
     expect(
       scribeSupabaseConfig.authRedirectUrl,
-      'com.tkforgeworks.cheesyscribe://auth-callback',
+      'https://tkforgeworks.com/apps/cheesy-scribe/auth/',
     );
   });
 
-  test('the redirect is a URL both Dart and GoTrue can parse', () {
+  test('the redirect is an HTTPS URL the manifest claims with autoVerify', () {
+    // CHEESE-68: an Android App Link. GoTrue appends ?code=… to the URL as
+    // sent, so the manifest claims the path as a prefix and the allow list
+    // entry must carry the same trailing slash.
+    final uri = Uri.parse(scribeAuthRedirectUrl);
+    expect(uri.scheme, 'https');
+    expect(uri.host, 'tkforgeworks.com');
+    expect(uri.path, endsWith('/'));
+    final prefix = uri.path.substring(0, uri.path.length - 1);
+    final manifest = File('android/app/src/main/AndroidManifest.xml')
+        .readAsStringSync();
+    expect(
+      manifest,
+      contains(
+        'android:scheme="https" android:host="${uri.host}" '
+        'android:pathPrefix="$prefix"',
+      ),
+    );
+    final filter = manifest.indexOf('android:autoVerify="true"');
+    expect(filter, greaterThan(-1));
+    expect(manifest.indexOf('android:host="${uri.host}"'), greaterThan(filter));
+  });
+
+  test('the legacy scheme is still a URL GoTrue can parse and is claimed', () {
     // rc.1 used the application id verbatim; its underscore is not a scheme
     // character, so GoTrue replaced the redirect with the Site URL in every
     // mail and Uri.parse threw on the link. Keep the scheme underscore-free
-    // and identical to the manifest's intent filter.
-    final uri = Uri.parse(scribeAuthRedirectUrl);
+    // and identical to the manifest's intent filter for as long as it stays.
+    final uri = Uri.parse(legacyAuthCallbackUrl);
     expect(uri.scheme, 'com.tkforgeworks.cheesyscribe');
     expect(uri.host, 'auth-callback');
-    expect(scribeAuthRedirectUrl, isNot(contains('_')));
+    expect(legacyAuthCallbackUrl, isNot(contains('_')));
     final manifest = File('android/app/src/main/AndroidManifest.xml')
         .readAsStringSync();
     expect(
       manifest,
       contains('android:scheme="${uri.scheme}" android:host="${uri.host}"'),
     );
+  });
+
+  test('isAuthCallback recognises both links with whatever GoTrue appends', () {
+    expect(
+      isAuthCallback(Uri.parse('$scribeAuthRedirectUrl?code=abc')),
+      isTrue,
+    );
+    expect(
+      isAuthCallback(
+        Uri.parse(
+          '$scribeAuthRedirectUrl#error=access_denied&error_code=otp_expired',
+        ),
+      ),
+      isTrue,
+    );
+    // go_router hands the location over without its trailing slash.
+    expect(
+      isAuthCallback(
+        Uri.parse('https://tkforgeworks.com/apps/cheesy-scribe/auth?code=abc'),
+      ),
+      isTrue,
+    );
+    expect(
+      isAuthCallback(
+        Uri.parse('https://tkforgeworks.com/apps/cheesy-scribe/authx'),
+      ),
+      isFalse,
+    );
+    expect(
+      isAuthCallback(Uri.parse('$legacyAuthCallbackUrl/?code=abc')),
+      isTrue,
+    );
+    expect(
+      isAuthCallback(
+        Uri.parse('https://tkforgeworks.com/privacy/cheesy-scribe/'),
+      ),
+      isFalse,
+    );
+    expect(
+      isAuthCallback(
+        Uri.parse('https://example.com/apps/cheesy-scribe/auth/?code=x'),
+      ),
+      isFalse,
+    );
+    expect(isAuthCallback(Uri.parse('/notes')), isFalse);
   });
 
   testApp('pumpApp injects a signed-out fake backend by default', (

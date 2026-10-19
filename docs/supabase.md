@@ -75,9 +75,11 @@ list. The CLI is installed at `~/.supabase/bin` and reads the same token.
   `accounts@tkforgeworks.com`, name "Cheesy Scribe").
 - Authentication → URL configuration: Site URL
   `https://tkforgeworks.com/privacy/cheesy-scribe/`; Redirect URLs
-  `com.tkforgeworks.cheesyscribe://auth-callback` (the application id
-  **without its underscore**: a URL scheme cannot contain one, see
-  CHEESE-61).
+  `https://tkforgeworks.com/apps/cheesy-scribe/auth/` (the App Link,
+  CHEESE-68, exactly as the app sends it, trailing slash included) and,
+  until the legacy filter goes, `com.tkforgeworks.cheesyscribe://auth-callback`
+  (the application id **without its underscore**: a URL scheme cannot
+  contain one, see CHEESE-61).
 - Authentication → Email templates: the files under `supabase/templates/`.
 
 The project-scoped token lacks `project_admin_write`, so these cannot be

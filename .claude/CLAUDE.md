@@ -36,11 +36,13 @@ Layout so far:
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
   `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
   routes a `NoTransitionPage` (CHEESE-43; `test/app_test.dart` pins it).
-  A top-level `redirect` sends the auth-callback URI
-  (`com.tkforgeworks.cheesyscribe://auth-callback/?code=…`, which Android
-  hands the router whole, cold or warm) to `/account`; supabase_flutter
-  reads the code from the same link itself (CHEESE-61, found on rc.2 as
-  "no routes for location"). `test/support.dart`'s `openLink()` sends the
+  A top-level `redirect` sends the auth-callback URI (`isAuthCallback`:
+  the App Link `https://tkforgeworks.com/apps/cheesy-scribe/auth/?code=…`
+  matched by scheme, host and path prefix, since go_router drops the
+  trailing slash, or the legacy custom scheme; Android hands the router the
+  whole URI, cold or warm) to `/account`; supabase_flutter reads the code
+  from the same link itself (CHEESE-61, found on rc.2 as "no routes for
+  location"; CHEESE-68 for the App Link). `test/support.dart`'s `openLink()` sends the
   engine's `pushRouteInformation` for the warm case.
 - `lib/app/shell/` — `ScribeShell` (Scaffold owning the drawer; screens are
   their own Scaffolds and call `ScribeShell.openDrawer(context)`, not
@@ -124,11 +126,19 @@ Layout so far:
 - `lib/data/forge_providers.dart` (CHEESE-59) — the backend handle:
   `scribeSupabaseConfig` (`ForgeSupabaseConfig.fromEnvironment` with
   `authRedirectUrl: scribeAuthRedirectUrl` =
-  `com.tkforgeworks.cheesyscribe://auth-callback`: the application id
-  **minus its underscore**, since a URL scheme cannot contain one; rc.1
-  used `cheesy_scribe://` and GoTrue, which validates `redirect_to` with
-  Go's URL parser before the allow list, sent every mail link to the Site
-  URL instead; the test pins that it parses and matches the manifest),
+  `https://tkforgeworks.com/apps/cheesy-scribe/auth/`, an Android App Link
+  since CHEESE-68 (rc.9): the website's `/.well-known/assetlinks.json`
+  names the Play app-signing and upload certificates, so a Play-signed
+  install opens the app for that path with nothing left in the mail
+  client, and its landing page catches everyone else (TKFW-85). The
+  trailing slash is part of the allow-list entry. `legacyAuthCallbackUrl`
+  = `com.tkforgeworks.cheesyscribe://auth-callback`, the rc.2–rc.8
+  scheme (the application id **minus its underscore**, since a URL scheme
+  cannot contain one; rc.1 used `cheesy_scribe://` and GoTrue, which
+  validates `redirect_to` with Go's URL parser before the allow list, sent
+  every mail link to the Site URL instead), still accepted by
+  `isAuthCallback` and the manifest one more RC; the tests pin both
+  against the manifest),
   `forgeCoreProvider`
   (`ForgeCore?`, null by default; `main()` overrides it with
   `ForgeCore.initialize` when `isConfigured`), `forgeAuthProvider` /
@@ -246,8 +256,13 @@ Layout so far:
   signed in). Forgot password for an unknown address reports success by
   Supabase design (no account enumeration); forge_ui rc.6's check-email
   reset copy is conditional ("If there is an account for …"). The manifest
-  declares the `com.tkforgeworks.cheesyscribe://auth-callback` intent
-  filter; supabase_flutter consumes the link, nothing here parses it.
+  declares an `autoVerify` https intent filter for
+  `tkforgeworks.com` + `pathPrefix /apps/cheesy-scribe/auth` (CHEESE-68)
+  and, one more RC, the legacy custom-scheme filter; CI's `-debugsigned`
+  and local debug builds cannot verify the App Link (their key is not in
+  the statement file), so there the mail link opens the website's landing
+  page, whose "Open Cheesy Scribe" intent link still reaches the app.
+  supabase_flutter consumes the link, nothing here parses it.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
   CHEESE-33): a thin wrapper over forge_ui's `ForgeAboutScreen` (layout
   and the maker line with the tinted mark live in the package; pass
@@ -882,3 +897,13 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   row. CHEESE-66 added `PRIVACY.md` (the inventory with the store
   checklist; the Console items are Tim's) while TKFW-83 (website deletion
   page + policy) ran in parallel.
+- 2026-10-18 (night): rc.5–rc.8 passed Tim's device checks (multi-account,
+  attach, deletion, forced sign-out from a web deletion). Tim finished the
+  Console items (deletion URL, Data safety, reviewer account, consent
+  screen published); the closed track stays on 0.2.0 for a two-week
+  usability review, so 0.3.0 RCs remain on internal testing (CHEESE-50
+  ready to close). CHEESE-68 + TKFW-85: the mail redirect became the
+  Android App Link `https://tkforgeworks.com/apps/cheesy-scribe/auth/`
+  (website PR #30 live: statement file with both Play fingerprints, landing
+  page, analytics off under `/apps/`); the legacy scheme stays one RC.
+  Supabase allow list entry for the new URL is Tim's (dashboard).
