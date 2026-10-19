@@ -86,6 +86,10 @@ class SyncCoordinator with WidgetsBindingObserver {
         _retryTimer = Timer(_backoff, () => unawaited(service.sync()));
       case SyncPhase.syncing || SyncPhase.signedOut:
         break;
+      case SyncPhase.accountGone:
+        // Nothing to retry: the app signs this phone out, which disposes
+        // this coordinator.
+        _retryTimer?.cancel();
     }
   }
 

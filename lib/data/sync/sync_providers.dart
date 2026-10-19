@@ -50,6 +50,7 @@ final syncServiceProvider = Provider<SyncService?>((ref) {
     profile: ref.watch(remoteProfileProvider),
     settings: ref.watch(settingsRepositoryProvider),
     searches: ref.watch(recentSearchesRepositoryProvider),
+    accounts: ref.watch(forgeAccountsProvider),
   );
 });
 

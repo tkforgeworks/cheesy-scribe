@@ -405,6 +405,17 @@ Layout so far:
   `starInactive`, `wheelGrid`). Read colours through `context.colors`,
   `context.forge` (`textTertiary`, `rowDivider`, …) and `context.scribe`;
   text styles through `context.text` and `ForgeType.ui/serif/mono`.
+- `lib/app/session_guard.dart` (CHEESE-65) — `SessionGuard`, built by
+  `ScribeApp` with the app's `scaffoldMessengerKey` and `watch()`ed from
+  its build: when `syncStatusProvider` reports `SyncPhase.accountGone`
+  (the sync's first step asks `ForgeAccounts.getAccount()`; a flagged or
+  purged account, or a `42501` on a write, means deleted from the website
+  or another phone) it signs this phone out, removes the account's notes
+  and sync state and shows `accountDeleted`; when the auth stream signs
+  out on its own (refresh failed after a purge) it does the same cleanup
+  with `sessionEnded`. `signOutIntentProvider` (`SignOutIntent.mark()`
+  before a user-initiated sign-out or deletion, `take()` by the guard)
+  keeps those quiet.
 - `lib/app/widgets/` — the atoms that are this app's own: `StarRating`,
   `JournalField`, `ForgeLogoBadge`/`WedgeGlyph`; import the `widgets.dart`
   barrel. The rest of DESIGN_SPEC §5 comes from forge_ui:

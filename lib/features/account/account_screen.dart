@@ -5,6 +5,7 @@ import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
+import '../../app/session_guard.dart';
 import '../../app/shell/scribe_shell.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/forge_providers.dart';
@@ -217,6 +218,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         }
       }
     }
+    ref.read(signOutIntentProvider.notifier).mark();
     await auth.signOut();
     await notes.removeOwned(userId);
     await meta.clear();
@@ -275,9 +277,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final notes = ref.read(notesRepositoryProvider);
     final meta = ref.read(syncMetaRepositoryProvider);
     final messenger = ScaffoldMessenger.of(context);
+    ref.read(signOutIntentProvider.notifier).mark();
     final result = await accounts.deleteAccount();
     switch (result) {
       case ForgeFailed(:final error):
+        ref.read(signOutIntentProvider.notifier).take(); // still signed in
         return dataErrorCopy(error);
       case ForgeOk():
         await notes.removeOwned(userId);

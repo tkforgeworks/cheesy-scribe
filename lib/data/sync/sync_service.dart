@@ -36,6 +36,7 @@ class SyncService {
     this.profile,
     this.settings,
     this.searches,
+    this.accounts,
     DateTime Function()? now,
     this.overlap = const Duration(days: 1),
   }) : assert(notes.owner != null, 'sync needs a signed-in owner scope'),
@@ -55,6 +56,12 @@ class SyncService {
   final ForgeEntriesRepository<ProfilePayload>? profile;
   final SettingsRepository? settings;
   final RecentSearchesRepository? searches;
+
+  /// Checked at the start of every run: an account flagged for deletion
+  /// or already purged ends in [SyncPhase.accountGone] instead of a sync,
+  /// so a deletion made on the website or another phone reaches this one
+  /// the next time it looks (CHEESE-65). Null skips the check.
+  final ForgeAccounts? accounts;
   final DateTime Function() _now;
 
   /// How far before the high-water mark the key listing starts, to absorb
@@ -104,6 +111,29 @@ class SyncService {
   Future<SyncStatus> _run() async {
     final dirty = await notes.dirtyNotes();
     _set(_status.copyWith(phase: SyncPhase.syncing, pending: dirty.length));
+
+    // 0. Is the account still there? Row-level security would hide the
+    //    data of a flagged account anyway, but silently: an empty key
+    //    listing looks like "nothing new", not "you were deleted".
+    if (accounts case final accounts?) {
+      switch (await accounts.getAccount()) {
+        case ForgeFailed(:final error, :final message):
+          return _fail(error, message);
+        case ForgeOk(:final value):
+          if (value == null || value.isPendingDeletion) {
+            _set(
+              _status.copyWith(
+                phase: SyncPhase.accountGone,
+                message: value == null
+                    ? 'account purged'
+                    : 'deletion requested',
+                pending: dirty.length,
+              ),
+            );
+            return _status;
+          }
+      }
+    }
 
     // 1. The server's side of the diff: everything changed there since we
     //    last looked (minus the overlap). Fetched before pushing so a local
@@ -293,9 +323,11 @@ class SyncService {
   }
 
   Future<SyncStatus> _fail(ForgeDataError error, String message) async {
-    final phase = error == ForgeDataError.network
-        ? SyncPhase.offline
-        : SyncPhase.error;
+    final phase = switch (error) {
+      ForgeDataError.network => SyncPhase.offline,
+      ForgeDataError.accountInactive => SyncPhase.accountGone,
+      _ => SyncPhase.error,
+    };
     if (phase == SyncPhase.error) await meta.set(lastErrorKey, message);
     _set(
       _status.copyWith(

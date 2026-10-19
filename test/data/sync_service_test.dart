@@ -16,8 +16,13 @@ import '../support.dart';
 
 /// One phone: its own database and clock, the shared server.
 class Device {
-  Device(this.name, this.remote, {required DateTime start, this.profile})
-    : now = start {
+  Device(
+    this.name,
+    this.remote, {
+    required DateTime start,
+    this.profile,
+    this.accounts,
+  }) : now = start {
     db = openTestDatabase();
     notes = NotesRepository(db, now: () => now, owner: 'tim');
     meta = SyncMetaRepository(db);
@@ -30,6 +35,7 @@ class Device {
       profile: profile,
       settings: profile == null ? null : settings,
       searches: profile == null ? null : searches,
+      accounts: accounts,
       now: () => now,
     );
     addTearDown(service.dispose);
@@ -38,6 +44,7 @@ class Device {
   final String name;
   final FakeForgeEntriesRepository<TastingNote> remote;
   final FakeForgeEntriesRepository<ProfilePayload>? profile;
+  final FakeForgeAccounts? accounts;
   DateTime now;
   late final AppDatabase db;
   late final NotesRepository notes;
@@ -336,6 +343,35 @@ void main() {
       profiles.nextError = ForgeDataError.network;
       expect((await a.service.sync()).phase, SyncPhase.offline);
       expect((await a.service.sync()).phase, SyncPhase.idle);
+    });
+  });
+
+  group('account status (CHEESE-65)', () {
+    test('a flagged or purged account ends the run as accountGone', () async {
+      final accounts = FakeForgeAccounts(auth);
+      final a = Device(
+        'a',
+        remote,
+        start: DateTime.utc(2026, 10, 18, 12),
+        accounts: accounts,
+      );
+      await a.notes.save(note('1', 'One'));
+      expect((await a.service.sync()).phase, SyncPhase.idle);
+      expect(remote.rows.keys, ['1']);
+
+      accounts.deletionRequestedAt = DateTime.utc(2026, 10, 18, 12, 30);
+      a.tick();
+      await a.notes.save(note('2', 'Two'));
+      final calls = remote.calls.length;
+      final status = await a.service.sync();
+      expect(status.phase, SyncPhase.accountGone);
+      expect(status.pending, 1);
+      // Nothing was pushed or pulled for a dead account.
+      expect(remote.calls.length, calls);
+      // The server refusing a write the same way (RLS, 42501) reads alike.
+      accounts.deletionRequestedAt = null;
+      remote.nextError = ForgeDataError.accountInactive;
+      expect((await a.service.sync()).phase, SyncPhase.accountGone);
     });
   });
 }
