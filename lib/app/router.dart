@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:forge_core/forge_core.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/forge_providers.dart';
 import '../features/about/about_screen.dart';
 import '../features/about/licenses_screen.dart';
 import '../features/feedback/feedback_screen.dart';
 import '../features/glossary/glossary_screen.dart';
 import '../features/glossary/glossary_terms.dart';
 import '../features/account/account_screen.dart';
+import '../features/account/add_password_screen.dart';
+import '../features/account/check_email_screen.dart';
+import '../features/account/set_password_screen.dart';
 import '../features/library/library_screen.dart';
 import '../features/library/style_detail_screen.dart';
 import '../features/notes/note_detail_screen.dart';
@@ -16,18 +21,38 @@ import '../features/settings/settings_screen.dart';
 import '../features/stats/stats_screen.dart';
 import 'shell/scribe_shell.dart';
 
-/// Builds the app router (DESIGN_SPEC §7, minus `/login`: local-first).
+/// Builds the app router (DESIGN_SPEC §7, minus `/login`: sign-in lives on
+/// `/account`, CHEESE-61).
 ///
 /// The `ShellRoute` owns the drawer for the drawer's destinations
 /// (`/notes`, `/library`, `/stats`, `/settings`, `/account`, `/about`;
 /// CHEESE-47), reached with `context.go`. Everything else is pushed on the
 /// root navigator so it covers the shell and uses back/close instead of
 /// the drawer.
-GoRouter createScribeRouter({String initialLocation = '/notes'}) {
+GoRouter createScribeRouter({
+  String initialLocation = '/notes',
+  void Function(ForgeMailLink link)? onMailLink,
+}) {
   final rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
   return GoRouter(
     navigatorKey: rootKey,
     initialLocation: initialLocation,
+    // CHEESE-61/68: a confirmation or reset link opens the app as a
+    // platform route carrying the whole URI
+    // (`https://tkforgeworks.com/apps/cheesy-scribe/auth/?token_hash=…`),
+    // whether the app was cold or warm. forge_core verifies the token from
+    // that same link on its own; the router only needs somewhere to go,
+    // and Account is where the resulting session (or set-password push,
+    // or the expired-link message) shows. Without this the location
+    // matches nothing and the error page appears (rc.2).
+    // [onMailLink] hears which kind of link it was, so the app can greet
+    // the sign-in or recovery state that follows.
+    redirect: (context, state) {
+      if (!isAuthCallback(state.uri)) return null;
+      final mail = ForgeMailLink.parse(state.uri);
+      if (mail != null) onMailLink?.call(mail);
+      return '/account';
+    },
     routes: [
       ShellRoute(
         builder: (context, state, child) =>
@@ -98,6 +123,30 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
             path: '/account',
             pageBuilder: (context, state) =>
                 _shellPage(state, const AccountScreen()),
+            routes: [
+              // CHEESE-64: "Set a password" on a Google-only account.
+              GoRoute(
+                path: 'add-password',
+                parentNavigatorKey: rootKey,
+                pageBuilder: (context, state) =>
+                    _pushedPage(state, const AddPasswordScreen()),
+              ),
+              // CHEESE-61: the waiting state after a sign-up or reset
+              // request, pushed over Account.
+              GoRoute(
+                path: 'check-email',
+                parentNavigatorKey: rootKey,
+                pageBuilder: (context, state) => _pushedPage(
+                  state,
+                  CheckEmailScreen(
+                    email: state.uri.queryParameters['email'] ?? '',
+                    purpose: CheckEmailScreen.purposeOf(
+                      state.uri.queryParameters['purpose'],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: '/about',
@@ -128,6 +177,12 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
                 .asNameMap()[state.pathParameters['section']],
           ),
         ),
+      ),
+      // CHEESE-61: opened by ScribeApp when a password-reset link lands.
+      GoRoute(
+        path: SetPasswordScreen.path,
+        pageBuilder: (context, state) =>
+            _pushedPage(state, const SetPasswordScreen()),
       ),
       GoRoute(
         path: '/feedback',

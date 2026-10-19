@@ -1,11 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- The in-app feedback form posts to tkforgeworks.com (CHEESE-51); the
-         app makes no other network calls. -->
+    <!-- The in-app feedback form posts to tkforgeworks.com (CHEESE-51), and
+         the optional account features talk to the Supabase project once the
+         user signs in (CHEESE-11); nothing else uses the network. -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- No Android backup of the app's data (CHEESE-62): the account is
+         the backup once the user signs in, and an OS restore could put a
+         stale database over a synced one on a new phone. Signed-out notes
+         live only on the phone, as the app has always said. -->
     <application
         android:label="Cheesy Scribe"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -27,6 +33,24 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Confirmation and password-reset mails send the user back here
+                 (CHEESE-68): an Android App Link. autoVerify makes Android
+                 fetch https://tkforgeworks.com/.well-known/assetlinks.json at
+                 install and, when it names this build's signing certificate,
+                 open the app for this path without asking. Play-signed and
+                 upload-key builds verify; CI's -debugsigned builds and
+                 local debug builds do not (their keys are not in the file),
+                 so there the link opens the website's landing page instead.
+                 Must equal scribeAuthRedirectUrl in
+                 lib/data/forge_providers.dart (host + path; the mail
+                 template appends ?token_hash=…&type=…). forge_core verifies
+                 the token from the link; the app never parses it. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="tkforgeworks.com" android:pathPrefix="/apps/cheesy-scribe/auth"/>
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

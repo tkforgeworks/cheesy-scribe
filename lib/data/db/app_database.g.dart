@@ -17,6 +17,17 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _ownerUserIdMeta = const VerificationMeta(
+    'ownerUserId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerUserId = GeneratedColumn<String>(
+    'owner_user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _cheeseNameMeta = const VerificationMeta(
     'cheeseName',
   );
@@ -49,6 +60,31 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<String> updatedAt = GeneratedColumn<String>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
   );
   static const VerificationMeta _creameryMeta = const VerificationMeta(
     'creamery',
@@ -435,9 +471,12 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    ownerUserId,
     cheeseName,
     tastedAt,
     createdAt,
+    updatedAt,
+    dirty,
     creamery,
     origin,
     rind,
@@ -490,6 +529,15 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     } else if (isInserting) {
       context.missing(_idMeta);
     }
+    if (data.containsKey('owner_user_id')) {
+      context.handle(
+        _ownerUserIdMeta,
+        ownerUserId.isAcceptableOrUnknown(
+          data['owner_user_id']!,
+          _ownerUserIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('cheese_name')) {
       context.handle(
         _cheeseNameMeta,
@@ -513,6 +561,18 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
       );
     } else if (isInserting) {
       context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
     }
     if (data.containsKey('creamery')) {
       context.handle(
@@ -730,6 +790,10 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      ownerUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_user_id'],
+      ),
       cheeseName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}cheese_name'],
@@ -741,6 +805,14 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
       )!,
       creamery: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -908,9 +980,24 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
 
 class NoteRow extends DataClass implements Insertable<NoteRow> {
   final String id;
+
+  /// The account this note belongs to (`auth.users.id`), or null for a
+  /// note made while signed out. The notebook shows one owner at a time:
+  /// the signed-in account's notes, or the unowned ones when signed out
+  /// (`NotesRepository.owner`). Set by the repository, never by the model.
+  final String? ownerUserId;
   final String cheeseName;
   final String tastedAt;
   final String createdAt;
+
+  /// Last change, UTC ISO; stamped by the repository on save, compared by
+  /// sync. The empty default only exists so the v3 migration can add the
+  /// column; it is backfilled from [createdAt] in the same step.
+  final String updatedAt;
+
+  /// Changed locally since the last push to the account. Defaults to true
+  /// so rows that predate sync are uploaded on the first sign-in.
+  final bool dirty;
   final String? creamery;
   final String? origin;
   final RindType? rind;
@@ -950,9 +1037,12 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   final String searchText;
   const NoteRow({
     required this.id,
+    this.ownerUserId,
     required this.cheeseName,
     required this.tastedAt,
     required this.createdAt,
+    required this.updatedAt,
+    required this.dirty,
     this.creamery,
     this.origin,
     this.rind,
@@ -992,9 +1082,14 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || ownerUserId != null) {
+      map['owner_user_id'] = Variable<String>(ownerUserId);
+    }
     map['cheese_name'] = Variable<String>(cheeseName);
     map['tasted_at'] = Variable<String>(tastedAt);
     map['created_at'] = Variable<String>(createdAt);
+    map['updated_at'] = Variable<String>(updatedAt);
+    map['dirty'] = Variable<bool>(dirty);
     if (!nullToAbsent || creamery != null) {
       map['creamery'] = Variable<String>(creamery);
     }
@@ -1065,9 +1160,14 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   NotesCompanion toCompanion(bool nullToAbsent) {
     return NotesCompanion(
       id: Value(id),
+      ownerUserId: ownerUserId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerUserId),
       cheeseName: Value(cheeseName),
       tastedAt: Value(tastedAt),
       createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      dirty: Value(dirty),
       creamery: creamery == null && nullToAbsent
           ? const Value.absent()
           : Value(creamery),
@@ -1130,9 +1230,12 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return NoteRow(
       id: serializer.fromJson<String>(json['id']),
+      ownerUserId: serializer.fromJson<String?>(json['ownerUserId']),
       cheeseName: serializer.fromJson<String>(json['cheeseName']),
       tastedAt: serializer.fromJson<String>(json['tastedAt']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
+      updatedAt: serializer.fromJson<String>(json['updatedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
       creamery: serializer.fromJson<String?>(json['creamery']),
       origin: serializer.fromJson<String?>(json['origin']),
       rind: $NotesTable.$converterrindn.fromJson(
@@ -1182,9 +1285,12 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'ownerUserId': serializer.toJson<String?>(ownerUserId),
       'cheeseName': serializer.toJson<String>(cheeseName),
       'tastedAt': serializer.toJson<String>(tastedAt),
       'createdAt': serializer.toJson<String>(createdAt),
+      'updatedAt': serializer.toJson<String>(updatedAt),
+      'dirty': serializer.toJson<bool>(dirty),
       'creamery': serializer.toJson<String?>(creamery),
       'origin': serializer.toJson<String?>(origin),
       'rind': serializer.toJson<String?>(
@@ -1232,9 +1338,12 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
 
   NoteRow copyWith({
     String? id,
+    Value<String?> ownerUserId = const Value.absent(),
     String? cheeseName,
     String? tastedAt,
     String? createdAt,
+    String? updatedAt,
+    bool? dirty,
     Value<String?> creamery = const Value.absent(),
     Value<String?> origin = const Value.absent(),
     Value<RindType?> rind = const Value.absent(),
@@ -1271,9 +1380,12 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     String? searchText,
   }) => NoteRow(
     id: id ?? this.id,
+    ownerUserId: ownerUserId.present ? ownerUserId.value : this.ownerUserId,
     cheeseName: cheeseName ?? this.cheeseName,
     tastedAt: tastedAt ?? this.tastedAt,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    dirty: dirty ?? this.dirty,
     creamery: creamery.present ? creamery.value : this.creamery,
     origin: origin.present ? origin.value : this.origin,
     rind: rind.present ? rind.value : this.rind,
@@ -1316,11 +1428,16 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   NoteRow copyWithCompanion(NotesCompanion data) {
     return NoteRow(
       id: data.id.present ? data.id.value : this.id,
+      ownerUserId: data.ownerUserId.present
+          ? data.ownerUserId.value
+          : this.ownerUserId,
       cheeseName: data.cheeseName.present
           ? data.cheeseName.value
           : this.cheeseName,
       tastedAt: data.tastedAt.present ? data.tastedAt.value : this.tastedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
       creamery: data.creamery.present ? data.creamery.value : this.creamery,
       origin: data.origin.present ? data.origin.value : this.origin,
       rind: data.rind.present ? data.rind.value : this.rind,
@@ -1380,9 +1497,12 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   String toString() {
     return (StringBuffer('NoteRow(')
           ..write('id: $id, ')
+          ..write('ownerUserId: $ownerUserId, ')
           ..write('cheeseName: $cheeseName, ')
           ..write('tastedAt: $tastedAt, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('dirty: $dirty, ')
           ..write('creamery: $creamery, ')
           ..write('origin: $origin, ')
           ..write('rind: $rind, ')
@@ -1424,9 +1544,12 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   @override
   int get hashCode => Object.hashAll([
     id,
+    ownerUserId,
     cheeseName,
     tastedAt,
     createdAt,
+    updatedAt,
+    dirty,
     creamery,
     origin,
     rind,
@@ -1467,9 +1590,12 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       identical(this, other) ||
       (other is NoteRow &&
           other.id == this.id &&
+          other.ownerUserId == this.ownerUserId &&
           other.cheeseName == this.cheeseName &&
           other.tastedAt == this.tastedAt &&
           other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.dirty == this.dirty &&
           other.creamery == this.creamery &&
           other.origin == this.origin &&
           other.rind == this.rind &&
@@ -1508,9 +1634,12 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
 
 class NotesCompanion extends UpdateCompanion<NoteRow> {
   final Value<String> id;
+  final Value<String?> ownerUserId;
   final Value<String> cheeseName;
   final Value<String> tastedAt;
   final Value<String> createdAt;
+  final Value<String> updatedAt;
+  final Value<bool> dirty;
   final Value<String?> creamery;
   final Value<String?> origin;
   final Value<RindType?> rind;
@@ -1548,9 +1677,12 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
   final Value<int> rowid;
   const NotesCompanion({
     this.id = const Value.absent(),
+    this.ownerUserId = const Value.absent(),
     this.cheeseName = const Value.absent(),
     this.tastedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
     this.creamery = const Value.absent(),
     this.origin = const Value.absent(),
     this.rind = const Value.absent(),
@@ -1589,9 +1721,12 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
   });
   NotesCompanion.insert({
     required String id,
+    this.ownerUserId = const Value.absent(),
     required String cheeseName,
     required String tastedAt,
     required String createdAt,
+    this.updatedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
     this.creamery = const Value.absent(),
     this.origin = const Value.absent(),
     this.rind = const Value.absent(),
@@ -1637,9 +1772,12 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
        searchText = Value(searchText);
   static Insertable<NoteRow> custom({
     Expression<String>? id,
+    Expression<String>? ownerUserId,
     Expression<String>? cheeseName,
     Expression<String>? tastedAt,
     Expression<String>? createdAt,
+    Expression<String>? updatedAt,
+    Expression<bool>? dirty,
     Expression<String>? creamery,
     Expression<String>? origin,
     Expression<String>? rind,
@@ -1678,9 +1816,12 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (ownerUserId != null) 'owner_user_id': ownerUserId,
       if (cheeseName != null) 'cheese_name': cheeseName,
       if (tastedAt != null) 'tasted_at': tastedAt,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (dirty != null) 'dirty': dirty,
       if (creamery != null) 'creamery': creamery,
       if (origin != null) 'origin': origin,
       if (rind != null) 'rind': rind,
@@ -1721,9 +1862,12 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
 
   NotesCompanion copyWith({
     Value<String>? id,
+    Value<String?>? ownerUserId,
     Value<String>? cheeseName,
     Value<String>? tastedAt,
     Value<String>? createdAt,
+    Value<String>? updatedAt,
+    Value<bool>? dirty,
     Value<String?>? creamery,
     Value<String?>? origin,
     Value<RindType?>? rind,
@@ -1762,9 +1906,12 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
   }) {
     return NotesCompanion(
       id: id ?? this.id,
+      ownerUserId: ownerUserId ?? this.ownerUserId,
       cheeseName: cheeseName ?? this.cheeseName,
       tastedAt: tastedAt ?? this.tastedAt,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      dirty: dirty ?? this.dirty,
       creamery: creamery ?? this.creamery,
       origin: origin ?? this.origin,
       rind: rind ?? this.rind,
@@ -1809,6 +1956,9 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
+    if (ownerUserId.present) {
+      map['owner_user_id'] = Variable<String>(ownerUserId.value);
+    }
     if (cheeseName.present) {
       map['cheese_name'] = Variable<String>(cheeseName.value);
     }
@@ -1817,6 +1967,12 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     }
     if (createdAt.present) {
       map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<String>(updatedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
     }
     if (creamery.present) {
       map['creamery'] = Variable<String>(creamery.value);
@@ -1938,9 +2094,12 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
   String toString() {
     return (StringBuffer('NotesCompanion(')
           ..write('id: $id, ')
+          ..write('ownerUserId: $ownerUserId, ')
           ..write('cheeseName: $cheeseName, ')
           ..write('tastedAt: $tastedAt, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('dirty: $dirty, ')
           ..write('creamery: $creamery, ')
           ..write('origin: $origin, ')
           ..write('rind: $rind, ')
@@ -2407,12 +2566,493 @@ class SettingsCompanion extends UpdateCompanion<SettingRow> {
   }
 }
 
+class $NoteTombstonesTable extends NoteTombstones
+    with TableInfo<$NoteTombstonesTable, NoteTombstoneRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NoteTombstonesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+    'deleted_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerUserIdMeta = const VerificationMeta(
+    'ownerUserId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerUserId = GeneratedColumn<String>(
+    'owner_user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, deletedAt, ownerUserId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'note_tombstones';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<NoteTombstoneRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_deletedAtMeta);
+    }
+    if (data.containsKey('owner_user_id')) {
+      context.handle(
+        _ownerUserIdMeta,
+        ownerUserId.isAcceptableOrUnknown(
+          data['owner_user_id']!,
+          _ownerUserIdMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  NoteTombstoneRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NoteTombstoneRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deleted_at'],
+      )!,
+      ownerUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_user_id'],
+      ),
+    );
+  }
+
+  @override
+  $NoteTombstonesTable createAlias(String alias) {
+    return $NoteTombstonesTable(attachedDatabase, alias);
+  }
+}
+
+class NoteTombstoneRow extends DataClass
+    implements Insertable<NoteTombstoneRow> {
+  final String id;
+  final String deletedAt;
+  final String? ownerUserId;
+  const NoteTombstoneRow({
+    required this.id,
+    required this.deletedAt,
+    this.ownerUserId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['deleted_at'] = Variable<String>(deletedAt);
+    if (!nullToAbsent || ownerUserId != null) {
+      map['owner_user_id'] = Variable<String>(ownerUserId);
+    }
+    return map;
+  }
+
+  NoteTombstonesCompanion toCompanion(bool nullToAbsent) {
+    return NoteTombstonesCompanion(
+      id: Value(id),
+      deletedAt: Value(deletedAt),
+      ownerUserId: ownerUserId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownerUserId),
+    );
+  }
+
+  factory NoteTombstoneRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NoteTombstoneRow(
+      id: serializer.fromJson<String>(json['id']),
+      deletedAt: serializer.fromJson<String>(json['deletedAt']),
+      ownerUserId: serializer.fromJson<String?>(json['ownerUserId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'deletedAt': serializer.toJson<String>(deletedAt),
+      'ownerUserId': serializer.toJson<String?>(ownerUserId),
+    };
+  }
+
+  NoteTombstoneRow copyWith({
+    String? id,
+    String? deletedAt,
+    Value<String?> ownerUserId = const Value.absent(),
+  }) => NoteTombstoneRow(
+    id: id ?? this.id,
+    deletedAt: deletedAt ?? this.deletedAt,
+    ownerUserId: ownerUserId.present ? ownerUserId.value : this.ownerUserId,
+  );
+  NoteTombstoneRow copyWithCompanion(NoteTombstonesCompanion data) {
+    return NoteTombstoneRow(
+      id: data.id.present ? data.id.value : this.id,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      ownerUserId: data.ownerUserId.present
+          ? data.ownerUserId.value
+          : this.ownerUserId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NoteTombstoneRow(')
+          ..write('id: $id, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('ownerUserId: $ownerUserId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, deletedAt, ownerUserId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NoteTombstoneRow &&
+          other.id == this.id &&
+          other.deletedAt == this.deletedAt &&
+          other.ownerUserId == this.ownerUserId);
+}
+
+class NoteTombstonesCompanion extends UpdateCompanion<NoteTombstoneRow> {
+  final Value<String> id;
+  final Value<String> deletedAt;
+  final Value<String?> ownerUserId;
+  final Value<int> rowid;
+  const NoteTombstonesCompanion({
+    this.id = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.ownerUserId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  NoteTombstonesCompanion.insert({
+    required String id,
+    required String deletedAt,
+    this.ownerUserId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       deletedAt = Value(deletedAt);
+  static Insertable<NoteTombstoneRow> custom({
+    Expression<String>? id,
+    Expression<String>? deletedAt,
+    Expression<String>? ownerUserId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (ownerUserId != null) 'owner_user_id': ownerUserId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  NoteTombstonesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? deletedAt,
+    Value<String?>? ownerUserId,
+    Value<int>? rowid,
+  }) {
+    return NoteTombstonesCompanion(
+      id: id ?? this.id,
+      deletedAt: deletedAt ?? this.deletedAt,
+      ownerUserId: ownerUserId ?? this.ownerUserId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<String>(deletedAt.value);
+    }
+    if (ownerUserId.present) {
+      map['owner_user_id'] = Variable<String>(ownerUserId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NoteTombstonesCompanion(')
+          ..write('id: $id, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('ownerUserId: $ownerUserId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncMetaTable extends SyncMeta
+    with TableInfo<$SyncMetaTable, SyncMetaRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncMetaTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [key, value];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_meta';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncMetaRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  SyncMetaRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncMetaRow(
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncMetaTable createAlias(String alias) {
+    return $SyncMetaTable(attachedDatabase, alias);
+  }
+}
+
+class SyncMetaRow extends DataClass implements Insertable<SyncMetaRow> {
+  final String key;
+  final String value;
+  const SyncMetaRow({required this.key, required this.value});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['value'] = Variable<String>(value);
+    return map;
+  }
+
+  SyncMetaCompanion toCompanion(bool nullToAbsent) {
+    return SyncMetaCompanion(key: Value(key), value: Value(value));
+  }
+
+  factory SyncMetaRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncMetaRow(
+      key: serializer.fromJson<String>(json['key']),
+      value: serializer.fromJson<String>(json['value']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'value': serializer.toJson<String>(value),
+    };
+  }
+
+  SyncMetaRow copyWith({String? key, String? value}) =>
+      SyncMetaRow(key: key ?? this.key, value: value ?? this.value);
+  SyncMetaRow copyWithCompanion(SyncMetaCompanion data) {
+    return SyncMetaRow(
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncMetaRow(')
+          ..write('key: $key, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, value);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncMetaRow &&
+          other.key == this.key &&
+          other.value == this.value);
+}
+
+class SyncMetaCompanion extends UpdateCompanion<SyncMetaRow> {
+  final Value<String> key;
+  final Value<String> value;
+  final Value<int> rowid;
+  const SyncMetaCompanion({
+    this.key = const Value.absent(),
+    this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncMetaCompanion.insert({
+    required String key,
+    required String value,
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       value = Value(value);
+  static Insertable<SyncMetaRow> custom({
+    Expression<String>? key,
+    Expression<String>? value,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncMetaCompanion copyWith({
+    Value<String>? key,
+    Value<String>? value,
+    Value<int>? rowid,
+  }) {
+    return SyncMetaCompanion(
+      key: key ?? this.key,
+      value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncMetaCompanion(')
+          ..write('key: $key, ')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $NotesTable notes = $NotesTable(this);
   late final $RecentSearchesTable recentSearches = $RecentSearchesTable(this);
   late final $SettingsTable settings = $SettingsTable(this);
+  late final $NoteTombstonesTable noteTombstones = $NoteTombstonesTable(this);
+  late final $SyncMetaTable syncMeta = $SyncMetaTable(this);
   late final Index notesByDate = Index(
     'notes_by_date',
     'CREATE INDEX notes_by_date ON notes (tasted_at, created_at)',
@@ -2420,6 +3060,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final Index notesByStyle = Index(
     'notes_by_style',
     'CREATE INDEX notes_by_style ON notes (cheese_style_id)',
+  );
+  late final Index notesDirty = Index(
+    'notes_dirty',
+    'CREATE INDEX notes_dirty ON notes (dirty)',
+  );
+  late final Index notesOwner = Index(
+    'notes_owner',
+    'CREATE INDEX notes_owner ON notes (owner_user_id)',
   );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -2429,16 +3077,23 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     notes,
     recentSearches,
     settings,
+    noteTombstones,
+    syncMeta,
     notesByDate,
     notesByStyle,
+    notesDirty,
+    notesOwner,
   ];
 }
 
 typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
   required String id,
+  Value<String?> ownerUserId,
   required String cheeseName,
   required String tastedAt,
   required String createdAt,
+  Value<String> updatedAt,
+  Value<bool> dirty,
   Value<String?> creamery,
   Value<String?> origin,
   Value<RindType?> rind,
@@ -2477,9 +3132,12 @@ typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
 });
 typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
   Value<String> id,
+  Value<String?> ownerUserId,
   Value<String> cheeseName,
   Value<String> tastedAt,
   Value<String> createdAt,
+  Value<String> updatedAt,
+  Value<bool> dirty,
   Value<String?> creamery,
   Value<String?> origin,
   Value<RindType?> rind,
@@ -2530,6 +3188,11 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get cheeseName => $composableBuilder(
     column: $table.cheeseName,
     builder: (column) => ColumnFilters(column),
@@ -2542,6 +3205,16 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
 
   ColumnFilters<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2734,6 +3407,11 @@ class $$NotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get cheeseName => $composableBuilder(
     column: $table.cheeseName,
     builder: (column) => ColumnOrderings(column),
@@ -2746,6 +3424,16 @@ class $$NotesTableOrderingComposer
 
   ColumnOrderings<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2932,6 +3620,11 @@ class $$NotesTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get cheeseName => $composableBuilder(
     column: $table.cheeseName,
     builder: (column) => column,
@@ -2942,6 +3635,12 @@ class $$NotesTableAnnotationComposer
 
   GeneratedColumn<String> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get dirty =>
+      $composableBuilder(column: $table.dirty, builder: (column) => column);
 
   GeneratedColumn<String> get creamery =>
       $composableBuilder(column: $table.creamery, builder: (column) => column);
@@ -3093,9 +3792,12 @@ class $$NotesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String?> ownerUserId = const Value.absent(),
                 Value<String> cheeseName = const Value.absent(),
                 Value<String> tastedAt = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
+                Value<String> updatedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
                 Value<String?> creamery = const Value.absent(),
                 Value<String?> origin = const Value.absent(),
                 Value<RindType?> rind = const Value.absent(),
@@ -3133,9 +3835,12 @@ class $$NotesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => NotesCompanion(
                 id: id,
+                ownerUserId: ownerUserId,
                 cheeseName: cheeseName,
                 tastedAt: tastedAt,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                dirty: dirty,
                 creamery: creamery,
                 origin: origin,
                 rind: rind,
@@ -3175,9 +3880,12 @@ class $$NotesTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<String?> ownerUserId = const Value.absent(),
                 required String cheeseName,
                 required String tastedAt,
                 required String createdAt,
+                Value<String> updatedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
                 Value<String?> creamery = const Value.absent(),
                 Value<String?> origin = const Value.absent(),
                 Value<RindType?> rind = const Value.absent(),
@@ -3215,9 +3923,12 @@ class $$NotesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => NotesCompanion.insert(
                 id: id,
+                ownerUserId: ownerUserId,
                 cheeseName: cheeseName,
                 tastedAt: tastedAt,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                dirty: dirty,
                 creamery: creamery,
                 origin: origin,
                 rind: rind,
@@ -3582,6 +4293,322 @@ typedef $$SettingsTableProcessedTableManager =
       SettingRow,
       PrefetchHooks Function()
     >;
+typedef $$NoteTombstonesTableCreateCompanionBuilder =
+    NoteTombstonesCompanion Function({
+      required String id,
+      required String deletedAt,
+      Value<String?> ownerUserId,
+      Value<int> rowid,
+    });
+typedef $$NoteTombstonesTableUpdateCompanionBuilder =
+    NoteTombstonesCompanion Function({
+      Value<String> id,
+      Value<String> deletedAt,
+      Value<String?> ownerUserId,
+      Value<int> rowid,
+    });
+
+class $$NoteTombstonesTableFilterComposer
+    extends Composer<_$AppDatabase, $NoteTombstonesTable> {
+  $$NoteTombstonesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$NoteTombstonesTableOrderingComposer
+    extends Composer<_$AppDatabase, $NoteTombstonesTable> {
+  $$NoteTombstonesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$NoteTombstonesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $NoteTombstonesTable> {
+  $$NoteTombstonesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerUserId => $composableBuilder(
+    column: $table.ownerUserId,
+    builder: (column) => column,
+  );
+}
+
+class $$NoteTombstonesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $NoteTombstonesTable,
+          NoteTombstoneRow,
+          $$NoteTombstonesTableFilterComposer,
+          $$NoteTombstonesTableOrderingComposer,
+          $$NoteTombstonesTableAnnotationComposer,
+          $$NoteTombstonesTableCreateCompanionBuilder,
+          $$NoteTombstonesTableUpdateCompanionBuilder,
+          (
+            NoteTombstoneRow,
+            BaseReferences<
+              _$AppDatabase,
+              $NoteTombstonesTable,
+              NoteTombstoneRow
+            >,
+          ),
+          NoteTombstoneRow,
+          PrefetchHooks Function()
+        > {
+  $$NoteTombstonesTableTableManager(
+    _$AppDatabase db,
+    $NoteTombstonesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$NoteTombstonesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$NoteTombstonesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$NoteTombstonesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> deletedAt = const Value.absent(),
+                Value<String?> ownerUserId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => NoteTombstonesCompanion(
+                id: id,
+                deletedAt: deletedAt,
+                ownerUserId: ownerUserId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String deletedAt,
+                Value<String?> ownerUserId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => NoteTombstonesCompanion.insert(
+                id: id,
+                deletedAt: deletedAt,
+                ownerUserId: ownerUserId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$NoteTombstonesTable, NoteTombstoneRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $NoteTombstonesTable,
+                    NoteTombstoneRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$NoteTombstonesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $NoteTombstonesTable,
+      NoteTombstoneRow,
+      $$NoteTombstonesTableFilterComposer,
+      $$NoteTombstonesTableOrderingComposer,
+      $$NoteTombstonesTableAnnotationComposer,
+      $$NoteTombstonesTableCreateCompanionBuilder,
+      $$NoteTombstonesTableUpdateCompanionBuilder,
+      (
+        NoteTombstoneRow,
+        BaseReferences<_$AppDatabase, $NoteTombstonesTable, NoteTombstoneRow>,
+      ),
+      NoteTombstoneRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SyncMetaTableCreateCompanionBuilder = SyncMetaCompanion Function({
+  required String key,
+  required String value,
+  Value<int> rowid,
+});
+typedef $$SyncMetaTableUpdateCompanionBuilder = SyncMetaCompanion Function({
+  Value<String> key,
+  Value<String> value,
+  Value<int> rowid,
+});
+
+class $$SyncMetaTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncMetaTable> {
+  $$SyncMetaTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncMetaTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncMetaTable> {
+  $$SyncMetaTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncMetaTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncMetaTable> {
+  $$SyncMetaTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+}
+
+class $$SyncMetaTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncMetaTable,
+          SyncMetaRow,
+          $$SyncMetaTableFilterComposer,
+          $$SyncMetaTableOrderingComposer,
+          $$SyncMetaTableAnnotationComposer,
+          $$SyncMetaTableCreateCompanionBuilder,
+          $$SyncMetaTableUpdateCompanionBuilder,
+          (
+            SyncMetaRow,
+            BaseReferences<_$AppDatabase, $SyncMetaTable, SyncMetaRow>,
+          ),
+          SyncMetaRow,
+          PrefetchHooks Function()
+        > {
+  $$SyncMetaTableTableManager(_$AppDatabase db, $SyncMetaTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncMetaTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncMetaTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncMetaTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> key = const Value.absent(),
+            Value<String> value = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => SyncMetaCompanion(key: key, value: value, rowid: rowid),
+          createCompanionCallback: ({
+            required String key,
+            required String value,
+            Value<int> rowid = const Value.absent(),
+          }) => SyncMetaCompanion.insert(key: key, value: value, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SyncMetaTable, SyncMetaRow>(table),
+                  BaseReferences<_$AppDatabase, $SyncMetaTable, SyncMetaRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncMetaTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncMetaTable,
+      SyncMetaRow,
+      $$SyncMetaTableFilterComposer,
+      $$SyncMetaTableOrderingComposer,
+      $$SyncMetaTableAnnotationComposer,
+      $$SyncMetaTableCreateCompanionBuilder,
+      $$SyncMetaTableUpdateCompanionBuilder,
+      (SyncMetaRow, BaseReferences<_$AppDatabase, $SyncMetaTable, SyncMetaRow>),
+      SyncMetaRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3592,4 +4619,8 @@ class $AppDatabaseManager {
       $$RecentSearchesTableTableManager(_db, _db.recentSearches);
   $$SettingsTableTableManager get settings =>
       $$SettingsTableTableManager(_db, _db.settings);
+  $$NoteTombstonesTableTableManager get noteTombstones =>
+      $$NoteTombstonesTableTableManager(_db, _db.noteTombstones);
+  $$SyncMetaTableTableManager get syncMeta =>
+      $$SyncMetaTableTableManager(_db, _db.syncMeta);
 }

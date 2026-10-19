@@ -1,0 +1,22 @@
+{
+  "forge_core": "0.1.0+14",
+  "synced_at": "2026-10-19T05:19:24.083361Z",
+  "files": {
+    "functions/_shared/mail.ts": "dbd9e19c30c79bda5c36ede1726c1901d49f7de2a9a039e043a6e58df7c931ba",
+    "functions/forge-delete-confirm/deno.json": "5f1c69e365acfb48147f4f9c2806b4228ba91f920fc7723b25185e275bd29537",
+    "functions/forge-delete-confirm/index.ts": "322b55a05415c6fe894819020dab72e3ffe6f116cca0a4732fdda1751e46bcbf",
+    "functions/forge-delete-request/deno.json": "5f1c69e365acfb48147f4f9c2806b4228ba91f920fc7723b25185e275bd29537",
+    "functions/forge-delete-request/index.ts": "51f7ca555ae746d65df6e15ca68d356dc9d0787170e1b474356e41de8e690f93",
+    "functions/forge-purge/deno.json": "5f1c69e365acfb48147f4f9c2806b4228ba91f920fc7723b25185e275bd29537",
+    "functions/forge-purge/index.ts": "765757344d1ec6cf3222d8c9016e8025391caeda07e0e9171b03a5274f35bbe6",
+    "migrations/20261018120000_forge_accounts.sql": "d5b8b0fa580fc768ceacd5d22d332ddf822168a92c1fb510850a2fd1884b0956",
+    "migrations/20261018130000_forge_purge.sql": "9d57413e390579f9ed3f616f7a0dd3c8b37b65e20f25c54bb391c9891ad14aeb",
+    "migrations/20261018140000_forge_web_deletion.sql": "bf7266fffb4b1df98be02d14cf7387c23645d23cebb0dc456573efd569801c9d",
+    "templates/README.md": "73e00c03517e6593e1dc550cb9860b68730d88160d5a7cfec638fc11d6bc67a0",
+    "templates/confirmation.html": "68f15c4e2cb50048dfccbdb0cece6a8bf73bf46cb8eca38e1700f977c7c7bac5",
+    "templates/email_change.html": "50f48fd703a484b8f6c82705a4e41e3a4050eb49b5ad16d329652152f93da8fe",
+    "templates/entries.sql": "a67a6e945b10d765fe1e7edbc1fce45eb2a2284571cce294427bfd5e79265c28",
+    "templates/magic_link.html": "2c746bd31d37afc762fc63fb455675e185453a500c3ad78fc2297f6558140c68",
+    "templates/recovery.html": "b9e0a61f19ec198a25f83c2a244ef02322fbabdd430dedfeb9bb263a67a6f79e"
+  }
+}

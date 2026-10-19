@@ -38,8 +38,22 @@ full="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml | tr -d '[:space:]')"
 app_version="${full%%+*}"
 echo "Cheesy Scribe $full → APK + AAB version $app_version"
 
-flutter build apk --release
-flutter build appbundle --release
+# Backend configuration (CHEESE-59, config/README.md): the Supabase URL and
+# key and the Google web client ID travel as --dart-defines. The pipeline
+# writes them to config/release.json from the DART_DEFINES_JSON secret
+# (DART_DEFINES_FILE names it); locally the same file, or none. Without one
+# the build is valid but cannot sign in.
+defines=()
+defines_file="${DART_DEFINES_FILE:-config/release.json}"
+if [[ -f "$defines_file" ]]; then
+  echo "Using build defines from $defines_file"
+  defines=(--dart-define-from-file="$defines_file")
+else
+  echo "WARNING: no $defines_file — this build has no backend configuration and cannot sign in." >&2
+fi
+
+flutter build apk --release "${defines[@]}"
+flutter build appbundle --release "${defines[@]}"
 
 mkdir -p release
 apk="release/cheesy-scribe-$app_version-android$suffix.apk"

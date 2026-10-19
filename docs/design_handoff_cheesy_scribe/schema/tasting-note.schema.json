@@ -11,6 +11,7 @@
     "cheeseName": { "type": "string", "minLength": 1 },
     "tastedAt": { "type": "string", "format": "date", "description": "Calendar date of the tasting (local), YYYY-MM-DD" },
     "createdAt": { "type": "string", "format": "date-time", "description": "First save, UTC; tiebreak for notes tasted the same day" },
+    "updatedAt": { "type": "string", "format": "date-time", "description": "Last change, UTC; stamped on save, compared by sync (last write wins). Absent in payloads older than schema v3 (CHEESE-58): then equals createdAt" },
     "creamery": { "type": "string" },
     "origin": { "type": "string" },
     "rind": { "enum": ["natural", "bloomy", "washed", "waxed", "leafWrapped", "rindless", "other"] },

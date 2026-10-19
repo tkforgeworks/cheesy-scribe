@@ -8,15 +8,34 @@ part 'app_database.g.dart';
 /// Tasting notes. Dates are ISO text so they sort as strings: [tastedAt]
 /// is `YYYY-MM-DD` (local calendar day), [createdAt] a UTC date-time.
 /// Enums store their `name`. The 16 flavor spokes are integer columns
-/// (`fl_*`, 0 = unset) so stats and filters can stay in SQL.
+/// (`fl_*`, 0 = unset) so stats and filters can stay in SQL. [updatedAt]
+/// and [dirty] are sync bookkeeping (schema v3, CHEESE-58); [ownerUserId]
+/// is the ownership model (schema v4, CHEESE-62).
 @DataClassName('NoteRow')
 @TableIndex(name: 'notes_by_date', columns: {#tastedAt, #createdAt})
 @TableIndex(name: 'notes_by_style', columns: {#cheeseStyleId})
+@TableIndex(name: 'notes_dirty', columns: {#dirty})
+@TableIndex(name: 'notes_owner', columns: {#ownerUserId})
 class Notes extends Table {
   TextColumn get id => text()();
+
+  /// The account this note belongs to (`auth.users.id`), or null for a
+  /// note made while signed out. The notebook shows one owner at a time:
+  /// the signed-in account's notes, or the unowned ones when signed out
+  /// (`NotesRepository.owner`). Set by the repository, never by the model.
+  TextColumn get ownerUserId => text().nullable()();
   TextColumn get cheeseName => text()();
   TextColumn get tastedAt => text()();
   TextColumn get createdAt => text()();
+
+  /// Last change, UTC ISO; stamped by the repository on save, compared by
+  /// sync. The empty default only exists so the v3 migration can add the
+  /// column; it is backfilled from [createdAt] in the same step.
+  TextColumn get updatedAt => text().withDefault(const Constant(''))();
+
+  /// Changed locally since the last push to the account. Defaults to true
+  /// so rows that predate sync are uploaded on the first sign-in.
+  BoolColumn get dirty => boolean().withDefault(const Constant(true))();
   TextColumn get creamery => text().nullable()();
   TextColumn get origin => text().nullable()();
   TextColumn get rind => textEnum<RindType>().nullable()();
@@ -79,14 +98,40 @@ class Settings extends Table {
   Set<Column> get primaryKey => {key};
 }
 
-@DriftDatabase(tables: [Notes, RecentSearches, Settings])
+/// Ids of locally deleted notes, kept until sync has deleted them from the
+/// account (CHEESE-58). Only owned notes leave one: nothing on the server
+/// knows an unowned note. [ownerUserId] says whose (schema v4).
+@DataClassName('NoteTombstoneRow')
+class NoteTombstones extends Table {
+  TextColumn get id => text()();
+  TextColumn get deletedAt => text()();
+  TextColumn get ownerUserId => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Sync engine state (last sync time, last error, …). Its own table because
+/// `SettingsRepository.save` rewrites every [Settings] row (CHEESE-58).
+@DataClassName('SyncMetaRow')
+class SyncMeta extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
+@DriftDatabase(
+  tables: [Notes, RecentSearches, Settings, NoteTombstones, SyncMeta],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   /// Bump with every table change and add a case to [_upgradeTo]. Never
   /// edit a released case; users upgrade through each step in order.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   /// The schema version that last changed what [searchTextFor] produces
   /// (2: LEMON relabelled CITRUS, CHEESE-45). Raise it, and the schema
@@ -109,6 +154,30 @@ class AppDatabase extends _$AppDatabase {
     switch (version) {
       case 2:
         // No table change; the search text is rebuilt (searchTextVersion).
+        break;
+      case 3:
+        // Sync bookkeeping (CHEESE-58). Existing notes get their creation
+        // time as last change and start dirty, so a first sign-in uploads
+        // everything.
+        await m.addColumn(notes, notes.updatedAt);
+        await m.addColumn(notes, notes.dirty);
+        await customStatement('UPDATE notes SET updated_at = created_at');
+        await m.createIndex(notesDirty);
+        // The v3 shape of the table, frozen: `m.createTable` would build
+        // today's columns and the v4 step's addColumn would then fail.
+        await customStatement(
+          'CREATE TABLE IF NOT EXISTS "note_tombstones" ("id" TEXT NOT NULL, '
+          '"deleted_at" TEXT NOT NULL, PRIMARY KEY ("id"))',
+        );
+        await m.createTable(syncMeta);
+        break;
+      case 4:
+        // Ownership (CHEESE-62). Existing notes were made before accounts
+        // existed, so they are unowned: the notebook keeps showing them
+        // while signed out, and the first sign-in offers to attach them.
+        await m.addColumn(notes, notes.ownerUserId);
+        await m.addColumn(noteTombstones, noteTombstones.ownerUserId);
+        await m.createIndex(notesOwner);
         break;
       default:
         throw StateError('No migration to schema version $version');
@@ -135,6 +204,7 @@ TastingNote noteFromRow(NoteRow row) => TastingNote(
   cheeseName: row.cheeseName,
   tastedAt: TastingNote.parseDate(row.tastedAt),
   createdAt: DateTime.parse(row.createdAt),
+  updatedAt: row.updatedAt.isEmpty ? null : DateTime.parse(row.updatedAt),
   creamery: row.creamery,
   origin: row.origin,
   rind: row.rind,
@@ -172,12 +242,15 @@ TastingNote noteFromRow(NoteRow row) => TastingNote(
   photoUrl: row.photoUrl,
 );
 
-/// Domain → row (all columns set, for upsert).
+/// Domain → row (every column but [Notes.dirty] and [Notes.ownerUserId],
+/// which the repository sets: dirty is true for a local edit and false for
+/// a row received from the account; the owner is the repository's scope).
 NotesCompanion noteToCompanion(TastingNote note) => NotesCompanion(
   id: Value(note.id),
   cheeseName: Value(note.cheeseName),
   tastedAt: Value(TastingNote.formatDate(note.tastedAt)),
   createdAt: Value(note.createdAt.toUtc().toIso8601String()),
+  updatedAt: Value(note.updatedAt.toUtc().toIso8601String()),
   creamery: Value(note.creamery),
   origin: Value(note.origin),
   rind: Value(note.rind),

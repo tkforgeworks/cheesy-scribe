@@ -1,9 +1,12 @@
 import 'package:cheesy_scribe/app/theme/scribe_theme.dart';
 import 'package:cheesy_scribe/data/db/app_database.dart';
+import 'package:cheesy_scribe/data/forge_providers.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/providers.dart';
 import 'package:cheesy_scribe/data/repositories/library_repository.dart';
 import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
+import 'package:cheesy_scribe/data/sync/profile_payload.dart';
+import 'package:cheesy_scribe/data/sync/sync_providers.dart';
 import 'package:cheesy_scribe/features/feedback/feedback_client.dart';
 import 'package:cheesy_scribe/main.dart';
 import 'package:drift/native.dart';
@@ -11,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:forge_core/testing.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -41,6 +45,13 @@ const testDevice = FeedbackDevice(
 /// feedback relay; without one, any network call fails the test. The bundled cheese library
 /// is pre-loaded on the real event loop (asset I/O never completes on the
 /// fake clock) so style pickers and counts resolve under `pumpAndSettle`.
+///
+/// The backend is always a fake (CHEESE-59): [auth] drives sign-in state
+/// (a fresh signed-out `FakeForgeAuth` by default), [accounts] the
+/// account row (a `FakeForgeAccounts` over [auth] by default) and [remote]
+/// the server's notes table (a `FakeForgeEntriesRepository`, CHEESE-62).
+/// Pass `backup: false` for a build with no configuration, where all three
+/// are null and the app says backup isn't available.
 /// Returns the database so tests can seed or inspect it.
 Future<AppDatabase> pumpApp(
   WidgetTester tester, {
@@ -48,9 +59,21 @@ Future<AppDatabase> pumpApp(
   AppDatabase? db,
   AppSettings? settings,
   http.Client? feedbackHttp,
+  FakeForgeAuth? auth,
+  FakeForgeAccounts? accounts,
+  FakeForgeEntriesRepository<TastingNote>? remote,
+  FakeForgeEntriesRepository<ProfilePayload>? remoteProfile,
+  bool backup = true,
 }) async {
   final database = db ?? openTestDatabase();
   final library = LibraryRepository();
+  final fakeAuth = auth ?? FakeForgeAuth();
+  if (auth == null) addTearDown(fakeAuth.dispose);
+  final fakeAccounts = accounts ?? FakeForgeAccounts(fakeAuth);
+  final fakeRemote =
+      remote ?? FakeForgeEntriesRepository<TastingNote>(fakeAuth);
+  final fakeProfile =
+      remoteProfile ?? FakeForgeEntriesRepository<ProfilePayload>(fakeAuth);
   await tester.runAsync(() async {
     if (settings != null) await SettingsRepository(database).save(settings);
     await library.load();
@@ -78,6 +101,10 @@ Future<AppDatabase> pumpApp(
               }),
         ),
         feedbackDeviceProvider.overrideWith((ref) async => testDevice),
+        forgeAuthProvider.overrideWithValue(backup ? fakeAuth : null),
+        forgeAccountsProvider.overrideWithValue(backup ? fakeAccounts : null),
+        remoteNotesProvider.overrideWithValue(backup ? fakeRemote : null),
+        remoteProfileProvider.overrideWithValue(backup ? fakeProfile : null),
       ],
       child: ScribeApp(key: ValueKey(restart), initialLocation: at),
     ),
@@ -100,8 +127,12 @@ void testApp(
       await body(tester);
     } finally {
       await tester.pumpWidget(const SizedBox.shrink());
-      // A zero-length timer only fires when the fake clock advances.
-      await tester.pump(const Duration(milliseconds: 1));
+      // A zero-length timer only fires when the fake clock advances; a few
+      // ticks, since a cancel can queue another (the sync coordinator's
+      // subscriptions, CHEESE-62).
+      for (var i = 0; i < 3; i++) {
+        await tester.pump(const Duration(milliseconds: 1));
+      }
     }
   });
 }
@@ -112,6 +143,24 @@ void testApp(
 /// forever at teardown. `runAsync` executes [op] on the real event loop.
 Future<T> onDb<T>(WidgetTester tester, Future<T> Function() op) async =>
     (await tester.runAsync(op)) as T;
+
+/// A deep link arriving while the app runs: the engine's
+/// `pushRouteInformation`, which is how Android hands an opened
+/// `com.tkforgeworks.cheesyscribe://auth-callback/?code=…` link to the
+/// router (a cold start passes it as the initial location instead).
+Future<void> openLink(WidgetTester tester, String location) async {
+  await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+    SystemChannels.navigation.name,
+    SystemChannels.navigation.codec.encodeMethodCall(
+      MethodCall('pushRouteInformation', <String, dynamic>{
+        'location': location,
+        'state': null,
+      }),
+    ),
+    (_) {},
+  );
+  await tester.pumpAndSettle();
+}
 
 /// The Android system back button/gesture: the engine's `popRoute`, which
 /// go_router's delegate answers (unlike `tester.pageBack()`, which taps the

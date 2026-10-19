@@ -6,7 +6,8 @@ An app based on the tasting note book from [33Books](https://www.33books.com), s
 
 [v0.1.0](https://github.com/tkforgeworks/cheesy-scribe/releases/tag/v0.1.0) is the first release: a signed APK on
 [GitHub Releases](https://github.com/tkforgeworks/cheesy-scribe/releases/latest) and a Google Play testing build (not yet
-public on the store). Flutter / Material 3, **Android only**, local-first (notes stay on the device). The plan and
+public on the store). Flutter / Material 3, **Android only**, local-first (notes stay on the device; 0.3.0 adds an
+optional account for backup, see [`PRIVACY.md`](PRIVACY.md)). The plan and
 ticket map are in [`docs/CHEESE-1-decomposition.md`](docs/CHEESE-1-decomposition.md); the design handoff is
 in [`docs/design_handoff_cheesy_scribe/`](docs/design_handoff_cheesy_scribe/).
 
@@ -22,6 +23,13 @@ flutter analyze
 flutter test
 ```
 
+Sign-in and backup (0.3.0) need the Supabase project's URL and publishable key and the Google Web OAuth client
+ID, passed as `--dart-define`s and never committed: copy `config/dev.example.json` to the gitignored
+`config/dev.json`, fill it in and run with `flutter run --dart-define-from-file=config/dev.json`
+([`config/README.md`](config/README.md)). Without the file the app runs local-only and Account says backup isn't
+available in this build; that is what CI and tests see. Release builds get the same values from the pipeline
+(the `DART_DEFINES_JSON` repository secret, written to `config/release.json` before `build-android.sh` runs).
+
 CI consumes the org's reusable [`ci-flutter.yml`](https://github.com/tkforgeworks/.github/blob/main/.github/workflows/ci-flutter.yml);
 the check reports as `ci / ci`. Note that `dart format` checks every `.dart` file in the repo, which is why the
 handoff's reference Dart files carry a `.txt` suffix.
@@ -31,8 +39,8 @@ handoff's reference Dart files carry a `.txt` suffix.
 This repo follows the TK ForgeWorks branching model ([`docs/branching-and-release.md`](https://github.com/tkforgeworks/.github/blob/main/docs/branching-and-release.md)):
 
 - `main` is the released state and only moves by merging a release PR.
-- Work accumulates on the current release branch, `v0.2.0/main`.
-- Topic branches are named `v0.2.0/CHEESE-N-short-topic` and PR into the release branch, never into `main`.
+- Work accumulates on the current release branch, `v0.3.0/main`.
+- Topic branches are named `v0.3.0/CHEESE-N-short-topic` and PR into the release branch, never into `main`.
 - Commit subjects are the changelog: `CHEESE-N: Imperative summary`, with `CHEESE-N: Fix ...` for bug fixes.
 
 Both branches are protected by repository rulesets per [`docs/branch-protection-ruleset.md`](https://github.com/tkforgeworks/.github/blob/main/docs/branch-protection-ruleset.md): `main` is PR-only with no force-push, no deletion, and no bypass; `v*/main` blocks force-push and deletion. `main` also requires the `ci / ci` check to pass with the branch up to date.
@@ -54,8 +62,8 @@ it and it decides for itself:
 Version bumps are ordinary commits made by the bump helper (bash and PowerShell do the same thing):
 
 ```sh
-scripts/release/bump-version.sh rc      # on v0.2.0/main: 0.2.0-rc.1+10, commit, push → CI publishes the prerelease
-scripts/release/bump-version.sh final   # 0.2.0+11, commit, push, opens the release PR into main → merge cuts v0.2.0
+scripts/release/bump-version.sh rc      # on v0.3.0/main: 0.3.0-rc.1+16, commit, push → CI publishes the prerelease
+scripts/release/bump-version.sh final   # 0.3.0+17, commit, push, opens the release PR into main → merge cuts v0.3.0
 ```
 
 The base version comes from the release-branch name; `+BUILD` (the Android `versionCode`) goes up on every bump.

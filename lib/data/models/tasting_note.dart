@@ -8,6 +8,8 @@ import 'enums.dart';
 /// Handoff model amended per CHEESE-1 §3 B1–B8: [verdict], [price] +
 /// [priceUnit] (was `pricePerLb`), [attributeOther], [rating] 0 = unrated,
 /// [tastedAt] is a date (local midnight), [createdAt] breaks ordering ties.
+/// [updatedAt] is sync metadata (CHEESE-58): stamped by the repository on
+/// save, excluded from [==].
 @immutable
 class TastingNote {
   TastingNote({
@@ -15,6 +17,7 @@ class TastingNote {
     required this.cheeseName,
     required DateTime tastedAt,
     required this.createdAt,
+    DateTime? updatedAt,
     this.creamery,
     this.origin,
     this.rind,
@@ -36,6 +39,7 @@ class TastingNote {
   }) : assert(rating >= 0 && rating <= 5, 'rating is 0 (unrated) to 5'),
        assert(price == null || price >= 0, 'price is never negative'),
        tastedAt = dateOnly(tastedAt),
+       updatedAt = updatedAt ?? createdAt,
        flavors = Map.unmodifiable({
          for (final e in flavors.entries)
            if (e.value > 0) e.key: e.value.clamp(0, 5),
@@ -49,6 +53,11 @@ class TastingNote {
 
   /// When the note was first saved; orders notes tasted on the same day.
   final DateTime createdAt;
+
+  /// Last local change, UTC. The repository stamps it on every save and
+  /// sync compares it (last write wins). Defaults to [createdAt]. Metadata:
+  /// not part of [==], so a re-saved note still equals its draft.
+  final DateTime updatedAt;
   final String? creamery;
   final String? origin;
   final RindType? rind;
@@ -127,6 +136,7 @@ class TastingNote {
     String? cheeseName,
     DateTime? tastedAt,
     DateTime? createdAt,
+    DateTime? updatedAt,
     Object? creamery = _unset,
     Object? origin = _unset,
     Object? rind = _unset,
@@ -151,6 +161,7 @@ class TastingNote {
       cheeseName: cheeseName ?? this.cheeseName,
       tastedAt: tastedAt ?? this.tastedAt,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       creamery: _pick(creamery, this.creamery),
       origin: _pick(origin, this.origin),
       rind: _pick(rind, this.rind),
@@ -179,6 +190,9 @@ class TastingNote {
     createdAt: json['createdAt'] == null
         ? parseDate(json['tastedAt'] as String)
         : DateTime.parse(json['createdAt'] as String),
+    updatedAt: json['updatedAt'] == null
+        ? null
+        : DateTime.parse(json['updatedAt'] as String),
     creamery: json['creamery'] as String?,
     origin: json['origin'] as String?,
     rind: json['rind'] == null
@@ -212,6 +226,7 @@ class TastingNote {
     'cheeseName': cheeseName,
     'tastedAt': formatDate(tastedAt),
     'createdAt': createdAt.toUtc().toIso8601String(),
+    'updatedAt': updatedAt.toUtc().toIso8601String(),
     if (creamery != null) 'creamery': creamery,
     if (origin != null) 'origin': origin,
     if (rind != null) 'rind': rind!.name,

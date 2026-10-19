@@ -3,8 +3,8 @@
 ## What this is
 
 Cheese-tasting notes app modeled on the 33Books tasting notebook: track,
-record, and look back at cheeses tasted. **v0.1.0 is released** (2026-10-12;
-GitHub release + Play internal testing). The original plan is
+record, and look back at cheeses tasted. **v0.2.0 is released** (2026-10-16;
+v0.1.0 on 2026-10-12; GitHub release + Play internal testing). The original plan is
 `docs/CHEESE-1-decomposition.md` (inventory of the design handoff, decisions,
 architecture, and the ticket list mirrored in Jira epics CHEESE-3..12). The
 design handoff itself lives in `docs/design_handoff_cheesy_scribe/`
@@ -29,11 +29,21 @@ Layout so far:
   DESIGN_SPEC §6/§7's "back app bar"), plus
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
   fullscreen dialog), `/notes/:id`, `/library/:styleId`,
+  `/account/check-email`, `/auth/set-password` (CHEESE-61),
+  `/account/add-password` (CHEESE-64),
   `/licenses`, `/feedback`, `/glossary`, `/glossary/:section` (`_pushedPage` = Flutter's `MaterialPage`: Android
   slide-and-fade + predictive back). No `/login`. `new` is declared before
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
   `material_ui`'s `MaterialApp`, misses ours and gives plain `builder:`
   routes a `NoTransitionPage` (CHEESE-43; `test/app_test.dart` pins it).
+  A top-level `redirect` sends the auth-callback URI (`isAuthCallback`:
+  the App Link `https://tkforgeworks.com/apps/cheesy-scribe/auth/` plus
+  whatever the mail appended, matched by scheme, host and path prefix
+  since go_router drops the trailing slash; Android hands the router the
+  whole URI, cold or warm) to `/account`; forge_core verifies the token
+  from the same link itself (CHEESE-61, found on rc.2 as "no routes for
+  location"; CHEESE-68 for the App Link and the token links). `test/support.dart`'s `openLink()` sends the
+  engine's `pushRouteInformation` for the warm case.
 - `lib/app/shell/` — `ScribeShell` (Scaffold owning the drawer; screens are
   their own Scaffolds and call `ScribeShell.openDrawer(context)`, not
   `Scaffold.of`. Its `PopScope(canPop: false)` makes system back on a
@@ -52,11 +62,21 @@ Layout so far:
   `docs/design_handoff_cheesy_scribe/schema/*.schema.json` — the schemas are
   maintained, and `test/data/models_test.dart` validates emitted JSON
   against them with `json_schema`. `tastedAt` is a local-midnight date
-  (`YYYY-MM-DD` in JSON); `createdAt` is UTC date-time.
-- `lib/data/db/app_database.dart` — drift schema v2 (v2 changed no
-  table; CHEESE-45): `notes` (16 `fl_*`
-  flavor int columns, ISO text dates, enums by name, a normalised
-  `search_text` haystack), `recent_searches`, `settings` (key/value).
+  (`YYYY-MM-DD` in JSON); `createdAt` is UTC date-time; `updatedAt`
+  (CHEESE-58) defaults to `createdAt`, is stamped by the repository on
+  save, and is **sync metadata excluded from `==`/`hashCode`** so the
+  form's dirty check and "stored equals draft" tests are unaffected.
+  `NoteTombstone` (id + `deletedAt`) is the deletion marker type.
+- `lib/data/db/app_database.dart` — drift schema v4 (v2 changed no
+  table, CHEESE-45; v3 added the sync bookkeeping, CHEESE-58; v4 the
+  ownership model, CHEESE-62): `notes` (16 `fl_*` flavor int columns, ISO
+  text dates, enums by name, a normalised `search_text` haystack, plus
+  `updated_at`, `dirty` and `owner_user_id`, null = made while signed
+  out), `recent_searches`, `settings` (key/value), `note_tombstones` (id +
+  `deleted_at` + `owner_user_id`, kept until sync has pushed the
+  deletion; only owned notes leave one), `sync_meta`
+  (key/value for the sync engine; separate from `settings` because
+  `SettingsRepository.save` rewrites every row).
   `app_database.g.dart` is generated and committed: after any table change
   run `dart run build_runner build --delete-conflicting-outputs` **then
   `dart format .`** (the generator's output is not format-clean and CI
@@ -65,16 +85,37 @@ Layout so far:
   **labels**, so relabelling one means raising `schemaVersion` and
   `AppDatabase.searchTextVersion` together: upgrading from below it
   rebuilds every note's `search_text` after all schema steps
-  (`test/data/migration_test.dart`). Enum names are what's stored and
+  (`test/data/migration_test.dart`, which starts from the **released DDL
+  frozen in the test**, not from `createAll`: a subclass with a lower
+  `schemaVersion` would create today's columns and make `addColumn` fail).
+  The v3 step backfills `updated_at = created_at` and leaves every existing
+  note dirty; it creates `note_tombstones` from **frozen v3 DDL** (a
+  `createTable` would build today's columns and v4's `addColumn` would
+  fail). v4 leaves existing notes unowned: the first sign-in offers to
+  attach them. Enum names are what's stored and
   never change; `FlavorNote.lemon` is labelled CITRUS since CHEESE-45. `search_text.dart` holds
   `normalizeForSearch` (lower-case, diacritics folded, `[a-z0-9 ]` only),
   applied to both the stored haystack and the typed query.
-- `lib/data/repositories/` — `NotesRepository` (`NotesQuery` = search +
+- `lib/data/repositories/` — `NotesRepository` (**scoped to one `owner`**,
+  CHEESE-62: an account id or null for unowned; `notesRepositoryProvider`
+  passes `currentOwnerProvider`, so every stream restarts under the new
+  scope when the session changes; `NotesQuery` = search +
   minRating + styleId + paging; `watchPage/watchCount/watchNote/
-  watchNewest/watchAll/watchStyleCounts/watchTopStyleIds`, `save` is an
-  upsert, `newId()`), `SettingsRepository` (`watch/load/save/update`),
-  `RecentSearchesRepository` (cap 10). Domain types in, domain types out;
-  drift row classes (`NoteRow` etc.) never leave `lib/data`.
+  watchNewest/watchAll/watchStyleCounts/watchTopStyleIds`, `newId()`;
+  **`save` stamps `updatedAt` with the injectable `now`, files the row
+  under `owner` and marks it dirty**, returning the stamped note; `delete`
+  leaves a tombstone only for an owned note. Cross-scope calls:
+  `watchUnownedCount`, `attachUnownedTo(userId)` (dirty, stamps kept),
+  `removeOwned(userId)` (sign-out / deletion), `syncStamps(ids)`,
+  `watchTombstoneCount`. Sync
+  bookkeeping (CHEESE-58): `watchDirty/dirtyNotes`, `markClean(pushed)`
+  (clears only rows whose `updated_at` still matches, so an edit during a
+  push stays dirty), `applyRemote(notes)` (keeps the remote stamp, clean),
+  `applyRemoteDeletions(ids)` (no tombstone), `tombstones()`,
+  `clearTombstones(ids)`), `SyncMetaRepository` (`get/set/watch/clear`;
+  `set(key, null)` removes), `SettingsRepository` (`watch/load/save/
+  update`), `RecentSearchesRepository` (cap 10). Domain types in, domain
+  types out; drift row classes (`NoteRow` etc.) never leave `lib/data`.
 - `lib/data/repositories/library_repository.dart` + `assets/data/
   cheese_styles.json` — the bundled read-only library (27 styles, curated
   file order, ids are stable slugs: never rename one after release; add
@@ -82,6 +123,90 @@ Layout so far:
   `search()` folds diacritics. The six mocked styles keep the mockup's
   example strings (asserted in `test/data/library_test.dart`, which also
   schema-validates every entry). Tim owns the prose; edit in place.
+- `lib/data/forge_providers.dart` (CHEESE-59) — the backend handle:
+  `scribeSupabaseConfig` (`ForgeSupabaseConfig.fromEnvironment` with
+  `authRedirectUrl: scribeAuthRedirectUrl` =
+  `https://tkforgeworks.com/apps/cheesy-scribe/auth/`, an Android App Link
+  since CHEESE-68 (rc.9): the website's `/.well-known/assetlinks.json`
+  names every certificate Play signs the package with (four, from Play
+  Console → Grow → Deep links), so a Play-signed install opens the app
+  for that path, and its landing page catches everyone else (TKFW-85).
+  Since rc.10 the mail templates (forge-core FC-13) link to that URL with
+  `?token_hash=…&type=…` instead of GoTrue's `/verify` redirect, whose 303
+  body ("See Other") stayed behind as a tab in Gmail's browser on rc.3 and
+  rc.9; forge_core verifies the token on arrival (`signedIn`,
+  `passwordRecovery`, or `mailLinkFailed`; `createScribeRouter`'s
+  `onMailLink` tells `ScribeApp` a link arrived, and `_onAuthState` greets
+  the state it produces with a snackbar: `emailConfirmedMessage`,
+  `resetLinkVerifiedMessage`, or `authErrorCopy` for a failed link,
+  copy in `auth_copy.dart`). The trailing slash is part of the
+  allow-list entry, which `{{ .RedirectTo }}` is validated against. The
+  rc.2–rc.8 custom scheme `com.tkforgeworks.cheesyscribe://auth-callback`
+  (the application id **minus its underscore**; rc.1 used
+  `cheesy_scribe://` and GoTrue sent every mail link to the Site URL) is
+  gone: GoTrue's `html/template` would rewrite it to `#ZgotmplZ` in the
+  token links anyway; the test pins the manifest against the constant),
+  `forgeCoreProvider`
+  (`ForgeCore?`, null by default; `main()` overrides it with
+  `ForgeCore.initialize` when `isConfigured`), `forgeAuthProvider` /
+  `forgeAccountsProvider` (derived, null without a backend; tests override
+  these two with the fakes), `backupAvailableProvider`,
+  `authStateProvider` (StreamProvider over `ForgeAuth.changes`; a
+  StreamProvider nobody watches reads as loading, so hold a listener in
+  tests) and `sessionProvider`. The three defines (`FORGE_SUPABASE_URL`,
+  `FORGE_SUPABASE_PUBLISHABLE_KEY`, `FORGE_GOOGLE_WEB_CLIENT_ID`) come
+  from `--dart-define-from-file=config/dev.json` (gitignored; shape in
+  `config/dev.example.json`, notes in `config/README.md`); release builds
+  from `config/release.json`, which the pipeline writes from the
+  `DART_DEFINES_JSON` repo secret (TKFW-84) and `build-android.sh` passes
+  when present. A build without them runs local-only; CI and tests never
+  have them, and initialising opens no connection until a sign-in.
+- `supabase/` (CHEESE-60; `docs/supabase.md` is the runbook) — forge_core's
+  migrations, functions and templates copied by `dart run
+  forge_core:sync_supabase` with `forge_core.lock` (re-run when the pin
+  moves; `test/supabase_drift_test.dart` fails on drift; never edit the
+  copies), plus the app's own `migrations/20261018150000_cheesy_scribe_
+  tables.sql`: dedicated `notes` (one row per note) and `profiles` (one row
+  per user, `id = user_id`) tables in the entries-template shape with a
+  constant `kind`, so `core.entries<T>(table:)` reads them. `data` =
+  `TastingNote.toJson()` minus search text plus integer `schemaVersion`;
+  server checks (object ≤ 64 KB, schemaVersion unless tombstone,
+  `updated_at` ≤ now + 1 day), server-stamped immutable
+  `created_at`/`id`/`user_id`, RLS own-row + `forge_account_active()`, DML
+  grants only. `smoke/cheesy_scribe_tables.sql` proves all of it and rolls
+  back. Applied to the live project through the Management API and
+  recorded in `schema_migrations`. Dashboard-only settings are listed in
+  the runbook; the project-scoped token cannot change them.
+- `lib/data/sync/` (CHEESE-62) — `sync_payload.dart` (`noteToPayload` =
+  `toJson()` + `schemaVersion` 1, `noteFromPayload` strips/migrates it),
+  `sync_status.dart` (`SyncPhase` signedOut/idle/syncing/offline/error,
+  `SyncStatus` with `lastSyncAt`, `pending`, `message`),
+  `sync_service.dart` (`SyncService(notes: owner-scoped, meta, remote)`;
+  `sync()` is single-flight and **compares before pushing**: list server
+  keys since `last_sync_at` minus a 1-day `overlap` for clock skew, push
+  dirty notes and tombstones only when newer than the server's copy (older
+  ones are dropped and the server's version pulled), apply remote
+  deletions newer than the local note, fetch remote notes newer than the
+  local copy, record the high-water mark; network → `offline`, else
+  `error` remembered in `sync_meta`), `sync_coordinator.dart`
+  (`SyncCoordinator`: first sync on creation, resume via
+  `WidgetsBindingObserver`, 3 s debounce after `watchDirty`/tombstone
+  changes, retry with backoff 30 s doubling to 15 min; `syncNow()` for
+  Sync now and the sign-out flush), `sync_providers.dart`
+  (`remoteNotesProvider` = `core.entries<TastingNote>(table: 'notes', kind:
+  'tasting_note')`, `remoteProfileProvider` (`profiles`, kind `profile`),
+  `syncServiceProvider`, `syncCoordinatorProvider` kept alive by
+  `ScribeApp`, `syncStatusProvider`). `profile_payload.dart` (CHEESE-63):
+  `ProfilePayload(memberSince, recentSearches)` + `schemaVersion`; the
+  service reconciles the one `profiles` row (id = user id) after the
+  notes on every run: recent searches follow the later side (the local
+  side's stamp is the newest `searched_at`,
+  `RecentSearchesRepository.entries()`/`replaceAll()`; the repository
+  takes an injectable `now`), member since is the earlier date, a
+  difference is pushed with the device time; `sync_meta.profile_synced_at`
+  is the server stamp last reconciled. The server's `keep_newer` trigger
+  enforces LWW against racing phones. `android:allowBackup="false"`: the
+  account is the backup.
 - `lib/data/providers.dart` — `appDatabaseProvider` (drift_flutter
   `driftDatabase(name: 'cheesy_scribe')`; tests override it), the
   repository providers, `appSettingsProvider` (StreamProvider),
@@ -93,7 +218,58 @@ Layout so far:
   (default "You"), mono `MEMBER SINCE <year> · N NOTES` (year = earliest
   note, else `AppSettings.memberSince`, which the screen stamps on first
   visit), DISPLAY NAME `ForgeBoxedField` saved on blur / Done. The drawer and
-  search-bar avatar read the same `displayNameProvider`.
+  search-bar avatar read the same `displayNameProvider`; the name stays
+  local even when signed in. Beneath it (CHEESE-61): no backend →
+  `AccountScreen.backupUnavailable`; signed out → `ForgeSignInPanel`
+  (`signInHeading`/`signInBlurb`; Google, sign in, create, forgot) whose
+  callbacks run through `_run` (busy flag, `ForgeAuthEmailSent` and
+  `emailNotConfirmed` push check-email, failures show
+  `authErrorCopy(error)` from `auth_copy.dart`, Tim's prose); signed in →
+  `ForgeAccountSettings` with the email and linked methods and Sign out
+  (`offerLocalErase: false`; CHEESE-62 sign-out = `syncNow()`, a
+  `showForgeConfirmSheet` warning (`unsyncedTitle`) when something is
+  still unpushed, `signOut()`, `removeOwned(userId)`, `sync_meta.clear()`;
+  Delete account (CHEESE-65): `onDeleteAccount` runs inside forge_ui's
+  typed-DELETE sheet (`deleteTitle`/`deleteAside`, purge "within
+  minutes"), calls `ForgeAccounts.deleteAccount()` (flags for the purge,
+  signs out everywhere), then `removeOwned` + `sync_meta.clear()` and the
+  `deletedMessage` snackbar; a `ForgeFailed` returns `dataErrorCopy` so
+  the sheet stays open). CHEESE-64 fills the rest: `username` from
+  `accountProvider` (`ForgeAccounts.watchAccount`, invalidated after a
+  write) saved through `setUsername` (`usernameSavedMessage`,
+  `dataErrorCopy` on failure), Link Google → `linkGoogle()` through `_run`
+  (copy for `identityAlreadyLinked`), Set a password →
+  `/account/add-password` (`AddPasswordScreen`, a `ForgeSetPasswordScreen`
+  over `setPassword()`; leaving it changes nothing, unlike the reset
+  flow). The DISPLAY NAME hint gains `displayNameSignedInHint` ("lives on
+  this phone; your account's username is below"). MEMBER SINCE keeps the
+  earliest-tasting rule (decision 3b) rather than the account's
+  `created_at`. Ownership UI (CHEESE-62): on a `signedIn`
+  event with unowned notes present, `_offerAttach` shows a confirm sheet
+  (`attachTitle(n)`, "Add them" / "Not now") → `attachUnownedTo`;
+  declined notes stay hidden while signed in and a "Signed-out notes"
+  group (`unownedRowKey`, `attachKey`) re-offers them.
+  `check_email_screen.dart` — `CheckEmailScreen` (`/account/check-email?
+  email=&purpose=confirm|reset`, `CheckEmailScreen.location()`), a
+  `ForgeCheckEmailScreen` whose Send again calls `resendConfirmation` /
+  `sendPasswordReset` and which pops itself when `signedIn` arrives.
+  `set_password_screen.dart` — `SetPasswordScreen` (`/auth/set-password`),
+  pushed by `ScribeApp`'s `ref.listen(authStateProvider)` on
+  `passwordRecovery` (`pushReplacement` when check-email is showing, so the
+  two never stack); success snackbars `savedMessage` and pops. The reset
+  link is itself a sign-in (Supabase opens the recovery session on
+  verification), so leaving set-password without saving signs out again
+  (`PopScope` → `signOut()`, `leftMessage` snackbar; rc.3 left the user
+  signed in). Forgot password for an unknown address reports success by
+  Supabase design (no account enumeration); forge_ui rc.6's check-email
+  reset copy is conditional ("If there is an account for …"). The manifest
+  declares an `autoVerify` https intent filter for
+  `tkforgeworks.com` + `pathPrefix /apps/cheesy-scribe/auth` (CHEESE-68),
+  the only link filter; CI's `-debugsigned`
+  and local debug builds cannot verify the App Link (their key is not in
+  the statement file), so there the mail link opens the website's landing
+  page, whose "Open Cheesy Scribe" intent link still reaches the app.
+  forge_core consumes the link, nothing here parses it.
 - `lib/features/about/about_screen.dart` — `AboutScreen` (`/about`,
   CHEESE-33): a thin wrapper over forge_ui's `ForgeAboutScreen` (layout
   and the maker line with the tinted mark live in the package; pass
@@ -101,9 +277,12 @@ Layout so far:
   badge, version, `AboutScreen.blurb` (TKFW voice; Tim owns the copy),
   `privacyLine`, the menu-icon `leading`, and the link callbacks:
   tkforgeworks.com and the privacy policy (`privacyUri`,
-  `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`,
-  licences via `context.push('/licenses')`, Send feedback via
-  `context.push('/feedback')` (`onSendFeedback`, forge_ui since rc.3). Rows are
+  `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`, licences via `context.push('/licenses')`, Send feedback via
+  `context.push('/feedback')` (`onSendFeedback`, forge_ui since rc.3), and
+  Delete account (`onOpenDeleteAccount`, CHEESE-65: `/account` when signed
+  in, the website form `deleteAccountUri` when signed out, hidden without
+  a backend). The blurb and `privacyLine` mention the optional backup
+  since 0.3.0 (Tim's copy to review). Rows are
   found in tests by the package's keys (`ForgeAboutScreen.licensesKey`,
   `feedbackKey`, …).
 - `lib/features/feedback/` (CHEESE-51) — `FeedbackScreen` (`/feedback`):
@@ -115,10 +294,11 @@ Layout so far:
   `FeedbackClient` POSTs JSON to `https://tkforgeworks.com/api/feedback`,
   the relay in the TKForgeWorks_website repo (`functions/api/feedback.ts`,
   TKFW-82) that holds the Resend key and emails
-  `support@tkforgeworks.com` from `feedback+cheesy-scribe@`. The JSON
-  shape and the `cheesy-scribe` app id must match that function. This is
-  the app's only network call; it is why the release manifest declares
-  `INTERNET`, and the privacy policy describes it.
+  `support@tkforgeworks.com` from `feedback+cheesy-scribe@`. The JSON shape and the `cheesy-scribe` app id must match that function.
+  Until 0.3.0 this was the app's only network call; since CHEESE-59/61
+  the optional account (Supabase through forge_core) is the other one,
+  and both are why the manifest declares `INTERNET`. `PRIVACY.md`
+  (CHEESE-66) is the data inventory; the privacy policy describes both.
 - `lib/features/about/licenses_screen.dart` — `LicensesScreen`
   (`/licenses`, CHEESE-41), opened from About and Settings: a wrapper
   over `ForgeLicensesScreen` (app Apache-2.0 + GitHub `sourceUri`,
@@ -149,10 +329,19 @@ Layout so far:
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
   (`/settings`, CHEESE-31): `ForgeSettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
-  NOTIFICATIONS reminder row disabled at 45 % until CHEESE-12; ABOUT
-  version, `showLicensePage`, link to `/about`). No DATA group: CSV export
-  (CHEESE-32) was dropped on 2026-10-14 and its placeholder removed in
-  CHEESE-55; account backup (CHEESE-11) will bring its own section.
+  BACKUP (CHEESE-63): no backend → `AccountScreen.backupUnavailable`
+  dimmed, signed out → `signInRowKey` "Sign in to back up your notes" →
+  `/account`, signed in → `BackupStatusRow` + `accountRowKey` (email) →
+  `/account`; NOTIFICATIONS reminder row disabled at 45 % until CHEESE-12;
+  ABOUT version, `showLicensePage`, link to `/about`). No DATA group: CSV
+  export (CHEESE-32) was dropped on 2026-10-14.
+  `lib/features/account/backup_status_row.dart` — `BackupStatusRow`
+  (CHEESE-63; also `ForgeAccountSettings.status` under "Backup"): title
+  per `SyncPhase` (`upToDate`/`changesWaiting`, `syncing`, `offline`,
+  `failed`), hint copy never the server's message, `pendingLine(n)` when
+  not idle, trailing Sync now (`syncNowKey` → `coordinator.syncNow()`) or
+  a spinner; `relativeTime()` ("just now", "4 minutes ago", "yesterday",
+  "on Aug 3").
 - `lib/features/library/` — `LibraryScreen` (`/library`, CHEESE-29):
   `ScribeSearchBar` with a controller filters the 2-col `StyleCard` grid
   inline via `LibraryRepository.search`; counts from `styleCountsProvider`.
@@ -212,9 +401,20 @@ Layout so far:
   `FlavorEntryCard` (Wheel/List toggle, helper line; read-only card when
   `onChanged` is null). Both modes edit one `Map<FlavorNote,int>`; zeros
   are removed from the map, never stored.
+- **`forge_core`** (CHEESE-59) — the shared tkforgeworks Supabase package
+  (`tkforgeworks/forge-core`, git dependency pinned to `v0.1.0`, stable since 2026-10-19;
+  local checkout `~/Projects/forge-core`; Jira `FC`): config, `ForgeAuth`
+  (Google + email/password, linking, sign-out), `ForgeAccounts`,
+  `ForgeEntriesRepository`, the Supabase SQL/functions/templates and
+  `dart run forge_core:sync_supabase`. Fakes in
+  `package:forge_core/testing.dart`. Same rule as forge_ui: defects are
+  fixed upstream and the pin moves.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.1.0`, its first stable release; local checkout `~/Projects/forge-ui`). It owns the theme
+  `v0.2.0` (stable since 2026-10-19; rc.6 since CHEESE-61; v0.2 adds the sign-in panel and screens,
+  check-email and set-password screens, typed confirm sheet,
+  `ForgeAccountSettings`, sign-out sheet); local checkout `~/Projects/forge-ui`;
+  Jira project `FU` since 2026-10-17, forge-core's is `FC`). It owns the theme
   builder, type, radii, the forge gradient, every component theme, the
   bundled fonts and the shared atoms. A defect in any of that is fixed in
   forge-ui and the pin moved to the tag that carries the fix, never
@@ -227,6 +427,17 @@ Layout so far:
   `starInactive`, `wheelGrid`). Read colours through `context.colors`,
   `context.forge` (`textTertiary`, `rowDivider`, …) and `context.scribe`;
   text styles through `context.text` and `ForgeType.ui/serif/mono`.
+- `lib/app/session_guard.dart` (CHEESE-65) — `SessionGuard`, built by
+  `ScribeApp` with the app's `scaffoldMessengerKey` and `watch()`ed from
+  its build: when `syncStatusProvider` reports `SyncPhase.accountGone`
+  (the sync's first step asks `ForgeAccounts.getAccount()`; a flagged or
+  purged account, or a `42501` on a write, means deleted from the website
+  or another phone) it signs this phone out, removes the account's notes
+  and sync state and shows `accountDeleted`; when the auth stream signs
+  out on its own (refresh failed after a purge) it does the same cleanup
+  with `sessionEnded`. `signOutIntentProvider` (`SignOutIntent.mark()`
+  before a user-initiated sign-out or deletion, `take()` by the guard)
+  keeps those quiet.
 - `lib/app/widgets/` — the atoms that are this app's own: `StarRating`,
   `JournalField`, `ForgeLogoBadge`/`WedgeGlyph`; import the `widgets.dart`
   barrel. The rest of DESIGN_SPEC §5 comes from forge_ui:
@@ -255,7 +466,12 @@ Layout so far:
   (real app on an in-memory DB, optional seeded `AppSettings`, mocked
   package info, `testDevice` for the feedback form, and `feedbackHttp:` a
   `MockClient` for the relay; without one any network call fails the
-  test) and **`testApp()`**, which must replace `testWidgets` for
+  test; `auth:` / `accounts:` / `remote:` a `FakeForgeAuth` /
+  `FakeForgeAccounts` / `FakeForgeEntriesRepository<TastingNote>`, fresh
+  signed-out ones by default, and `backup: false` for a build with no
+  backend; a pre-signed-in test should use `FakeForgeAuth(initial:)` with
+  event `initial`, since a `signedIn` event triggers the attach offer) and
+  **`testApp()`**, which must replace `testWidgets` for
   any test that calls `pumpApp`: it unmounts the tree and pumps 1 ms so
   drift's stream-cancel timer fires before flutter_test's pending-timer
   check (otherwise the test fails and `db.close()` hangs the runner).
@@ -360,14 +576,20 @@ else refers to it).
 
 - Branching (`tkforgeworks/.github/docs/branching-and-release.md`): `main` is
   the released state; work accumulates on the current release branch
-  `vX.Y.Z/main` (currently **`v0.2.0/main`**, cut from `main` after the
-  v0.1.0 release PR, #34); topic branches PR **into the release branch**,
+  `vX.Y.Z/main` (currently **`v0.3.0/main`**, cut from `main` after the
+  v0.2.0 release PR, #50); topic branches PR **into the release branch**,
   never into `main`; the release branch reaches `main` via a release PR.
-- Branch names: `v0.2.0/CHEESE-N-short-topic`, cut from and PR'd into
-  `v0.2.0/main`. GitHub deletes the remote branch when its PR merges (repo
+  The release branch does not start on the new version: the first
+  `bump-version.sh rc` takes it from the branch name.
+- Branch names: `v0.3.0/CHEESE-N-short-topic`, cut from and PR'd into
+  `v0.3.0/main`. GitHub deletes the remote branch when its PR merges (repo
   setting `delete_branch_on_merge`, on since 2026-10-12; it is a repository
   setting, not a ruleset rule). A branch whose PR was closed unmerged is
-  still deleted by hand, as is the local copy.
+  still deleted by hand, as is the local copy. The exception is a release
+  PR's head: the `release-branches` ruleset blocks its deletion, so a
+  finished `vX.Y.Z/main` stays until it is removed with the ruleset-toggle
+  runbook in the org `branch-protection-ruleset.md` (disable, delete,
+  re-enable at once, verify).
 - **Two repository rulesets** (`tkforgeworks/.github/docs/branch-protection-ruleset.md`):
   - `main` (ruleset id 20916528): PR-only (0 approvals, self-merge allowed),
     no force-push or deletion, **no bypass actors** (not even admins).
@@ -424,6 +646,42 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   a project's worth of scope. The one exception (CHEESE-51, 2026-10-14): the
   feedback form posts what the user writes, on Send only, to the website's
   relay.
+- **0.3.0 account and sync** (Tim, 2026-10-17, CHEESE-57; spec revised in
+  forge-core FC-1, the canonical copy at
+  `forge-core/docs/forge-ui_forge-core_Shared_Flutter_Packages_Spec.md`):
+  Supabase through **`forge_core`** (git dependency like forge_ui), on a Pro
+  org, us-east-1; Tim created the project. **Google and email/password**
+  sign-in (confirmation required, forgot-password, Resend as Supabase SMTP,
+  Google + email linking); Apple waits for an iOS app. **Sign-in stays
+  optional**, reached from Account, and only turns on backup. Sync is
+  app-side: last-write-wins per note with tombstones as a manifest diff,
+  needing schema v3 first (`updated_at`, `dirty`, a tombstones table, a
+  `sync_meta` table — not `settings`, whose save rewrites every row). Note
+  ids are already UUID v4 and become the server `entries.id`. In-app
+  deletion types DELETE; sign-out and deletion keep local notes with an
+  "also erase this phone" option; the web deletion form is a website Pages
+  Function at `/privacy/cheesy-scribe/delete-account/`. Sign-in and
+  deletion ship in the same build (Play). **Revised 2026-10-18 (CHEESE-62):
+  the ownership model replaces "keep local notes + erase option".** Every
+  note has an owner (an account, or nobody for notes made while signed
+  out); the notebook shows one owner at a time. Sign-out pushes what it
+  can, warns if that failed, removes the account's notes from the phone
+  (the server keeps them) and leaves the signed-out notes. Sign-in
+  downloads the account's notes and offers to attach the signed-out ones;
+  declined ones stay hidden while signed in and are re-offered from
+  Account. Deletion has the same local effect plus the server purge.
+  Schema decisions (CHEESE-60): payload = `toJson()` + integer
+  `schemaVersion`; dedicated `notes` + `profiles` tables; last write wins
+  per whole note on device stamps with a 1-day listing overlap; Android OS
+  backup off; everything but theme and units syncs (display name via
+  `accounts.username`, memberSince + recent searches in `profiles`, still
+  to build). Supabase URL, publishable key and
+  Google web client ID arrive as `--dart-define`s (release-pipeline input,
+  gitignored local define file), never committed; CI's `-debugsigned`
+  builds can never sign in (no OAuth client for their key). Theme and units
+  stay per device; the display name is not prefilled and is stored as
+  `accounts.username` once entered. forge-ui builds the sign-in and account
+  screens first (v0.2), high-reuse screens are shared-first now.
 - **State: `flutter_riverpod` 3 without codegen; routing `go_router` with a
   `ShellRoute` for the four top-level destinations.** lazy-sleeper-app
   precedent.
@@ -516,9 +774,9 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   `v0.2.0/main` cut from `main`. `v0.1.0/main` was deleted the same day:
   the `release-branches` ruleset blocks deletion and has no bypass, so it
   was disabled, the branch deleted, and the ruleset re-enabled at once (the
-  runbook is in the org `branch-protection-ruleset.md`). Whether that rule
-  also stops the release PR's head from being auto-deleted on merge is
-  unobserved until the 0.2.0 release PR. Scope agreed the same day. **0.2.0** (the closed-testing release): CHEESE-45 glossary of tasting
+  runbook is in the org `branch-protection-ruleset.md`). That rule also
+  stops the release PR's head being auto-deleted on merge (seen with the
+  0.2.0 release PR). Scope agreed the same day. **0.2.0** (the closed-testing release): CHEESE-45 glossary of tasting
   terms, CHEESE-32 CSV export (pulled forward from 1.0.0; dropped
   2026-10-14, placeholder removed in CHEESE-55), CHEESE-51 "Send
   feedback" link in About, CHEESE-48 forge_ui adoption, CHEESE-50 opening
@@ -527,7 +785,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   `groups` entry, done last before the final bump (Dependabot PRs target
   `main` and are never merged there directly). **1.0.0** (the public store release): CHEESE-46 production track,
   CHEESE-49 guided first-use tour, CHEESE-52 choosing the Play track from
-  the pipeline, CHEESE-11 account + sync, CHEESE-12 weekly reminder.
+  the pipeline, CHEESE-11 account + sync, CHEESE-12 weekly reminder
+  (CHEESE-11 moved to its own 0.3.0 on 2026-10-16).
 - 2026-10-13: forge_ui adopted (CHEESE-48): theme, fonts, shared atoms,
   About and licences now come from `forge_ui`; 26 files and
   `assets/fonts/` deleted. Pinned to `v0.1.0-rc.2`: rc.1 required Dart
@@ -576,3 +835,98 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - 2026-10-14: forge_ui `v0.1.0` released (forge-ui PRs #11 status, #12
   release; the package code is identical to rc.3) and re-pinned here under
   CHEESE-48. No RC was cut for the re-pin; it ships with the next one.
+- 2026-10-16: rc.5 (CHEESE-53, 54, 55 and the forge_ui re-pin) passed
+  Tim's device pass; the Play Data safety form was updated for the
+  feedback form and sent for review. **v0.2.0 released**:
+  `bump-version.sh final` → `0.2.0+15` (`8c2a531`), release PR #50 merged
+  into `main` (`dd39d21`), run 38987356589 (GitHub release with APK + AAB,
+  Play internal upload); same code as rc.5. The notes diffed against
+  v0.1.0 as intended (org PR #18). Dependabot's grouping took effect at
+  once: one grouped PR, #51 (package_info_plus 10.2.2), against `main`,
+  left open and bundled on the release branch before the 0.3.0 final, as
+  CHEESE-53 did. Old branches cleared with the runbook: here
+  `v0.2.0/main`; in forge-ui `v0.0.1/main`, `v0.1.0/main` and six merged
+  `v0.1.0/*` topic branches (forge-ui now has only `main`).
+- 2026-10-16: **0.3.0 split out** by Tim: account and cloud sync
+  (CHEESE-11) is big enough to test on the closed track by itself before
+  the store release, so it is the whole of 0.3.0. 1.0.0 keeps CHEESE-46,
+  49, 52 and 12. `v0.3.0/main` cut from `main` at `dd39d21` (CHEESE-56).
+  CHEESE-50 (closed track) is still Tim's to open.
+- 2026-10-17: **0.3.0 plan settled** (CHEESE-57). Tim answered the ten
+  decisions (recorded as a comment there; summary under "Architecture
+  decisions"). Jira projects `FC` (forge-core) and `FU` (forge-ui) created.
+  Spec revised in forge-core FC-1 (PR #7 into its `v0.1.0/main`), forge-ui's
+  copy replaced by a pointer in FU-1 (PR #13; `v0.2.0/main` cut there).
+  CHEESE-11 retitled "Account and cloud sync (0.3.0)" with the agreed scope.
+  Tickets created 2026-10-18 (CHEESE-57 comment has the map and order):
+  FC-2..12, FU-2..6, CHEESE-58..67 under CHEESE-11, TKFW-83 (website
+  deletion page) and TKFW-84 (`release-flutter.yml` dart-define input).
+  Tim authorised merging own PRs once CI passes, except any cheesy-scribe
+  PR that preps an RC.
+- 2026-10-18: schema v3 sync bookkeeping (CHEESE-58): `updated_at` +
+  `dirty` on notes, `note_tombstones`, `sync_meta`, the repository's sync
+  calls, `TastingNote.updatedAt`; migration test rebuilt on frozen released
+  DDL. Renders pixel-identical. The sync engine (CHEESE-62) builds on it
+  once forge-core FC-8 exists.
+- 2026-10-18: forge-core v0.1.0 (rc.10) and forge-ui v0.2.0 (rc.5) complete
+  (FC-1..12, FU-1..6); the Supabase project has the forge migrations,
+  three Edge Functions, cron jobs, Vault entries and function secrets, and
+  purge, web deletion and the Resend deletion mail are verified live.
+  CHEESE-59 adopted both pins and the define plumbing
+  (`lib/data/forge_providers.dart`, `config/`, `build-android.sh`;
+  TKFW-84 adds the `DART_DEFINES_JSON` secret to the org workflow). Tim
+  chose to wire sign-in (CHEESE-61: the Account page's signed-out and
+  signed-in states, check-email and set-password, the auth-callback intent
+  filter, plain Sign out) next and to discuss the `entries` schema
+  (CHEESE-60) before any sync work. Sign-in has not yet run on a device:
+  the first real Google and email round trip needs `config/dev.json`
+  (values from Tim) and a debug build on his phone, whose debug SHA-1 has
+  an Android OAuth client. CHEESE-65 (deletion) must ship in the same RC
+  as sign-in before any tester build.
+- 2026-10-18 (later): rc.1 → rc.4 device passes with Tim fixed three
+  sign-in issues in turn: the redirect scheme (underscore; CHEESE-61,
+  forge-core rc.11 asserts), the deep link reaching go_router as a route
+  (top-level `redirect`), and set-password leaving the user signed in when
+  abandoned (sign out on leave; forge-ui rc.6 made the reset copy
+  conditional, Tim chose no email-existence check). App Links for the mail
+  redirect are CHEESE-68 + TKFW-85, later in 0.3.0. Schema decided
+  question by question (CHEESE-60 comment) and the `notes` + `profiles`
+  tables applied live. CHEESE-62: Tim replaced the "keep local notes"
+  decision with the ownership model (schema v4, scoped repository, attach
+  offer, sign-out removal) and the sync engine shipped with it (compare-
+  before-push LWW, coordinator, server `keep_newer` trigger as migration
+  20261018160000). rc.5 passed Tim's multi-account and attach checks.
+  CHEESE-63 added the profile row sync and the backup status row in
+  Settings and Account with Sync now. CHEESE-64 the username, Link
+  Google and Set a password rows (its PR #63 was merged with CI red by a
+  chained merge command; #64 fixed the test, and merges now gate on the
+  check state). CHEESE-65 the typed-DELETE account deletion and About's Delete account
+  row. CHEESE-66 added `PRIVACY.md` (the inventory with the store
+  checklist; the Console items are Tim's) while TKFW-83 (website deletion
+  page + policy) ran in parallel.
+- 2026-10-18 (night): rc.5–rc.8 passed Tim's device checks (multi-account,
+  attach, deletion, forced sign-out from a web deletion). Tim finished the
+  Console items (deletion URL, Data safety, reviewer account, consent
+  screen published); the closed track stays on 0.2.0 for a two-week
+  usability review, so 0.3.0 RCs remain on internal testing (CHEESE-50
+  ready to close). CHEESE-68 + TKFW-85: the mail redirect became the
+  Android App Link `https://tkforgeworks.com/apps/cheesy-scribe/auth/`
+  (website PR #30 live: statement file with both Play fingerprints, landing
+  page, analytics off under `/apps/`). rc.9 showed the App Link verified
+  but Gmail still kept a tab with GoTrue's 303 body, so forge-core FC-13
+  (rc.12) moved the mail templates to token links
+  (`{{ .RedirectTo }}?token_hash=…&type=…`, verified in-app by forge_core)
+  and rc.10 took the pin, the re-synced templates, the `mailLinkFailed`
+  snackbar and dropped the legacy scheme; rc.11 added the greetings for a
+  verified link. Tim pasted the templates; rc.10 and rc.11 passed on his
+  phone, and he ran the same-note edit race on two devices with no issue.
+- 2026-10-19: **CHEESE-67 release pass.** `test/data/sync_service_test.dart`
+  gained a `KeepNewerRemote` (the server's `keep_newer` trigger emulated
+  over the package fake, plus a hook into the listing/pushing window) and
+  four edit-race tests: concurrent syncs, a newer edit landing between a
+  phone's key listing and its push (both directions), and a deletion
+  racing an older edit. forge-core `v0.1.0` and forge-ui `v0.2.0` finals
+  cut from rc.12 / rc.6 and re-pinned here; Dependabot #51
+  (package_info_plus 10.2.2) bundled. Then `bump-version.sh final` and the
+  release PR into `main` (Tim merges); website PR #29 (policy) merges once
+  0.3.0 is on `main`.

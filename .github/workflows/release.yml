@@ -16,6 +16,12 @@
 # run add `android-signing: optional` under `with:` (rc.1 was cut that way,
 # debug-signed).
 #
+# Backend configuration (CHEESE-59 / TKFW-84): the DART_DEFINES_JSON repo
+# secret holds the --dart-define-from-file JSON (Supabase URL, publishable
+# key, Google web client ID). release-flutter.yml writes it to
+# config/release.json and exports DART_DEFINES_FILE before build-android.sh
+# runs; a repo without the secret builds without defines (local-only app).
+#
 # Google Play (CHEESE-42): once the release is published, the play-store job
 # (org release-play-store.yml) uploads its AAB to the internal testing track
 # and rolls it out to testers (What's new = the release-note bullets). Auth is
