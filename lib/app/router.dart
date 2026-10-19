@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forge_core/forge_core.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/forge_providers.dart';
@@ -28,7 +29,10 @@ import 'shell/scribe_shell.dart';
 /// CHEESE-47), reached with `context.go`. Everything else is pushed on the
 /// root navigator so it covers the shell and uses back/close instead of
 /// the drawer.
-GoRouter createScribeRouter({String initialLocation = '/notes'}) {
+GoRouter createScribeRouter({
+  String initialLocation = '/notes',
+  void Function(ForgeMailLink link)? onMailLink,
+}) {
   final rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
   return GoRouter(
     navigatorKey: rootKey,
@@ -41,7 +45,14 @@ GoRouter createScribeRouter({String initialLocation = '/notes'}) {
     // and Account is where the resulting session (or set-password push,
     // or the expired-link message) shows. Without this the location
     // matches nothing and the error page appears (rc.2).
-    redirect: (context, state) => isAuthCallback(state.uri) ? '/account' : null,
+    // [onMailLink] hears which kind of link it was, so the app can greet
+    // the sign-in or recovery state that follows.
+    redirect: (context, state) {
+      if (!isAuthCallback(state.uri)) return null;
+      final mail = ForgeMailLink.parse(state.uri);
+      if (mail != null) onMailLink?.call(mail);
+      return '/account';
+    },
     routes: [
       ShellRoute(
         builder: (context, state, child) =>

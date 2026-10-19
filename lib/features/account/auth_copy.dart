@@ -52,3 +52,9 @@ String dataErrorCopy(ForgeDataError error) => switch (error) {
     'Could not reach the server. Check your connection.',
   ForgeDataError.unknown => 'Something went wrong. Try again.',
 };
+
+/// Shown at the bottom of the screen when a mail link has done its job
+/// (CHEESE-68): forge_core verifies the token on arrival, and without a
+/// word the user would just find themselves in the app.
+const emailConfirmedMessage = "Email confirmed. You're signed in.";
+const resetLinkVerifiedMessage = 'Reset link verified. Choose a new password.';

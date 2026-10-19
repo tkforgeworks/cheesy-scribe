@@ -42,6 +42,7 @@ void main() {
     auth.startPasswordRecovery(session);
     await tester.pumpAndSettle();
     expect(find.text('Choose a new password'), findsOneWidget);
+    expect(find.text(resetLinkVerifiedMessage), findsOneWidget);
   });
 
   testApp('an expired link says so on Account and stays signed out', (
@@ -74,5 +75,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Signed in'), findsOneWidget);
     expect(find.text('tim@example.com'), findsOneWidget);
+    expect(find.text(emailConfirmedMessage), findsOneWidget);
+  });
+
+  testApp('a sign-in that no mail link produced is not greeted', (
+    tester,
+  ) async {
+    final auth = FakeForgeAuth();
+    addTearDown(auth.dispose);
+    await pumpApp(tester, auth: auth);
+    auth.signIn(session);
+    await tester.pumpAndSettle();
+    expect(find.text(emailConfirmedMessage), findsNothing);
+    expect(find.text(resetLinkVerifiedMessage), findsNothing);
   });
 }
