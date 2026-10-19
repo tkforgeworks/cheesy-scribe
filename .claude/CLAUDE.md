@@ -176,10 +176,19 @@ Layout so far:
   changes, retry with backoff 30 s doubling to 15 min; `syncNow()` for
   Sync now and the sign-out flush), `sync_providers.dart`
   (`remoteNotesProvider` = `core.entries<TastingNote>(table: 'notes', kind:
-  'tasting_note')`, `syncServiceProvider`, `syncCoordinatorProvider` kept
-  alive by `ScribeApp`, `syncStatusProvider`). The server's `keep_newer`
-  trigger enforces the same rule against racing phones.
-  `android:allowBackup="false"`: the account is the backup.
+  'tasting_note')`, `remoteProfileProvider` (`profiles`, kind `profile`),
+  `syncServiceProvider`, `syncCoordinatorProvider` kept alive by
+  `ScribeApp`, `syncStatusProvider`). `profile_payload.dart` (CHEESE-63):
+  `ProfilePayload(memberSince, recentSearches)` + `schemaVersion`; the
+  service reconciles the one `profiles` row (id = user id) after the
+  notes on every run: recent searches follow the later side (the local
+  side's stamp is the newest `searched_at`,
+  `RecentSearchesRepository.entries()`/`replaceAll()`; the repository
+  takes an injectable `now`), member since is the earlier date, a
+  difference is pushed with the device time; `sync_meta.profile_synced_at`
+  is the server stamp last reconciled. The server's `keep_newer` trigger
+  enforces LWW against racing phones. `android:allowBackup="false"`: the
+  account is the backup.
 - `lib/data/providers.dart` — `appDatabaseProvider` (drift_flutter
   `driftDatabase(name: 'cheesy_scribe')`; tests override it), the
   repository providers, `appSettingsProvider` (StreamProvider),
@@ -279,10 +288,19 @@ Layout so far:
 - `lib/features/settings/settings_screen.dart` — `SettingsScreen`
   (`/settings`, CHEESE-31): `ForgeSettingsGroup` cards (APPEARANCE theme +
   units segmented rows persisting via `SettingsRepository.update`;
-  NOTIFICATIONS reminder row disabled at 45 % until CHEESE-12; ABOUT
-  version, `showLicensePage`, link to `/about`). No DATA group: CSV export
-  (CHEESE-32) was dropped on 2026-10-14 and its placeholder removed in
-  CHEESE-55; account backup (CHEESE-11) will bring its own section.
+  BACKUP (CHEESE-63): no backend → `AccountScreen.backupUnavailable`
+  dimmed, signed out → `signInRowKey` "Sign in to back up your notes" →
+  `/account`, signed in → `BackupStatusRow` + `accountRowKey` (email) →
+  `/account`; NOTIFICATIONS reminder row disabled at 45 % until CHEESE-12;
+  ABOUT version, `showLicensePage`, link to `/about`). No DATA group: CSV
+  export (CHEESE-32) was dropped on 2026-10-14.
+  `lib/features/account/backup_status_row.dart` — `BackupStatusRow`
+  (CHEESE-63; also `ForgeAccountSettings.status` under "Backup"): title
+  per `SyncPhase` (`upToDate`/`changesWaiting`, `syncing`, `offline`,
+  `failed`), hint copy never the server's message, `pendingLine(n)` when
+  not idle, trailing Sync now (`syncNowKey` → `coordinator.syncNow()`) or
+  a spinner; `relativeTime()` ("just now", "4 minutes ago", "yesterday",
+  "on Aug 3").
 - `lib/features/library/` — `LibraryScreen` (`/library`, CHEESE-29):
   `ScribeSearchBar` with a controller filters the 2-col `StyleCard` grid
   inline via `LibraryRepository.search`; counts from `styleCountsProvider`.
@@ -825,5 +843,6 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   decision with the ownership model (schema v4, scoped repository, attach
   offer, sign-out removal) and the sync engine shipped with it (compare-
   before-push LWW, coordinator, server `keep_newer` trigger as migration
-  20261018160000). Profile sync (memberSince, recent searches) is still
-  to build; the status row is CHEESE-63.
+  20261018160000). rc.5 passed Tim's multi-account and attach checks.
+  CHEESE-63 added the profile row sync and the backup status row in
+  Settings and Account with Sync now.

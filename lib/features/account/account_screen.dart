@@ -14,6 +14,7 @@ import '../../data/repositories/notes_repository.dart';
 import '../../data/sync/sync_providers.dart';
 import '../../data/sync/sync_status.dart';
 import 'auth_copy.dart';
+import 'backup_status_row.dart';
 import 'check_email_screen.dart';
 
 /// `/account`: the local profile (CHEESE-34) with, beneath it, the optional
@@ -381,6 +382,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           ],
           busy: _busy,
           errorText: _error,
+          status: const BackupStatusRow(),
+          statusLabel: 'Backup',
           offerLocalErase: false,
           signOutAside: AccountScreen.signOutAside,
           onSignOut: _signOut,

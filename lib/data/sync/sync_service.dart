@@ -4,7 +4,10 @@ import 'package:forge_core/forge_core.dart';
 
 import '../models/models.dart';
 import '../repositories/notes_repository.dart';
+import '../repositories/recent_searches_repository.dart';
+import '../repositories/settings_repository.dart';
 import '../repositories/sync_meta_repository.dart';
+import 'profile_payload.dart';
 import 'sync_status.dart';
 
 /// One account's notes, reconciled between this phone and the server
@@ -30,15 +33,28 @@ class SyncService {
     required this.notes,
     required this.meta,
     required this.remote,
+    this.profile,
+    this.settings,
+    this.searches,
     DateTime Function()? now,
     this.overlap = const Duration(days: 1),
   }) : assert(notes.owner != null, 'sync needs a signed-in owner scope'),
+       assert(
+         profile == null || (settings != null && searches != null),
+         'profile sync needs the settings and recent-searches repositories',
+       ),
        _now = now ?? DateTime.now;
 
   /// Scoped to the signed-in account.
   final NotesRepository notes;
   final SyncMetaRepository meta;
   final ForgeEntriesRepository<TastingNote> remote;
+
+  /// The account's one `profiles` row (member since, recent searches);
+  /// null skips profile sync. Reconciled after the notes on every run.
+  final ForgeEntriesRepository<ProfilePayload>? profile;
+  final SettingsRepository? settings;
+  final RecentSearchesRepository? searches;
   final DateTime Function() _now;
 
   /// How far before the high-water mark the key listing starts, to absorb
@@ -47,6 +63,9 @@ class SyncService {
 
   static const lastSyncKey = 'last_sync_at';
   static const lastErrorKey = 'last_error';
+
+  /// The server stamp of the profile row this phone last reconciled with.
+  static const profileSyncedKey = 'profile_synced_at';
 
   final _controller = StreamController<SyncStatus>.broadcast();
   SyncStatus _status = const SyncStatus(phase: SyncPhase.idle);
@@ -185,6 +204,11 @@ class SyncService {
       }
     }
 
+    // 5. The profile row: recent searches follow the later side, member
+    //    since is the earlier date, and a difference is pushed.
+    final profileFailure = await _syncProfile();
+    if (profileFailure != null) return profileFailure;
+
     // The newest server stamp seen, or what we pushed, is the new mark.
     for (final n in toPush) {
       if (highWater == null || n.updatedAt.isAfter(highWater)) {
@@ -203,6 +227,69 @@ class SyncService {
       ),
     );
     return _status;
+  }
+
+  /// Returns a failure status, or null when the profile is reconciled.
+  Future<SyncStatus?> _syncProfile() async {
+    final profile = this.profile;
+    if (profile == null) return null;
+    final userId = notes.owner!;
+    final fetched = await profile.fetchByIds([userId]);
+    final ForgeEntry<ProfilePayload>? remoteRow;
+    switch (fetched) {
+      case ForgeFailed(:final error, :final message):
+        return _fail(error, message);
+      case ForgeOk(:final value):
+        remoteRow = value.where((e) => !e.isDeleted).firstOrNull;
+    }
+    final stored = await meta.get(profileSyncedKey);
+    final syncedAt = stored == null ? null : DateTime.parse(stored).toUtc();
+
+    var local = await _localProfile();
+    final localTerms = await searches!.entries();
+    final localChangedAt = localTerms.isEmpty ? null : localTerms.first.$2;
+    final remotePayload = remoteRow?.data;
+    if (remoteRow != null &&
+        remotePayload != null &&
+        (syncedAt == null || remoteRow.updatedAt.isAfter(syncedAt))) {
+      // The server changed since we last looked. Searches: the later side
+      // wins. Member since: the earlier date is the truth.
+      if (localChangedAt == null ||
+          !localChangedAt.isAfter(remoteRow.updatedAt)) {
+        await searches!.replaceAll(
+          remotePayload.recentSearches,
+          at: remoteRow.updatedAt,
+        );
+      }
+      final earliest = _earliest(local.memberSince, remotePayload.memberSince);
+      if (earliest != local.memberSince) {
+        await settings!.update((s) => s.copyWith(memberSince: earliest));
+      }
+      await meta.set(profileSyncedKey, remoteRow.updatedAt.toIso8601String());
+      local = await _localProfile();
+    }
+    if (remotePayload == null || local != remotePayload) {
+      final stamp = _now().toUtc();
+      final pushed = await profile.upsertAll([
+        ForgeEntry<ProfilePayload>(id: userId, data: local, updatedAt: stamp),
+      ]);
+      if (pushed case ForgeFailed(:final error, :final message)) {
+        return _fail(error, message);
+      }
+      await meta.set(profileSyncedKey, stamp.toIso8601String());
+    }
+    return null;
+  }
+
+  Future<ProfilePayload> _localProfile() async => ProfilePayload(
+    memberSince: (await settings!.load()).memberSince,
+    recentSearches: [for (final e in await searches!.entries()) e.$1],
+  );
+
+  static DateTime? _earliest(DateTime? a, DateTime? b) {
+    if (a == null) return b;
+    if (b == null) return a;
+    return b.isBefore(a) ? b : a;
   }
 
   Future<SyncStatus> _fail(ForgeDataError error, String message) async {

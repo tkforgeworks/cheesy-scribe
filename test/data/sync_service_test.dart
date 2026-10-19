@@ -1,7 +1,10 @@
 import 'package:cheesy_scribe/data/db/app_database.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
+import 'package:cheesy_scribe/data/repositories/recent_searches_repository.dart';
+import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
 import 'package:cheesy_scribe/data/repositories/sync_meta_repository.dart';
+import 'package:cheesy_scribe/data/sync/profile_payload.dart';
 import 'package:cheesy_scribe/data/sync/sync_payload.dart';
 import 'package:cheesy_scribe/data/sync/sync_service.dart';
 import 'package:cheesy_scribe/data/sync/sync_status.dart';
@@ -13,14 +16,20 @@ import '../support.dart';
 
 /// One phone: its own database and clock, the shared server.
 class Device {
-  Device(this.name, this.remote, {required DateTime start}) : now = start {
+  Device(this.name, this.remote, {required DateTime start, this.profile})
+    : now = start {
     db = openTestDatabase();
     notes = NotesRepository(db, now: () => now, owner: 'tim');
     meta = SyncMetaRepository(db);
+    settings = SettingsRepository(db);
+    searches = RecentSearchesRepository(db, now: () => now);
     service = SyncService(
       notes: notes,
       meta: meta,
       remote: remote,
+      profile: profile,
+      settings: profile == null ? null : settings,
+      searches: profile == null ? null : searches,
       now: () => now,
     );
     addTearDown(service.dispose);
@@ -28,10 +37,13 @@ class Device {
 
   final String name;
   final FakeForgeEntriesRepository<TastingNote> remote;
+  final FakeForgeEntriesRepository<ProfilePayload>? profile;
   DateTime now;
   late final AppDatabase db;
   late final NotesRepository notes;
   late final SyncMetaRepository meta;
+  late final SettingsRepository settings;
+  late final RecentSearchesRepository searches;
   late final SyncService service;
 
   Future<List<String>> ids() async =>
@@ -242,4 +254,88 @@ void main() {
       expect(await a.ids(), unorderedEquals(['1', '2']));
     },
   );
+
+  group('profile row (CHEESE-63)', () {
+    late FakeForgeEntriesRepository<ProfilePayload> profiles;
+    late Device a;
+    late Device b;
+
+    setUp(() {
+      profiles = FakeForgeEntriesRepository<ProfilePayload>(auth);
+      a = Device(
+        'a',
+        remote,
+        start: DateTime.utc(2026, 10, 18, 12),
+        profile: profiles,
+      );
+      b = Device(
+        'b',
+        remote,
+        start: DateTime.utc(2026, 10, 18, 12),
+        profile: profiles,
+      );
+    });
+
+    test('payload round-trips with schemaVersion', () {
+      final p = ProfilePayload(
+        memberSince: DateTime(2026, 6, 1),
+        recentSearches: const ['blue', 'comté'],
+      );
+      final json = p.toJson();
+      expect(json['schemaVersion'], 1);
+      expect(json['memberSince'], '2026-06-01');
+      expect(ProfilePayload.fromJson(json), p);
+      expect(ProfilePayload.fromJson({}), const ProfilePayload());
+    });
+
+    test('first sync pushes the profile; the other phone pulls it', () async {
+      await a.settings.update(
+        (s) => s.copyWith(memberSince: DateTime(2026, 6, 1)),
+      );
+      await a.searches.add('blue');
+      await a.service.sync();
+      final row = profiles.rows['tim']!;
+      expect(row.data!.recentSearches, ['blue']);
+      expect(row.data!.memberSince, DateTime(2026, 6, 1));
+      expect(row.updatedAt, a.now);
+
+      await b.service.sync();
+      expect(await b.searches.watch().first, ['blue']);
+      expect((await b.settings.load()).memberSince, DateTime(2026, 6, 1));
+      // Nothing to push back: the pulled profile equals the server's.
+      final pushes = profiles.calls.where((c) => c.$1 == 'upsertAll').length;
+      await b.service.sync();
+      expect(profiles.calls.where((c) => c.$1 == 'upsertAll').length, pushes);
+    });
+
+    test(
+      'searches follow the later side; member since the earlier date',
+      () async {
+        await a.settings.update(
+          (s) => s.copyWith(memberSince: DateTime(2026, 6, 1)),
+        );
+        await a.searches.add('blue');
+        await a.service.sync();
+        await b.service.sync();
+        // b searches later than a's last change: b's list wins everywhere.
+        b.tick(const Duration(minutes: 5));
+        await b.searches.add('gouda');
+        await b.settings.update(
+          (s) => s.copyWith(memberSince: DateTime(2024, 1, 1)),
+        );
+        await b.service.sync();
+        await a.service.sync();
+        expect(await a.searches.watch().first, ['gouda', 'blue']);
+        expect((await a.settings.load()).memberSince, DateTime(2024, 1, 1));
+        // a's older local search list does not overwrite b's newer one.
+        expect(profiles.rows['tim']!.data!.recentSearches, ['gouda', 'blue']);
+      },
+    );
+
+    test('a profile failure reports like a notes failure', () async {
+      profiles.nextError = ForgeDataError.network;
+      expect((await a.service.sync()).phase, SyncPhase.offline);
+      expect((await a.service.sync()).phase, SyncPhase.idle);
+    });
+  });
 }

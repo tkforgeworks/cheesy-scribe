@@ -292,6 +292,20 @@ void main() {
     scene('stats', '/stats', scrolled);
     scene('stats-empty', '/stats', plain, seeded: false);
     scene('settings', '/settings', plain);
+    // CHEESE-63: the BACKUP group signed in, and with the server down.
+    scene('settings-signed-in', '/settings', plain, signedIn: true);
+    scene('settings-offline', '/settings', (tester, p) async {
+      _remote.nextError = ForgeDataError.network;
+      await tester.runAsync(
+        () => NotesRepository(
+          _db,
+          owner: _session.userId,
+        ).save(_notes.first.copyWith(cheeseName: 'Edited offline')),
+      );
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    }, signedIn: true);
     // CHEESE-61: signed out (the sign-in panel under the profile), a build
     // with no backend, signed in, the sign-out sheet, a failed attempt,
     // the two check-email states and the set-password screen.
