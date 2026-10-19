@@ -40,3 +40,15 @@ String authErrorCopy(ForgeAuthError error) => switch (error) {
     'That is the only way to sign in to this account, so it stays.',
   ForgeAuthError.unknown => 'Something went wrong. Try again.',
 };
+
+/// The same for the account and data calls (`ForgeResult` failures).
+String dataErrorCopy(ForgeDataError error) => switch (error) {
+  ForgeDataError.sessionMissing => 'You are signed out. Sign in and try again.',
+  ForgeDataError.accountInactive =>
+    'This account is being deleted, so it can no longer be changed.',
+  ForgeDataError.invalid =>
+    'That was not accepted. A username is at most 40 characters.',
+  ForgeDataError.network =>
+    'Could not reach the server. Check your connection.',
+  ForgeDataError.unknown => 'Something went wrong. Try again.',
+};

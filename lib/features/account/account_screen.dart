@@ -13,6 +13,7 @@ import '../../data/providers.dart';
 import '../../data/repositories/notes_repository.dart';
 import '../../data/sync/sync_providers.dart';
 import '../../data/sync/sync_status.dart';
+import 'add_password_screen.dart';
 import 'auth_copy.dart';
 import 'backup_status_row.dart';
 import 'check_email_screen.dart';
@@ -65,6 +66,14 @@ class AccountScreen extends ConsumerStatefulWidget {
   static const signOutAside =
       "This account's notes leave the phone; the account keeps them. "
       'Notes made while signed out stay.';
+
+  /// Under DISPLAY NAME (CHEESE-64): the two names are different things.
+  static const displayNameHint =
+      'Shows in the drawer and on the search bar. Saved when you leave the '
+      'field.';
+  static const displayNameSignedInHint =
+      ' Lives on this phone; your account\'s username is below.';
+  static const usernameSavedMessage = 'Username saved.';
 
   @override
   ConsumerState<AccountScreen> createState() => _AccountScreenState();
@@ -225,6 +234,32 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     await ref.read(notesRepositoryProvider).attachUnownedTo(userId);
   }
 
+  // --- Signed-in account management (CHEESE-64) --------------------------
+
+  Future<void> _saveUsername(String? value) async {
+    final accounts = ref.read(forgeAccountsProvider);
+    if (accounts == null) return;
+    setState(() => _error = null);
+    final result = await accounts.setUsername(value);
+    if (!mounted) return;
+    switch (result) {
+      case ForgeOk():
+        ref.invalidate(accountProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AccountScreen.usernameSavedMessage)),
+        );
+      case ForgeFailed(:final error):
+        setState(() => _error = dataErrorCopy(error));
+    }
+  }
+
+  void _link(ForgeSignInProvider provider) {
+    if (provider != ForgeSignInProvider.google) return;
+    _run((auth) => auth.linkGoogle());
+  }
+
+  void _setPassword() => context.push(AddPasswordScreen.path);
+
   @override
   Widget build(BuildContext context) {
     ref.listen(authStateProvider, (_, next) {
@@ -328,7 +363,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            'Shows in the drawer and on the search bar. Saved when you leave the field.',
+            AccountScreen.displayNameHint +
+                (authState?.isSignedIn ?? false
+                    ? AccountScreen.displayNameSignedInHint
+                    : ''),
             style: context.text.bodySmall,
           ),
           const SizedBox(height: 28),
@@ -370,16 +408,21 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       );
     }
     final unowned = ref.watch(unownedNotesCountProvider).asData?.value ?? 0;
+    final account = ref.watch(accountProvider).asData?.value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ForgeAccountSettings(
           email: session.email ?? 'Signed in',
+          username: account?.username,
+          onUsernameChanged: _saveUsername,
           linked: [
             for (final identity in session.identities)
               if (_providerOf(identity) case final provider?)
                 ForgeLinkedSignIn(provider: provider, email: identity.email),
           ],
+          onLink: _link,
+          onSetPassword: _setPassword,
           busy: _busy,
           errorText: _error,
           status: const BackupStatusRow(),

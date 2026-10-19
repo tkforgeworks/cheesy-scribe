@@ -362,6 +362,13 @@ void main() {
       await tester.pumpAndSettle();
       await _shot(tester, p);
     }, signedIn: true);
+    // CHEESE-64: "Set a password" form from the signed-in Account page.
+    scene(
+      'account-add-password',
+      '/account/add-password',
+      plain,
+      signedIn: true,
+    );
     scene('check-email', '/account', (tester, p) async {
       await tester.tap(find.byKey(ForgeSignInPanel.switchModeKey));
       await tester.pumpAndSettle();
