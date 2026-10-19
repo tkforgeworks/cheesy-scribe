@@ -1,6 +1,6 @@
 {
-  "forge_core": "0.1.0-rc.12+13",
-  "synced_at": "2026-10-19T04:14:05.815553Z",
+  "forge_core": "0.1.0+14",
+  "synced_at": "2026-10-19T05:19:24.083361Z",
   "files": {
     "functions/_shared/mail.ts": "dbd9e19c30c79bda5c36ede1726c1901d49f7de2a9a039e043a6e58df7c931ba",
     "functions/forge-delete-confirm/deno.json": "5f1c69e365acfb48147f4f9c2806b4228ba91f920fc7723b25185e275bd29537",

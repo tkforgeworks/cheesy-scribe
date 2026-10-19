@@ -361,20 +361,20 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.1.0-rc.12"
-      resolved-ref: "38c7b08105e355673865648e330e30e11e9c56d9"
+      ref: "v0.1.0"
+      resolved-ref: "2cfc10002088f3cb51cc8ab9f8806e08d419bd90"
       url: "https://github.com/tkforgeworks/forge-core.git"
     source: git
-    version: "0.1.0-rc.12+13"
+    version: "0.1.0+14"
   forge_ui:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.2.0-rc.6"
-      resolved-ref: b034e7f2ebe8f1d601c226f07e9f492adb210f2b
+      ref: "v0.2.0"
+      resolved-ref: "85744f4983f6aa2d776d4e67341868f326752df0"
       url: "https://github.com/tkforgeworks/forge-ui.git"
     source: git
-    version: "0.2.0-rc.6+11"
+    version: "0.2.0+12"
   functions_client:
     dependency: transitive
     description:
@@ -683,10 +683,10 @@ packages:
     dependency: "direct main"
     description:
       name: package_info_plus
-      sha256: "127e1751e37ffb2ff4658beeaca77bad0c27bf5f932bd3a501c2296926d4b481"
+      sha256: "73ef2cd5c11a7548f9b7f6fc2a4f6113de2e64aa2a70de63feede95548822908"
       url: "https://pub.dev"
     source: hosted
-    version: "10.2.1"
+    version: "10.2.2"
   package_info_plus_platform_interface:
     dependency: transitive
     description:
