@@ -67,6 +67,19 @@ class AccountScreen extends ConsumerStatefulWidget {
       "This account's notes leave the phone; the account keeps them. "
       'Notes made while signed out stay.';
 
+  /// Delete account (CHEESE-65): typed-DELETE confirm, then forge_core's
+  /// `deleteAccount()`, which flags the account for the purge and signs out
+  /// everywhere. The server removes everything within minutes (the privacy
+  /// policy says the same); this phone forgets the account's notes like a
+  /// sign-out does, and notes made while signed out stay.
+  static const deleteTitle = 'Delete your account?';
+  static const deleteAside =
+      'Everything in the account is removed within minutes: your notes, '
+      'your username and your sign-in. This phone forgets the account\'s '
+      'notes as well; notes made while signed out stay here.';
+  static const deletedMessage =
+      'Your account is being deleted. You are signed out.';
+
   /// Under DISPLAY NAME (CHEESE-64): the two names are different things.
   static const displayNameHint =
       'Shows in the drawer and on the search bar. Saved when you leave the '
@@ -253,6 +266,29 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     }
   }
 
+  /// Runs inside forge_ui's typed confirmation sheet: null closes it,
+  /// a message keeps it open.
+  Future<String?> _deleteAccount() async {
+    final accounts = ref.read(forgeAccountsProvider);
+    final userId = ref.read(sessionProvider)?.userId;
+    if (accounts == null || userId == null) return null;
+    final notes = ref.read(notesRepositoryProvider);
+    final meta = ref.read(syncMetaRepositoryProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    final result = await accounts.deleteAccount();
+    switch (result) {
+      case ForgeFailed(:final error):
+        return dataErrorCopy(error);
+      case ForgeOk():
+        await notes.removeOwned(userId);
+        await meta.clear();
+        messenger.showSnackBar(
+          const SnackBar(content: Text(AccountScreen.deletedMessage)),
+        );
+        return null;
+    }
+  }
+
   void _link(ForgeSignInProvider provider) {
     if (provider != ForgeSignInProvider.google) return;
     _run((auth) => auth.linkGoogle());
@@ -430,6 +466,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           offerLocalErase: false,
           signOutAside: AccountScreen.signOutAside,
           onSignOut: _signOut,
+          onDeleteAccount: _deleteAccount,
+          deleteTitle: AccountScreen.deleteTitle,
+          deleteAside: AccountScreen.deleteAside,
         ),
         if (unowned > 0) ...[
           const SizedBox(height: 20),

@@ -362,6 +362,15 @@ void main() {
       await tester.pumpAndSettle();
       await _shot(tester, p);
     }, signedIn: true);
+    // CHEESE-65: the typed confirmation for deleting the account.
+    scene('account-delete', '/account', (tester, p) async {
+      await tester.ensureVisible(find.byKey(ForgeAccountSettings.deleteKey));
+      await tester.tap(find.byKey(ForgeAccountSettings.deleteKey));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(ForgeConfirmSheet.fieldKey), 'DEL');
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    }, signedIn: true);
     // CHEESE-64: "Set a password" form from the signed-in Account page.
     scene(
       'account-add-password',
