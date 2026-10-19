@@ -272,10 +272,11 @@ Layout so far:
   `FeedbackClient` POSTs JSON to `https://tkforgeworks.com/api/feedback`,
   the relay in the TKForgeWorks_website repo (`functions/api/feedback.ts`,
   TKFW-82) that holds the Resend key and emails
-  `support@tkforgeworks.com` from `feedback+cheesy-scribe@`. The JSON
-  shape and the `cheesy-scribe` app id must match that function. This is
-  the app's only network call; it is why the release manifest declares
-  `INTERNET`, and the privacy policy describes it.
+  `support@tkforgeworks.com` from `feedback+cheesy-scribe@`. The JSON shape and the `cheesy-scribe` app id must match that function.
+  Until 0.3.0 this was the app's only network call; since CHEESE-59/61
+  the optional account (Supabase through forge_core) is the other one,
+  and both are why the manifest declares `INTERNET`. `PRIVACY.md`
+  (CHEESE-66) is the data inventory; the privacy policy describes both.
 - `lib/features/about/licenses_screen.dart` — `LicensesScreen`
   (`/licenses`, CHEESE-41), opened from About and Settings: a wrapper
   over `ForgeLicensesScreen` (app Apache-2.0 + GitHub `sourceUri`,
@@ -866,5 +867,7 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   Settings and Account with Sync now. CHEESE-64 the username, Link
   Google and Set a password rows (its PR #63 was merged with CI red by a
   chained merge command; #64 fixed the test, and merges now gate on the
-  check state). CHEESE-65 the typed-DELETE account deletion and About's
-  Delete account row.
+  check state). CHEESE-65 the typed-DELETE account deletion and About's Delete account
+  row. CHEESE-66 added `PRIVACY.md` (the inventory with the store
+  checklist; the Console items are Tim's) while TKFW-83 (website deletion
+  page + policy) ran in parallel.
