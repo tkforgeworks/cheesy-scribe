@@ -30,23 +30,19 @@ import 'shell/scribe_shell.dart';
 /// the drawer.
 GoRouter createScribeRouter({String initialLocation = '/notes'}) {
   final rootKey = GlobalKey<NavigatorState>(debugLabel: 'root');
-  final authCallback = Uri.parse(scribeAuthRedirectUrl);
   return GoRouter(
     navigatorKey: rootKey,
     initialLocation: initialLocation,
-    // CHEESE-61: a confirmation or reset link opens the app as a platform
-    // route carrying the whole URI
-    // (`com.tkforgeworks.cheesyscribe://auth-callback/?code=…`), whether
-    // the app was cold or warm. supabase_flutter reads the code from that
-    // same link on its own; the router only needs somewhere to go, and
-    // Account is where the resulting session (or set-password push) shows.
-    // Without this the location matches nothing and the error page appears
-    // (rc.2).
-    redirect: (context, state) =>
-        state.uri.scheme == authCallback.scheme &&
-            state.uri.host == authCallback.host
-        ? '/account'
-        : null,
+    // CHEESE-61/68: a confirmation or reset link opens the app as a
+    // platform route carrying the whole URI
+    // (`https://tkforgeworks.com/apps/cheesy-scribe/auth/?code=…`, or the
+    // legacy `com.tkforgeworks.cheesyscribe://auth-callback/?code=…`),
+    // whether the app was cold or warm. supabase_flutter reads the code
+    // from that same link on its own; the router only needs somewhere to
+    // go, and Account is where the resulting session (or set-password
+    // push) shows. Without this the location matches nothing and the error
+    // page appears (rc.2).
+    redirect: (context, state) => isAuthCallback(state.uri) ? '/account' : null,
     routes: [
       ShellRoute(
         builder: (context, state, child) =>

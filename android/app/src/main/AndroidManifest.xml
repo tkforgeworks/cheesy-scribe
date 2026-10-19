@@ -35,11 +35,27 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <!-- Confirmation and password-reset mails send the user back here
-                 (CHEESE-61): the application id minus its underscore as a
-                 custom scheme (a URL scheme cannot contain one), also on the
-                 Supabase project's redirect allow list. Must equal
-                 scribeAuthRedirectUrl in lib/data/forge_providers.dart.
-                 supabase_flutter reads the link; the app never parses it. -->
+                 (CHEESE-68): an Android App Link. autoVerify makes Android
+                 fetch https://tkforgeworks.com/.well-known/assetlinks.json at
+                 install and, when it names this build's signing certificate,
+                 open the app for this path without asking. Play-signed and
+                 upload-key builds verify; CI's -debugsigned builds and
+                 local debug builds do not (their keys are not in the file),
+                 so there the link opens the website's landing page instead.
+                 Must equal scribeAuthRedirectUrl in
+                 lib/data/forge_providers.dart (host + path, which GoTrue
+                 follows with ?code=…). supabase_flutter reads the link; the
+                 app never parses it. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="tkforgeworks.com" android:pathPrefix="/apps/cheesy-scribe/auth"/>
+            </intent-filter>
+            <!-- The custom scheme the mails used from rc.2 to rc.8
+                 (CHEESE-61; legacyAuthCallbackUrl), kept one more RC so a
+                 mail sent before the switch still opens the app. Remove with
+                 the constant. -->
             <intent-filter android:autoVerify="false">
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
