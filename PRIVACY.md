@@ -68,11 +68,11 @@ only with a feedback message.
 
 - [x] Google and email/password sign-in on Android (CHEESE-61; Apple when an iOS app exists)
 - [x] In-app account deletion in the same build as sign-in (CHEESE-65, `v0.3.0-rc.7`)
-- [ ] Deletion page and form live at `tkforgeworks.com/privacy/cheesy-scribe/delete-account/` (TKFW-83); URL entered in Play Console (App content → Account deletion) and in Data safety (Tim)
+- [x] Deletion page and form live at `tkforgeworks.com/privacy/cheesy-scribe/delete-account/` (TKFW-83, website PR #28); URL entered in Play Console (App content → Account deletion) and in Data safety (Tim, 2026-10-18)
 - [ ] Privacy policy live at `tkforgeworks.com/privacy/cheesy-scribe/`, naming Supabase and its region, Resend, the purge window and both deletion paths (TKFW-83; merge with the 0.3.0 release)
 - [x] This inventory current
-- [ ] Data safety form re-submitted (Tim, Console)
-- [ ] Play App access: a reviewer account (an email/password test account on the real project, no 2FA) with instructions (Tim, Console)
-- [ ] Google Cloud consent screen flipped from Testing to In production (Tim)
+- [x] Data safety form re-submitted (Tim, Console, 2026-10-18)
+- [x] Play App access: a reviewer account (an email/password test account on the real project, no 2FA) with instructions (Tim, Console, 2026-10-18)
+- [x] Google Cloud consent screen flipped from Testing to In production (Tim, 2026-10-18)
 - [x] Supabase Auth email templates, SMTP and rate limits set; Resend sender verified (2026-10-18)
 - [x] Server functions never log `data`; Edge Function logs carry ids only (forge-core)

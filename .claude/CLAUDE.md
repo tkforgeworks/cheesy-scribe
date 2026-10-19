@@ -402,7 +402,7 @@ Layout so far:
   `onChanged` is null). Both modes edit one `Map<FlavorNote,int>`; zeros
   are removed from the map, never stored.
 - **`forge_core`** (CHEESE-59) — the shared tkforgeworks Supabase package
-  (`tkforgeworks/forge-core`, git dependency pinned to `v0.1.0-rc.12`;
+  (`tkforgeworks/forge-core`, git dependency pinned to `v0.1.0`, stable since 2026-10-19;
   local checkout `~/Projects/forge-core`; Jira `FC`): config, `ForgeAuth`
   (Google + email/password, linking, sign-out), `ForgeAccounts`,
   `ForgeEntriesRepository`, the Supabase SQL/functions/templates and
@@ -411,7 +411,7 @@ Layout so far:
   fixed upstream and the pin moves.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.2.0-rc.6` since CHEESE-61 (v0.2 adds the sign-in panel and screens,
+  `v0.2.0` (stable since 2026-10-19; rc.6 since CHEESE-61; v0.2 adds the sign-in panel and screens,
   check-email and set-password screens, typed confirm sheet,
   `ForgeAccountSettings`, sign-out sheet); local checkout `~/Projects/forge-ui`;
   Jira project `FU` since 2026-10-17, forge-core's is `FC`). It owns the theme
@@ -917,5 +917,16 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (rc.12) moved the mail templates to token links
   (`{{ .RedirectTo }}?token_hash=…&type=…`, verified in-app by forge_core)
   and rc.10 took the pin, the re-synced templates, the `mailLinkFailed`
-  snackbar and dropped the legacy scheme. Tim pastes the four templates
-  into the dashboard and can remove the custom-scheme allow-list entry.
+  snackbar and dropped the legacy scheme; rc.11 added the greetings for a
+  verified link. Tim pasted the templates; rc.10 and rc.11 passed on his
+  phone, and he ran the same-note edit race on two devices with no issue.
+- 2026-10-19: **CHEESE-67 release pass.** `test/data/sync_service_test.dart`
+  gained a `KeepNewerRemote` (the server's `keep_newer` trigger emulated
+  over the package fake, plus a hook into the listing/pushing window) and
+  four edit-race tests: concurrent syncs, a newer edit landing between a
+  phone's key listing and its push (both directions), and a deletion
+  racing an older edit. forge-core `v0.1.0` and forge-ui `v0.2.0` finals
+  cut from rc.12 / rc.6 and re-pinned here; Dependabot #51
+  (package_info_plus 10.2.2) bundled. Then `bump-version.sh final` and the
+  release PR into `main` (Tim merges); website PR #29 (policy) merges once
+  0.3.0 is on `main`.

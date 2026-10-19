@@ -59,6 +59,37 @@ class Device {
   void tick([Duration d = const Duration(minutes: 1)]) => now = now.add(d);
 }
 
+/// The live server's `keep_newer` trigger (migration 20261018160000): an
+/// upsert whose `updated_at` is not newer than the stored row is dropped.
+/// The package fake overwrites blindly, so the race tests use this one.
+/// [beforeListKeysOnce] runs after the next key listing is taken and
+/// before it is returned: the window in which another phone can write.
+class KeepNewerRemote extends FakeForgeEntriesRepository<TastingNote> {
+  KeepNewerRemote(super.auth);
+
+  Future<void> Function()? beforeListKeysOnce;
+
+  @override
+  Future<ForgeResult<void>> upsertAll(
+    Iterable<ForgeEntry<TastingNote>> entries,
+  ) {
+    final kept = [
+      for (final e in entries)
+        if (rows[e.id] == null || e.updatedAt.isAfter(rows[e.id]!.updatedAt)) e,
+    ];
+    return super.upsertAll(kept);
+  }
+
+  @override
+  Future<ForgeResult<List<ForgeEntryKey>>> listKeys({DateTime? since}) async {
+    final result = await super.listKeys(since: since);
+    final hook = beforeListKeysOnce;
+    beforeListKeysOnce = null;
+    if (hook != null) await hook();
+    return result;
+  }
+}
+
 TastingNote note(String id, String name) => TastingNote(
   id: id,
   cheeseName: name,
@@ -135,6 +166,99 @@ void main() {
     await a.service.sync();
     await b.service.sync();
     expect((await b.notes.getNote('1'))!.cheeseName, 'A again');
+  });
+
+  group('same-note edit race (CHEESE-67)', () {
+    late KeepNewerRemote server;
+    late Device a;
+    late Device b;
+
+    setUp(() {
+      server = KeepNewerRemote(auth);
+      a = Device('a', server, start: DateTime.utc(2026, 10, 18, 12));
+      b = Device('b', server, start: DateTime.utc(2026, 10, 18, 12));
+    });
+
+    Future<void> shared() async {
+      await a.notes.save(note('1', 'Original'));
+      await a.service.sync();
+      await b.service.sync();
+    }
+
+    test('both phones sync at once: the newer edit wins everywhere', () async {
+      await shared();
+      a.tick(const Duration(minutes: 1));
+      await a.notes.save(note('1', 'From A'));
+      b.tick(const Duration(minutes: 2));
+      await b.notes.save(note('1', 'From B'));
+      await Future.wait([a.service.sync(), b.service.sync()]);
+      // One more round each lets whichever lost the race pull the winner.
+      await a.service.sync();
+      await b.service.sync();
+      expect(server.rows['1']!.data!.cheeseName, 'From B');
+      expect((await a.notes.getNote('1'))!.cheeseName, 'From B');
+      expect((await b.notes.getNote('1'))!.cheeseName, 'From B');
+      expect(await a.notes.dirtyNotes(), isEmpty);
+      expect(await b.notes.dirtyNotes(), isEmpty);
+    });
+
+    test('a newer edit landing between listing and pushing is kept', () async {
+      // The compare-before-push window: a lists the server's keys, b pushes
+      // a newer edit, then a pushes its older one against stale knowledge.
+      // The server's keep_newer drops it; a's next run pulls b's version.
+      await shared();
+      a.tick(const Duration(minutes: 1));
+      await a.notes.save(note('1', 'From A'));
+      b.tick(const Duration(minutes: 2));
+      await b.notes.save(note('1', 'From B'));
+      server.beforeListKeysOnce = () => b.service.sync();
+      await a.service.sync();
+      expect(server.rows['1']!.data!.cheeseName, 'From B');
+      expect(server.rows['1']!.updatedAt, b.now);
+      await a.service.sync();
+      expect((await a.notes.getNote('1'))!.cheeseName, 'From B');
+      expect(await a.notes.dirtyNotes(), isEmpty);
+    });
+
+    test(
+      'the same race in reverse: the stale phone held the newer edit',
+      () async {
+        await shared();
+        a.tick(const Duration(minutes: 2));
+        await a.notes.save(note('1', 'From A'));
+        b.tick(const Duration(minutes: 1));
+        await b.notes.save(note('1', 'From B'));
+        // b writes while a is between listing and pushing; a's edit is newer.
+        server.beforeListKeysOnce = () => b.service.sync();
+        await a.service.sync();
+        expect(server.rows['1']!.data!.cheeseName, 'From A');
+        await b.service.sync();
+        expect((await b.notes.getNote('1'))!.cheeseName, 'From A');
+        expect(await b.notes.dirtyNotes(), isEmpty);
+      },
+    );
+
+    test(
+      'a deletion racing an older edit wins; a newer edit resurrects',
+      () async {
+        await shared();
+        a.tick(const Duration(minutes: 1));
+        await a.notes.save(note('1', 'From A'));
+        b.tick(const Duration(minutes: 2));
+        await b.notes.delete('1');
+        server.beforeListKeysOnce = () => b.service.sync();
+        await a.service.sync();
+        expect(server.rows['1']!.data, isNull);
+        await a.service.sync();
+        expect(await a.notes.getNote('1'), isNull);
+
+        a.tick(const Duration(minutes: 5));
+        await a.notes.save(note('1', 'Back again'));
+        await a.service.sync();
+        await b.service.sync();
+        expect((await b.notes.getNote('1'))!.cheeseName, 'Back again');
+      },
+    );
   });
 
   test('a local edit newer than the server copy is not overwritten', () async {
