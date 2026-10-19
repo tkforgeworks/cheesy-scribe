@@ -212,7 +212,12 @@ Layout so far:
   (`offerLocalErase: false`; CHEESE-62 sign-out = `syncNow()`, a
   `showForgeConfirmSheet` warning (`unsyncedTitle`) when something is
   still unpushed, `signOut()`, `removeOwned(userId)`, `sync_meta.clear()`;
-  Delete account is CHEESE-65). CHEESE-64 fills the rest: `username` from
+  Delete account (CHEESE-65): `onDeleteAccount` runs inside forge_ui's
+  typed-DELETE sheet (`deleteTitle`/`deleteAside`, purge "within
+  minutes"), calls `ForgeAccounts.deleteAccount()` (flags for the purge,
+  signs out everywhere), then `removeOwned` + `sync_meta.clear()` and the
+  `deletedMessage` snackbar; a `ForgeFailed` returns `dataErrorCopy` so
+  the sheet stays open). CHEESE-64 fills the rest: `username` from
   `accountProvider` (`ForgeAccounts.watchAccount`, invalidated after a
   write) saved through `setUsername` (`usernameSavedMessage`,
   `dataErrorCopy` on failure), Link Google → `linkGoogle()` through `_run`
@@ -250,9 +255,12 @@ Layout so far:
   badge, version, `AboutScreen.blurb` (TKFW voice; Tim owns the copy),
   `privacyLine`, the menu-icon `leading`, and the link callbacks:
   tkforgeworks.com and the privacy policy (`privacyUri`,
-  `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`,
-  licences via `context.push('/licenses')`, Send feedback via
-  `context.push('/feedback')` (`onSendFeedback`, forge_ui since rc.3). Rows are
+  `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`, licences via `context.push('/licenses')`, Send feedback via
+  `context.push('/feedback')` (`onSendFeedback`, forge_ui since rc.3), and
+  Delete account (`onOpenDeleteAccount`, CHEESE-65: `/account` when signed
+  in, the website form `deleteAccountUri` when signed out, hidden without
+  a backend). The blurb and `privacyLine` mention the optional backup
+  since 0.3.0 (Tim's copy to review). Rows are
   found in tests by the package's keys (`ForgeAboutScreen.licensesKey`,
   `feedbackKey`, …).
 - `lib/features/feedback/` (CHEESE-51) — `FeedbackScreen` (`/feedback`):
@@ -855,4 +863,8 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   before-push LWW, coordinator, server `keep_newer` trigger as migration
   20261018160000). rc.5 passed Tim's multi-account and attach checks.
   CHEESE-63 added the profile row sync and the backup status row in
-  Settings and Account with Sync now.
+  Settings and Account with Sync now. CHEESE-64 the username, Link
+  Google and Set a password rows (its PR #63 was merged with CI red by a
+  chained merge command; #64 fixed the test, and merges now gate on the
+  check state). CHEESE-65 the typed-DELETE account deletion and About's
+  Delete account row.

@@ -1,7 +1,10 @@
 import 'package:cheesy_scribe/data/db/app_database.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
+import 'package:cheesy_scribe/data/forge_providers.dart';
 import 'package:cheesy_scribe/features/account/account_screen.dart';
+import 'package:cheesy_scribe/features/account/auth_copy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:forge_core/forge_core.dart';
@@ -205,5 +208,69 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // the 30 s retry
     await tester.pumpAndSettle();
     expect(remote.rows.keys, unorderedEquals(['o1', 'o2']));
+  });
+
+  testApp('deleting the account needs DELETE typed, then forgets its notes', (
+    tester,
+  ) async {
+    final db = await boot(tester, anonNotes: 1);
+    await signInWithGoogle(tester);
+    await tester.tap(find.text(AccountScreen.notNowLabel));
+    await tester.pumpAndSettle();
+    await onDb(
+      tester,
+      () => NotesRepository(db, owner: owner).save(note('o1', 'Owned')),
+    );
+    await settleSync(tester);
+    expect(remote.rows.keys, ['o1']);
+
+    await tester.ensureVisible(find.byKey(ForgeAccountSettings.deleteKey));
+    await tester.tap(find.byKey(ForgeAccountSettings.deleteKey));
+    await tester.pumpAndSettle();
+    expect(find.text(AccountScreen.deleteTitle), findsOneWidget);
+    expect(find.text(AccountScreen.deleteAside), findsOneWidget);
+    // The confirm button stays off until the word is typed.
+    final confirm = find.widgetWithText(FilledButton, 'Delete account');
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+    await tester.enterText(find.byKey(ForgeConfirmSheet.fieldKey), 'delete');
+    await tester.pumpAndSettle();
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNotNull);
+    await tester.tap(confirm);
+    await tester.pumpAndSettle();
+
+    expect(auth.signOutCalls, [true]);
+    expect(find.text(AccountScreen.deletedMessage), findsOneWidget);
+    expect(find.byType(ForgeSignInPanel), findsOneWidget);
+    // The account's note is gone from the phone; the signed-out one stays.
+    expect(find.text('MEMBER SINCE 2026 · 1 NOTE'), findsOneWidget);
+    expect(
+      await onDb(
+        tester,
+        () => NotesRepository(db, owner: owner).watchAll().first,
+      ),
+      isEmpty,
+    );
+  });
+
+  testApp('a failed deletion keeps the sheet open and the user signed in', (
+    tester,
+  ) async {
+    await boot(tester, anonNotes: 0);
+    await signInWithGoogle(tester);
+    final accounts = ProviderScope.containerOf(
+      tester.element(find.byType(AccountScreen)),
+    ).read(forgeAccountsProvider) as FakeForgeAccounts;
+    accounts.nextError = ForgeDataError.network;
+    await tester.ensureVisible(find.byKey(ForgeAccountSettings.deleteKey));
+    await tester.tap(find.byKey(ForgeAccountSettings.deleteKey));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(ForgeConfirmSheet.fieldKey), 'DELETE');
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete account'));
+    await tester.pumpAndSettle();
+    expect(find.text(dataErrorCopy(ForgeDataError.network)), findsOneWidget);
+    expect(find.text(AccountScreen.deleteTitle), findsOneWidget);
+    expect(auth.signOutCalls, isEmpty);
+    expect(accounts.deleteCalls, 1);
   });
 }
