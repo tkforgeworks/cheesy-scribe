@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cheesy_scribe/data/models/models.dart';
+import 'package:cheesy_scribe/data/sync/sync_payload.dart';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:json_schema/json_schema.dart';
@@ -87,6 +88,21 @@ void main() {
       expectValid(schema, roundTrip(minimalNote.toJson()));
       final bad = roundTrip(fullNote.toJson())..['pricePerLb'] = 3;
       expect(schema.validate(bad).errors, isNotEmpty);
+      // photoUrl left the schema with CHEESE-82; nothing emits it any more.
+      final photo = roundTrip(fullNote.toJson())..['photoUrl'] = 'x';
+      expect(schema.validate(photo).errors, isNotEmpty);
+    });
+
+    test('ignores a photoUrl from a payload written before CHEESE-82', () {
+      // A server row pushed by 0.3.0 may still carry the key; the reader
+      // drops it rather than failing, and the note is otherwise intact.
+      final old = roundTrip(noteToPayload(fullNote))
+        ..['photoUrl'] = 'https://example.com/e.jpg';
+      expect(noteFromPayload(old), fullNote);
+      expect(
+        TastingNote.fromJson(old).toJson().containsKey('photoUrl'),
+        isFalse,
+      );
     });
 
     test('updatedAt defaults to createdAt, round-trips, is not equality', () {

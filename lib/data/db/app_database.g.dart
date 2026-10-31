@@ -446,17 +446,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _photoUrlMeta = const VerificationMeta(
-    'photoUrl',
-  );
-  @override
-  late final GeneratedColumn<String> photoUrl = GeneratedColumn<String>(
-    'photo_url',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _searchTextMeta = const VerificationMeta(
     'searchText',
   );
@@ -509,7 +498,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
     flCrumbly,
     flCrystalline,
     cheeseStyleId,
-    photoUrl,
     searchText,
   ];
   @override
@@ -763,12 +751,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
         ),
       );
     }
-    if (data.containsKey('photo_url')) {
-      context.handle(
-        _photoUrlMeta,
-        photoUrl.isAcceptableOrUnknown(data['photo_url']!, _photoUrlMeta),
-      );
-    }
     if (data.containsKey('search_text')) {
       context.handle(
         _searchTextMeta,
@@ -950,10 +932,6 @@ class $NotesTable extends Notes with TableInfo<$NotesTable, NoteRow> {
         DriftSqlType.string,
         data['${effectivePrefix}cheese_style_id'],
       ),
-      photoUrl: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}photo_url'],
-      ),
       searchText: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}search_text'],
@@ -1030,7 +1008,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
   final int flCrumbly;
   final int flCrystalline;
   final String? cheeseStyleId;
-  final String? photoUrl;
 
   /// Lower-cased, diacritic-stripped haystack of every searchable field
   /// (see [searchTextFor]); the search box matches against this.
@@ -1075,7 +1052,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     required this.flCrumbly,
     required this.flCrystalline,
     this.cheeseStyleId,
-    this.photoUrl,
     required this.searchText,
   });
   @override
@@ -1150,9 +1126,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     if (!nullToAbsent || cheeseStyleId != null) {
       map['cheese_style_id'] = Variable<String>(cheeseStyleId);
     }
-    if (!nullToAbsent || photoUrl != null) {
-      map['photo_url'] = Variable<String>(photoUrl);
-    }
     map['search_text'] = Variable<String>(searchText);
     return map;
   }
@@ -1216,9 +1189,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       cheeseStyleId: cheeseStyleId == null && nullToAbsent
           ? const Value.absent()
           : Value(cheeseStyleId),
-      photoUrl: photoUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(photoUrl),
       searchText: Value(searchText),
     );
   }
@@ -1276,7 +1246,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       flCrumbly: serializer.fromJson<int>(json['flCrumbly']),
       flCrystalline: serializer.fromJson<int>(json['flCrystalline']),
       cheeseStyleId: serializer.fromJson<String?>(json['cheeseStyleId']),
-      photoUrl: serializer.fromJson<String?>(json['photoUrl']),
       searchText: serializer.fromJson<String>(json['searchText']),
     );
   }
@@ -1331,7 +1300,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       'flCrumbly': serializer.toJson<int>(flCrumbly),
       'flCrystalline': serializer.toJson<int>(flCrystalline),
       'cheeseStyleId': serializer.toJson<String?>(cheeseStyleId),
-      'photoUrl': serializer.toJson<String?>(photoUrl),
       'searchText': serializer.toJson<String>(searchText),
     };
   }
@@ -1376,7 +1344,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     int? flCrumbly,
     int? flCrystalline,
     Value<String?> cheeseStyleId = const Value.absent(),
-    Value<String?> photoUrl = const Value.absent(),
     String? searchText,
   }) => NoteRow(
     id: id ?? this.id,
@@ -1422,7 +1389,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     cheeseStyleId: cheeseStyleId.present
         ? cheeseStyleId.value
         : this.cheeseStyleId,
-    photoUrl: photoUrl.present ? photoUrl.value : this.photoUrl,
     searchText: searchText ?? this.searchText,
   );
   NoteRow copyWithCompanion(NotesCompanion data) {
@@ -1486,7 +1452,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
       cheeseStyleId: data.cheeseStyleId.present
           ? data.cheeseStyleId.value
           : this.cheeseStyleId,
-      photoUrl: data.photoUrl.present ? data.photoUrl.value : this.photoUrl,
       searchText: data.searchText.present
           ? data.searchText.value
           : this.searchText,
@@ -1535,7 +1500,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           ..write('flCrumbly: $flCrumbly, ')
           ..write('flCrystalline: $flCrystalline, ')
           ..write('cheeseStyleId: $cheeseStyleId, ')
-          ..write('photoUrl: $photoUrl, ')
           ..write('searchText: $searchText')
           ..write(')'))
         .toString();
@@ -1582,7 +1546,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
     flCrumbly,
     flCrystalline,
     cheeseStyleId,
-    photoUrl,
     searchText,
   ]);
   @override
@@ -1628,7 +1591,6 @@ class NoteRow extends DataClass implements Insertable<NoteRow> {
           other.flCrumbly == this.flCrumbly &&
           other.flCrystalline == this.flCrystalline &&
           other.cheeseStyleId == this.cheeseStyleId &&
-          other.photoUrl == this.photoUrl &&
           other.searchText == this.searchText);
 }
 
@@ -1672,7 +1634,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
   final Value<int> flCrumbly;
   final Value<int> flCrystalline;
   final Value<String?> cheeseStyleId;
-  final Value<String?> photoUrl;
   final Value<String> searchText;
   final Value<int> rowid;
   const NotesCompanion({
@@ -1715,7 +1676,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     this.flCrumbly = const Value.absent(),
     this.flCrystalline = const Value.absent(),
     this.cheeseStyleId = const Value.absent(),
-    this.photoUrl = const Value.absent(),
     this.searchText = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1759,7 +1719,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     this.flCrumbly = const Value.absent(),
     this.flCrystalline = const Value.absent(),
     this.cheeseStyleId = const Value.absent(),
-    this.photoUrl = const Value.absent(),
     required String searchText,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1810,7 +1769,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     Expression<int>? flCrumbly,
     Expression<int>? flCrystalline,
     Expression<String>? cheeseStyleId,
-    Expression<String>? photoUrl,
     Expression<String>? searchText,
     Expression<int>? rowid,
   }) {
@@ -1854,7 +1812,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
       if (flCrumbly != null) 'fl_crumbly': flCrumbly,
       if (flCrystalline != null) 'fl_crystalline': flCrystalline,
       if (cheeseStyleId != null) 'cheese_style_id': cheeseStyleId,
-      if (photoUrl != null) 'photo_url': photoUrl,
       if (searchText != null) 'search_text': searchText,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1900,7 +1857,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     Value<int>? flCrumbly,
     Value<int>? flCrystalline,
     Value<String?>? cheeseStyleId,
-    Value<String?>? photoUrl,
     Value<String>? searchText,
     Value<int>? rowid,
   }) {
@@ -1944,7 +1900,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
       flCrumbly: flCrumbly ?? this.flCrumbly,
       flCrystalline: flCrystalline ?? this.flCrystalline,
       cheeseStyleId: cheeseStyleId ?? this.cheeseStyleId,
-      photoUrl: photoUrl ?? this.photoUrl,
       searchText: searchText ?? this.searchText,
       rowid: rowid ?? this.rowid,
     );
@@ -2078,9 +2033,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
     if (cheeseStyleId.present) {
       map['cheese_style_id'] = Variable<String>(cheeseStyleId.value);
     }
-    if (photoUrl.present) {
-      map['photo_url'] = Variable<String>(photoUrl.value);
-    }
     if (searchText.present) {
       map['search_text'] = Variable<String>(searchText.value);
     }
@@ -2132,7 +2084,6 @@ class NotesCompanion extends UpdateCompanion<NoteRow> {
           ..write('flCrumbly: $flCrumbly, ')
           ..write('flCrystalline: $flCrystalline, ')
           ..write('cheeseStyleId: $cheeseStyleId, ')
-          ..write('photoUrl: $photoUrl, ')
           ..write('searchText: $searchText, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -3126,7 +3077,6 @@ typedef $$NotesTableCreateCompanionBuilder = NotesCompanion Function({
   Value<int> flCrumbly,
   Value<int> flCrystalline,
   Value<String?> cheeseStyleId,
-  Value<String?> photoUrl,
   required String searchText,
   Value<int> rowid,
 });
@@ -3170,7 +3120,6 @@ typedef $$NotesTableUpdateCompanionBuilder = NotesCompanion Function({
   Value<int> flCrumbly,
   Value<int> flCrystalline,
   Value<String?> cheeseStyleId,
-  Value<String?> photoUrl,
   Value<String> searchText,
   Value<int> rowid,
 });
@@ -3379,11 +3328,6 @@ class $$NotesTableFilterComposer extends Composer<_$AppDatabase, $NotesTable> {
 
   ColumnFilters<String> get cheeseStyleId => $composableBuilder(
     column: $table.cheeseStyleId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get photoUrl => $composableBuilder(
-    column: $table.photoUrl,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3597,11 +3541,6 @@ class $$NotesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get photoUrl => $composableBuilder(
-    column: $table.photoUrl,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get searchText => $composableBuilder(
     column: $table.searchText,
     builder: (column) => ColumnOrderings(column),
@@ -3754,9 +3693,6 @@ class $$NotesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get photoUrl =>
-      $composableBuilder(column: $table.photoUrl, builder: (column) => column);
-
   GeneratedColumn<String> get searchText => $composableBuilder(
     column: $table.searchText,
     builder: (column) => column,
@@ -3830,7 +3766,6 @@ class $$NotesTableTableManager
                 Value<int> flCrumbly = const Value.absent(),
                 Value<int> flCrystalline = const Value.absent(),
                 Value<String?> cheeseStyleId = const Value.absent(),
-                Value<String?> photoUrl = const Value.absent(),
                 Value<String> searchText = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => NotesCompanion(
@@ -3873,7 +3808,6 @@ class $$NotesTableTableManager
                 flCrumbly: flCrumbly,
                 flCrystalline: flCrystalline,
                 cheeseStyleId: cheeseStyleId,
-                photoUrl: photoUrl,
                 searchText: searchText,
                 rowid: rowid,
               ),
@@ -3918,7 +3852,6 @@ class $$NotesTableTableManager
                 Value<int> flCrumbly = const Value.absent(),
                 Value<int> flCrystalline = const Value.absent(),
                 Value<String?> cheeseStyleId = const Value.absent(),
-                Value<String?> photoUrl = const Value.absent(),
                 required String searchText,
                 Value<int> rowid = const Value.absent(),
               }) => NotesCompanion.insert(
@@ -3961,7 +3894,6 @@ class $$NotesTableTableManager
                 flCrumbly: flCrumbly,
                 flCrystalline: flCrystalline,
                 cheeseStyleId: cheeseStyleId,
-                photoUrl: photoUrl,
                 searchText: searchText,
                 rowid: rowid,
               ),

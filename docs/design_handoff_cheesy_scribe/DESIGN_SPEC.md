@@ -201,5 +201,5 @@ Colors/fills transition 200ms ease (TKFW rule: hover/state color shifts only —
 ## 10. Assets & icons
 - Icons: **Heroicons outline** (24×24, 2px stroke, round caps, `currentColor`) — matches TKFW. Flutter: bundle the SVGs (`flutter_svg`) or use the `heroicons` pub package. Do not mix filled variants; do not use Material Icons glyphs where a Heroicon exists.
 - Logo badge: forge-gradient circle + white cheese-wedge glyph (wedge with 3 holes — SVG path in the mockups; export from `design/Cheese Notes App.dc.html`). The TKFW hammer/anvil mark belongs to the parent brand — use it only in "About", next to "A TK ForgeWorks product".
-- Photos: none yet. `TastingNote.photoUrl` is in the model; when added, 16:9, radius 8, warm/natural per TKFW imagery rules.
+- Photos: none. `TastingNote.photoUrl` was modelled but never built, and photos were scrapped outright on 2026-10-28 (CHEESE-82 removed the field). Should the idea ever return: 16:9, radius 8, warm/natural per TKFW imagery rules.
 - Fonts: Google Fonts (Poppins 400–700, Source Serif 4 400/600 + italics, JetBrains Mono 400/500) — `google_fonts` package or bundle locally.

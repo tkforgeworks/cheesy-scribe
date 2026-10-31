@@ -10,7 +10,8 @@ part 'app_database.g.dart';
 /// Enums store their `name`. The 16 flavor spokes are integer columns
 /// (`fl_*`, 0 = unset) so stats and filters can stay in SQL. [updatedAt]
 /// and [dirty] are sync bookkeeping (schema v3, CHEESE-58); [ownerUserId]
-/// is the ownership model (schema v4, CHEESE-62).
+/// is the ownership model (schema v4, CHEESE-62). The never-used
+/// `photo_url` column was dropped in schema v5 (CHEESE-82).
 @DataClassName('NoteRow')
 @TableIndex(name: 'notes_by_date', columns: {#tastedAt, #createdAt})
 @TableIndex(name: 'notes_by_style', columns: {#cheeseStyleId})
@@ -68,7 +69,6 @@ class Notes extends Table {
   IntColumn get flCrumbly => integer().withDefault(const Constant(0))();
   IntColumn get flCrystalline => integer().withDefault(const Constant(0))();
   TextColumn get cheeseStyleId => text().nullable()();
-  TextColumn get photoUrl => text().nullable()();
 
   /// Lower-cased, diacritic-stripped haystack of every searchable field
   /// (see [searchTextFor]); the search box matches against this.
@@ -131,7 +131,7 @@ class AppDatabase extends _$AppDatabase {
   /// Bump with every table change and add a case to [_upgradeTo]. Never
   /// edit a released case; users upgrade through each step in order.
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   /// The schema version that last changed what [searchTextFor] produces
   /// (2: LEMON relabelled CITRUS, CHEESE-45). Raise it, and the schema
@@ -178,6 +178,13 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(notes, notes.ownerUserId);
         await m.addColumn(noteTombstones, noteTombstones.ownerUserId);
         await m.createIndex(notesOwner);
+        break;
+      case 5:
+        // Photos scrapped (CHEESE-82). The column was modelled in the
+        // handoff and never written by any build, so nothing is lost.
+        // drift_flutter bundles its own SQLite (3.35+), which knows
+        // DROP COLUMN whatever the OS version ships.
+        await m.dropColumn(notes, 'photo_url');
         break;
       default:
         throw StateError('No migration to schema version $version');
@@ -239,7 +246,6 @@ TastingNote noteFromRow(NoteRow row) => TastingNote(
     FlavorNote.crystalline: row.flCrystalline,
   },
   cheeseStyleId: row.cheeseStyleId,
-  photoUrl: row.photoUrl,
 );
 
 /// Domain → row (every column but [Notes.dirty] and [Notes.ownerUserId],
@@ -283,6 +289,5 @@ NotesCompanion noteToCompanion(TastingNote note) => NotesCompanion(
   flCrumbly: Value(note.flavorScore(FlavorNote.crumbly)),
   flCrystalline: Value(note.flavorScore(FlavorNote.crystalline)),
   cheeseStyleId: Value(note.cheeseStyleId),
-  photoUrl: Value(note.photoUrl),
   searchText: Value(searchTextFor(note)),
 );

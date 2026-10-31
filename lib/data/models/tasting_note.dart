@@ -35,7 +35,6 @@ class TastingNote {
     this.verdict,
     Map<FlavorNote, int> flavors = const {},
     this.cheeseStyleId,
-    this.photoUrl,
   }) : assert(rating >= 0 && rating <= 5, 'rating is 0 (unrated) to 5'),
        assert(price == null || price >= 0, 'price is never negative'),
        tastedAt = dateOnly(tastedAt),
@@ -91,9 +90,6 @@ class TastingNote {
 
   /// Library link (`CheeseStyle.id`), set by the STYLE picker (B1).
   final String? cheeseStyleId;
-
-  /// Modelled, no UI in v0.1.0 (B9).
-  final String? photoUrl;
 
   /// Whether the note carries a star rating at all (B7).
   bool get isRated => rating > 0;
@@ -154,7 +150,6 @@ class TastingNote {
     Object? verdict = _unset,
     Map<FlavorNote, int>? flavors,
     Object? cheeseStyleId = _unset,
-    Object? photoUrl = _unset,
   }) {
     return TastingNote(
       id: id ?? this.id,
@@ -179,7 +174,6 @@ class TastingNote {
       verdict: _pick(verdict, this.verdict),
       flavors: flavors ?? this.flavors,
       cheeseStyleId: _pick(cheeseStyleId, this.cheeseStyleId),
-      photoUrl: _pick(photoUrl, this.photoUrl),
     );
   }
 
@@ -218,7 +212,8 @@ class TastingNote {
       (k, v) => MapEntry(FlavorNote.values.byName(k), v as int),
     ),
     cheeseStyleId: json['cheeseStyleId'] as String?,
-    photoUrl: json['photoUrl'] as String?,
+    // A `photoUrl` key from a build before CHEESE-82 is ignored: photos were
+    // modelled but never built, and are out of scope for good.
   );
 
   Map<String, dynamic> toJson() => {
@@ -244,7 +239,6 @@ class TastingNote {
     if (verdict != null) 'verdict': verdict,
     'flavors': flavors.map((k, v) => MapEntry(k.name, v)),
     if (cheeseStyleId != null) 'cheeseStyleId': cheeseStyleId,
-    if (photoUrl != null) 'photoUrl': photoUrl,
   };
 
   /// `YYYY-MM-DD` (JSON Schema `date`).
@@ -291,8 +285,7 @@ class TastingNote {
           other.notes == notes &&
           other.verdict == verdict &&
           mapEquals(other.flavors, flavors) &&
-          other.cheeseStyleId == cheeseStyleId &&
-          other.photoUrl == photoUrl;
+          other.cheeseStyleId == cheeseStyleId;
 
   @override
   int get hashCode => Object.hash(

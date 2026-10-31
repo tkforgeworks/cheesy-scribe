@@ -36,7 +36,8 @@ lockup SVGs under `profile/assets/`).
 
 `TastingNote`: id, cheeseName*, tastedAt*, creamery, origin, rind (enum + rindOther),
 pricePerLb, milk (enum, default cow) + milkOther, isGrassfed, isRaw, rating 0–5 whole,
-texture (6-level enum), notes, flavors (16 spokes → 0–5), cheeseStyleId, photoUrl.
+texture (6-level enum), notes, flavors (16 spokes → 0–5), cheeseStyleId (photoUrl was in the
+handoff; scrapped and removed 2026-10-28, CHEESE-82).
 `CheeseStyle`: id, name, examples, description, typicalMilk[], typicalTexture.
 `UserProfile` and `AppSettings` as shown in the Account and Settings screens.
 `TastingStats` is derived client-side.
@@ -151,7 +152,8 @@ score on rows and exclude from average rating.
 **B8. `tastedAt` precision.** Form is a date picker; model is date-time. Proposal: store
 the date at local midnight, display date only, sort by date then created-at.
 
-**B9. Photos.** `photoUrl` is modelled with no UI. Out of scope; keep the field.
+**B9. Photos.** `photoUrl` was modelled with no UI and kept through 0.3.0. Scrapped outright on
+2026-10-28 (Tim); CHEESE-82 removed the field, column and schema entry.
 
 **B10. Search.** "Live-filters across name, creamery, origin, notes text, flavor tags" and
 "recent searches listed until typing starts". Recent searches persist locally (cap 10).

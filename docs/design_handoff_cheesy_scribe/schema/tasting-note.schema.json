@@ -35,7 +35,6 @@
       },
       "additionalProperties": { "type": "integer", "minimum": 1, "maximum": 5 }
     },
-    "cheeseStyleId": { "type": "string", "description": "FK -> CheeseStyle.id, set by the STYLE picker" },
-    "photoUrl": { "type": "string", "format": "uri", "description": "Modelled, no UI in v0.1.0" }
+    "cheeseStyleId": { "type": "string", "description": "FK -> CheeseStyle.id, set by the STYLE picker" }
   }
 }
