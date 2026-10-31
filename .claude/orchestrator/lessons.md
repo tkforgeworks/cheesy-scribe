@@ -32,3 +32,4 @@
 - Cloudflare Pages preview builds can fail on next/font/google resolution with nothing in the diff touching fonts (2026-10-31, PR #32); a retry through the Pages API (`POST .../deployments/<id>/retry`) passed. Check the build log before treating it as a real failure.
 - Cloudflare Pages does not create GitHub deployment objects for this repo; watch production through the Pages API deployments list, not `gh api .../deployments`.
 - The 1Password SSH agent can refuse to sign mid-session (auth prompt unanswered); fall back to `git fetch https://…` + `gh api -X DELETE .../git/refs/heads/<branch>` for cleanup.
+- A worker that papers over a missing shared-package slot (Stack overlay on a forge_ui screen) has done the right thing for its brief, but the main thread owns the follow-up: open the upstream ticket at once rather than leaving a "later" note in CLAUDE.md. FU-8 took under an hour end to end (2026-10-31).

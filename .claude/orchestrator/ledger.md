@@ -22,3 +22,4 @@ Tracker mode: off
 
 - Branches: cheesy-scribe `v0.4.0/CHEESE-71-share-row`; website `feature/TKFW-88-cheesy-scribe-share-page` (main checkout) and `feature/TKFW-89-feedback-screen-field` (worktree in the session scratchpad). All pushed empty.
 - Cross-repo contract fixed by the main thread: relay field `screen`, optional string 1..60, email line "Screen:" after Device; share URL `https://tkforgeworks.com/apps/cheesy-scribe/`.
+- CHEESE-72 follow-up (inline, main thread): About's Stack overlay was the agent's workaround for a missing slot; opened forge-ui FU-8, shipped `v0.2.1-rc.1` (forge-ui PR #22) and re-pinned here, so About now uses `ForgeAboutScreen.floatingActionButton`. Renders: 164/168 identical to the first CHEESE-72 pass; the 4 scrolled About scenes change on purpose (footnote clears the button).
