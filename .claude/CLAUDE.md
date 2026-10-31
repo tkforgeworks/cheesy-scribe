@@ -3,8 +3,9 @@
 ## What this is
 
 Cheese-tasting notes app modeled on the 33Books tasting notebook: track,
-record, and look back at cheeses tasted. **v0.2.0 is released** (2026-10-16;
-v0.1.0 on 2026-10-12; GitHub release + Play internal testing). The original plan is
+record, and look back at cheeses tasted. **v0.3.0 is released** (2026-10-19;
+v0.2.0 on 2026-10-16; v0.1.0 on 2026-10-12; GitHub release + Play internal
+testing). The original plan is
 `docs/CHEESE-1-decomposition.md` (inventory of the design handoff, decisions,
 architecture, and the ticket list mirrored in Jira epics CHEESE-3..12). The
 design handoff itself lives in `docs/design_handoff_cheesy_scribe/`
@@ -576,13 +577,13 @@ else refers to it).
 
 - Branching (`tkforgeworks/.github/docs/branching-and-release.md`): `main` is
   the released state; work accumulates on the current release branch
-  `vX.Y.Z/main` (currently **`v0.3.0/main`**, cut from `main` after the
-  v0.2.0 release PR, #50); topic branches PR **into the release branch**,
+  `vX.Y.Z/main` (currently **`v0.4.0/main`**, cut from `main` after the
+  v0.3.0 release PR, #72); topic branches PR **into the release branch**,
   never into `main`; the release branch reaches `main` via a release PR.
   The release branch does not start on the new version: the first
   `bump-version.sh rc` takes it from the branch name.
-- Branch names: `v0.3.0/CHEESE-N-short-topic`, cut from and PR'd into
-  `v0.3.0/main`. GitHub deletes the remote branch when its PR merges (repo
+- Branch names: `v0.4.0/CHEESE-N-short-topic`, cut from and PR'd into
+  `v0.4.0/main`. GitHub deletes the remote branch when its PR merges (repo
   setting `delete_branch_on_merge`, on since 2026-10-12; it is a repository
   setting, not a ruleset rule). A branch whose PR was closed unmerged is
   still deleted by hand, as is the local copy. The exception is a release
@@ -704,7 +705,13 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
 - **The look comes from forge_ui, pinned to an exact tag** (CHEESE-48,
   2026-10-13). The app keeps its palette and the widgets only it has;
   shared code is changed upstream and released, then the pin moves.
-- **Weekly reminder deferred** (CHEESE-12); Settings row shown disabled.
+- **Weekly reminder deferred** (CHEESE-12), past 1.0.0 since 2026-10-28;
+  Settings row shown disabled.
+- **Photos scrapped** (Tim, 2026-10-28): `TastingNote.photoUrl` was
+  modelled in the handoff but never got a picker or a view, and the
+  feature is out of scope for good, not deferred. CHEESE-82 removes the
+  field, column and schema entry. Store copy and screenshots must never
+  mention photos or CSV export (the latter dropped 2026-10-14).
 - **Portrait-only phone UI**; English only.
 - Tests are behaviour-level widget tests with an in-memory drift DB.
 - **Riverpod 3 does not export `Override`**, so helpers cannot take a
@@ -930,3 +937,36 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (package_info_plus 10.2.2) bundled. Then `bump-version.sh final` and the
   release PR into `main` (Tim merges); website PR #29 (policy) merges once
   0.3.0 is on `main`.
+- 2026-10-19: **v0.3.0 released.** `bump-version.sh final` → `0.3.0+27`
+  (`81d07ba`), release PR #72 merged into `main` (`795d289`), run
+  39204910237 (GitHub release with APK + AAB, Play internal upload); same
+  code as rc.11. Website PR #29 went live the same day: the policy at
+  `tkforgeworks.com/privacy/cheesy-scribe/` names Supabase and us-east-1,
+  Resend, the purge window and both deletion paths (PRIVACY.md checklist
+  ticked). `v0.3.0/main` deleted with the ruleset runbook; Dependabot #51
+  closed itself. CHEESE-11, 50, 57–68, FC-1..13, FU-1..6 and TKFW-83..85
+  marked ready-to-close (Tim closes). `docs/device-pass-0.3.0.md` records
+  the device pass. 0.3.0 stays on Play internal until the 0.2.0
+  closed-track review window ends (around 2026-11-01; promotion is
+  CHEESE-81).
+- 2026-10-28: **1.0.0 replanned** (Tim). The closed-test report produced
+  CHEESE-69–72 (ASO description, rendered store screenshots, "Share
+  Cheesy Scribe", floating feedback button), and the 2026-10-26 decision
+  that 1.0 launches on Google Play and the App Store together with Sign
+  in with Apple on every platform produced the iOS epic CHEESE-73
+  (74–80, with forge-core FC-14/15 → 0.2.0, forge-ui FU-7 → 0.3.0,
+  website TKFW-86/87). Split: **0.4.0** (`v0.4.0/main`, cut from `main` at
+  `795d289`) is the Android tester-feedback release on the closed track:
+  CHEESE-49 first-use tour, 71 Share (one tkforgeworks.com link for every
+  device, page TKFW-88; no store URL in the app), 72 feedback button
+  (relay `screen` field TKFW-89), 81 promote 0.3.0 to closed, 82 remove
+  `photoUrl`, Console-only 69 and 70, and Dependabot #73 bundled before
+  the final. **1.0.0** is the Apple epic plus CHEESE-46 and 52. Photos
+  scrapped outright; CHEESE-12 deferred past 1.0. iOS work builds on
+  Tim's M1 Air (8 GB: builds, signing, simulator and device runs only;
+  development stays on Linux) with `scripts/release/build-ios.sh` as the
+  gate before any macOS Actions run, and iOS CI only on release-branch
+  pushes or by hand, since macOS minutes cost ten times Linux ones
+  (CHEESE-74 has the four-PR split). Tim's new `cheesyscribe` domain has
+  no site yet (TKFW-90). Jira note: a `- [ ]` checklist line containing
+  backticks turns the whole list into literal text.

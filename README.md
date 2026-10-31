@@ -4,10 +4,12 @@ An app based on the tasting note book from [33Books](https://www.33books.com), s
 
 ## Status
 
-[v0.1.0](https://github.com/tkforgeworks/cheesy-scribe/releases/tag/v0.1.0) is the first release: a signed APK on
+[v0.3.0](https://github.com/tkforgeworks/cheesy-scribe/releases/tag/v0.3.0) is the latest release (v0.1.0 on
+2026-10-12, v0.2.0 on 2026-10-16, v0.3.0 on 2026-10-19): a signed APK and AAB on
 [GitHub Releases](https://github.com/tkforgeworks/cheesy-scribe/releases/latest) and a Google Play testing build (not yet
-public on the store). Flutter / Material 3, **Android only**, local-first (notes stay on the device; 0.3.0 adds an
-optional account for backup, see [`PRIVACY.md`](PRIVACY.md)). The plan and
+public on the store). Flutter / Material 3, **Android only**, local-first (notes stay on the device; 0.3.0 added an
+optional account for backup, see [`PRIVACY.md`](PRIVACY.md)). Next: 0.4.0 for the closed testers, then 1.0.0 on
+Google Play and the App Store together. The plan and
 ticket map are in [`docs/CHEESE-1-decomposition.md`](docs/CHEESE-1-decomposition.md); the design handoff is
 in [`docs/design_handoff_cheesy_scribe/`](docs/design_handoff_cheesy_scribe/).
 
@@ -39,8 +41,8 @@ handoff's reference Dart files carry a `.txt` suffix.
 This repo follows the TK ForgeWorks branching model ([`docs/branching-and-release.md`](https://github.com/tkforgeworks/.github/blob/main/docs/branching-and-release.md)):
 
 - `main` is the released state and only moves by merging a release PR.
-- Work accumulates on the current release branch, `v0.3.0/main`.
-- Topic branches are named `v0.3.0/CHEESE-N-short-topic` and PR into the release branch, never into `main`.
+- Work accumulates on the current release branch, `v0.4.0/main`.
+- Topic branches are named `v0.4.0/CHEESE-N-short-topic` and PR into the release branch, never into `main`.
 - Commit subjects are the changelog: `CHEESE-N: Imperative summary`, with `CHEESE-N: Fix ...` for bug fixes.
 
 Both branches are protected by repository rulesets per [`docs/branch-protection-ruleset.md`](https://github.com/tkforgeworks/.github/blob/main/docs/branch-protection-ruleset.md): `main` is PR-only with no force-push, no deletion, and no bypass; `v*/main` blocks force-push and deletion. `main` also requires the `ci / ci` check to pass with the branch up to date.
