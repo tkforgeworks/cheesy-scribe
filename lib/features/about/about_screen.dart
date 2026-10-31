@@ -9,6 +9,9 @@ import '../../app/shell/scribe_shell.dart';
 import '../../app/shell/shell_providers.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/forge_providers.dart';
+import '../feedback/feedback_client.dart';
+import '../feedback/feedback_fab.dart';
+import '../feedback/feedback_screen.dart';
 
 /// `/about` (DESIGN_SPEC §6 About, CHEESE-33): forge_ui's shared about
 /// screen with this app's badge, blurb, links and privacy line. The
@@ -44,6 +47,23 @@ class AboutScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ForgeAboutScreen builds its own Scaffold with no FAB slot, so the
+    // feedback button (CHEESE-72) sits on top where a small end-float FAB
+    // would, above the edge-to-edge nav bar.
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _about(context, ref),
+        Positioned(
+          right: 16,
+          bottom: 16 + MediaQuery.paddingOf(context).bottom,
+          child: const FeedbackFab(source: FeedbackSource.about),
+        ),
+      ],
+    );
+  }
+
+  Widget _about(BuildContext context, WidgetRef ref) {
     final version = ref.watch(appVersionProvider).asData?.value;
     final backup = ref.watch(backupAvailableProvider);
     final signedIn = ref.watch(sessionProvider) != null;
@@ -62,7 +82,8 @@ class AboutScreen extends ConsumerWidget {
       badge: const ForgeLogoBadge(size: 64),
       version: version,
       blurb: blurb,
-      onSendFeedback: () => context.push('/feedback'),
+      onSendFeedback: () =>
+          context.push(FeedbackScreen.location(FeedbackSource.about)),
       onOpenWebsite: () =>
           launchUrl(siteUri, mode: LaunchMode.externalApplication),
       onOpenPrivacyPolicy: () =>

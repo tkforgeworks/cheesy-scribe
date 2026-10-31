@@ -294,6 +294,22 @@ Layout so far:
   card showing app version, Android version and device model
   (`feedbackDeviceProvider`, `device_info_plus`), discard sheet,
   `ForgeErrorCard` with retry on failure, snackbar + pop on success.
+  Since CHEESE-72 the form always carries where it was opened from:
+  `FeedbackSource` (`feedback_client.dart`; `id` is the relay's `screen`
+  value, TKFW-89, ≤ 60 chars; `label` is shown), `FeedbackScreen(source:)`
+  from the `/feedback?screen=<id>` query (`FeedbackScreen.location(source)`;
+  missing or unknown → `other`), a fourth plain-text line on the "Sent with
+  your feedback" card (`sourceLine`), `'screen'` in the payload. The way
+  in is `FeedbackFab` (`feedback_fab.dart`: a `FloatingActionButton.small`,
+  bordered surface, own `heroTag`, `buttonKey`) set as the
+  `floatingActionButton` of every browse-only screen (note detail incl. the
+  gone state, library, style detail, stats, settings, both glossary pages)
+  and overlaid on About with a `Stack` because `ForgeAboutScreen` has no
+  FAB slot (a forge_ui slot is the cleaner fix, FU ticket later); on Home
+  it sits above `ForgeFab` in one `Column` inside the slide/fade pair, so
+  both hide on scroll-down (bottom sliver padding 136). Never on the note
+  form, Account, the auth screens, licences or the form itself. Those
+  screens' bottom scroll padding is 72 so the last card clears the button.
   `FeedbackClient` POSTs JSON to `https://tkforgeworks.com/api/feedback`,
   the relay in the TKForgeWorks_website repo (`functions/api/feedback.ts`,
   TKFW-82) that holds the Resend key and emails
@@ -980,3 +996,12 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (CHEESE-74 has the four-PR split). Tim's new `cheesyscribe` domain has
   no site yet (TKFW-90). Jira note: a `- [ ]` checklist line containing
   backticks turns the whole list into literal text.
+- 2026-10-31: CHEESE-71 (Settings → "Share Cheesy Scribe", share_plus, PR
+  #76) and the website's share page + project page (TKFW-88) and relay
+  `screen` field (TKFW-89, one website PR #32) shipped together; the share
+  page fetches the app icon from this repo's `main` at build time
+  (`scripts/fetch-app-icons.mjs` there), so the brand art stays here.
+  CHEESE-72 added the floating feedback button and the `screen` field.
+  Both tickets ran through the orchestrate skill; the ledger, briefs and
+  lessons under `.claude/orchestrator/` are committed as a distinct final
+  commit per ticket (Tim's call).

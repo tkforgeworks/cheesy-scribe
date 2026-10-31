@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cheesy_scribe/app/widgets/widgets.dart';
@@ -6,6 +7,7 @@ import 'package:cheesy_scribe/features/feedback/feedback_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:forge_ui/forge_ui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
@@ -50,6 +52,22 @@ void main() {
     expect(find.text('Cheesy Scribe 0.1.0'), findsOneWidget);
     expect(find.text(testDevice.os), findsOneWidget);
     expect(find.text(testDevice.model), findsOneWidget);
+    expect(
+      find.text(FeedbackScreen.sourceLine(FeedbackSource.about)),
+      findsOneWidget,
+    );
+    final card = find.ancestor(
+      of: find.text('SENT WITH YOUR FEEDBACK'),
+      matching: find.byType(Card),
+    );
+    expect(
+      find.descendant(of: card, matching: find.byType(TextField)),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: card, matching: find.byType(IconButton)),
+      findsNothing,
+    );
 
     // Nothing typed: back leaves without asking.
     await systemBack(tester);
@@ -93,6 +111,7 @@ void main() {
       'appVersion': '0.1.0',
       'osVersion': 'Android 16 (SDK 36)',
       'device': 'Google Pixel 9',
+      'screen': 'about',
     });
     expect(find.widgetWithText(AppBar, 'About Cheesy Scribe'), findsOneWidget);
     expect(find.text(FeedbackScreen.sentMessage), findsOneWidget);
@@ -180,5 +199,43 @@ void main() {
     await tester.tap(find.text('Discard'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'About Cheesy Scribe'), findsOneWidget);
+  });
+
+  testApp('opened from Stats, the form names and sends that screen', (
+    tester,
+  ) async {
+    tallScreen(tester);
+    Map<String, Object?>? sent;
+    // A successful send pops the form, so it needs a page beneath it.
+    await pumpApp(
+      tester,
+      at: '/stats',
+      feedbackHttp: MockClient((request) async {
+        sent = jsonDecode(request.body) as Map<String, Object?>;
+        return http.Response('{"ok":true}', 200);
+      }),
+    );
+    unawaited(
+      GoRouter.of(tester.element(find.byType(Scaffold).first))
+          .push(FeedbackScreen.location(FeedbackSource.stats)),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text(FeedbackScreen.sourceLine(FeedbackSource.stats)),
+      findsOneWidget,
+    );
+    await tester.tap(find.widgetWithText(FilterChip, 'Bug'));
+    await tester.enterText(field('Comments'), 'Chart overlaps.');
+    await tapSend(tester);
+    expect(sent!['screen'], 'stats');
+  });
+
+  testApp('without a screen query the source is Elsewhere', (tester) async {
+    tallScreen(tester);
+    await pumpApp(tester, at: '/feedback');
+    expect(
+      find.text(FeedbackScreen.sourceLine(FeedbackSource.other)),
+      findsOneWidget,
+    );
   });
 }

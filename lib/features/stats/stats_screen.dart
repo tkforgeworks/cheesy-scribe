@@ -7,6 +7,8 @@ import '../../app/shell/scribe_shell.dart';
 import '../../app/theme/scribe_theme.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
+import '../feedback/feedback_client.dart';
+import '../feedback/feedback_fab.dart';
 
 /// `/stats` (DESIGN_SPEC §6, CHEESE-30): two stat tiles, TOP FLAVORS bars
 /// and the MILK BREAKDOWN stacked bar, all derived from the notes on the
@@ -23,6 +25,7 @@ class StatsScreen extends ConsumerWidget {
     final notes = ref.watch(allNotesProvider);
     final c = context.colors;
     return Scaffold(
+      floatingActionButton: const FeedbackFab(source: FeedbackSource.stats),
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Open menu',
@@ -61,7 +64,8 @@ class _StatsBody extends StatelessWidget {
         16,
         8,
         16,
-        32,
+        // 40 dp feedback button + 16 margin + room (CHEESE-72).
+        72,
       ).withNavBarInset(context),
       children: [
         Row(

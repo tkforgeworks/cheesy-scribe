@@ -7,6 +7,8 @@ import 'package:heroicons/heroicons.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
+import '../feedback/feedback_client.dart';
+import '../feedback/feedback_fab.dart';
 import 'note_dates.dart';
 import 'widgets/flavor_entry_card.dart';
 import 'widgets/texture_meter.dart';
@@ -30,6 +32,9 @@ class NoteDetailScreen extends ConsumerWidget {
     final c = context.colors;
 
     return Scaffold(
+      floatingActionButton: const FeedbackFab(
+        source: FeedbackSource.noteDetail,
+      ),
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Back',
@@ -108,7 +113,8 @@ class _NoteBody extends ConsumerWidget {
         24,
         4,
         24,
-        32,
+        // 40 dp feedback button + 16 margin + room (CHEESE-72).
+        72,
       ).withNavBarInset(context),
       children: [
         ForgeMonoLabel(

@@ -11,6 +11,8 @@ import '../../data/models/models.dart';
 import '../../data/providers.dart';
 import '../account/account_screen.dart';
 import '../account/backup_status_row.dart';
+import '../feedback/feedback_client.dart';
+import '../feedback/feedback_fab.dart';
 import 'share_app.dart';
 
 /// `/settings` (DESIGN_SPEC §6, CHEESE-31): mono-labelled groups of
@@ -50,6 +52,7 @@ class SettingsScreen extends ConsumerWidget {
     );
 
     return Scaffold(
+      floatingActionButton: const FeedbackFab(source: FeedbackSource.settings),
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Open menu',
@@ -63,7 +66,8 @@ class SettingsScreen extends ConsumerWidget {
           16,
           8,
           16,
-          32,
+          // 40 dp feedback button + 16 margin + room (CHEESE-72).
+          72,
         ).withNavBarInset(context),
         children: [
           ForgeSettingsGroup(
