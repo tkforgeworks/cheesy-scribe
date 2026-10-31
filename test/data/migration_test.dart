@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cheesy_scribe/data/db/app_database.dart';
+import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
 import 'package:cheesy_scribe/data/repositories/sync_meta_repository.dart';
 import 'package:drift/drift.dart';
@@ -91,6 +92,21 @@ class _ReleasedDatabase extends GeneratedDatabase {
   );
 }
 
+/// Today's database held at schema v4: opening it over a released file
+/// runs the real v3 and v4 steps and stops, which is exactly the state of a
+/// phone that upgraded to 0.3.0.
+class _V4Database extends AppDatabase {
+  _V4Database(super.executor);
+
+  @override
+  int get schemaVersion => 4;
+}
+
+Future<List<String>> _columns(GeneratedDatabase db) async {
+  final rows = await db.customSelect('PRAGMA table_info(notes)').get();
+  return [for (final r in rows) r.data['name'] as String];
+}
+
 void main() {
   late File file;
 
@@ -100,7 +116,7 @@ void main() {
     file = File('${dir.path}/cheesy_scribe.sqlite');
   });
 
-  Future<AppDatabase> upgradedFrom(int version) async {
+  Future<void> seedReleased(int version) async {
     final old = _ReleasedDatabase(file, version);
     await old.insertNote(
       id: 'fog',
@@ -110,6 +126,10 @@ void main() {
       lemon: 4,
     );
     await old.close();
+  }
+
+  Future<AppDatabase> upgradedFrom(int version) async {
+    await seedReleased(version);
     final db = AppDatabase(NativeDatabase(file));
     addTearDown(db.close);
     return db;
@@ -156,8 +176,35 @@ void main() {
     expect(await meta.get('last_sync_at'), 'never');
 
     final version = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(version.data.values.single, 4);
+    expect(version.data.values.single, 5);
   });
+
+  test(
+    'upgrading from v4 drops the never-used photo_url (CHEESE-82)',
+    () async {
+      // A phone that shipped 0.3.0: the released DDL upgraded through v3 and
+      // v4 (the real steps, pinned to stop there), with a photo_url value
+      // nothing in the app could have written, to prove the drop is clean.
+      await seedReleased(2);
+      final v4 = _V4Database(NativeDatabase(file));
+      await v4.customStatement(
+        "UPDATE notes SET photo_url = 'https://example.com/fog.jpg' "
+        "WHERE id = 'fog'",
+      );
+      expect(await _columns(v4), contains('photo_url'));
+      await v4.close();
+
+      final db = AppDatabase(NativeDatabase(file));
+      addTearDown(db.close);
+      expect(await _columns(db), isNot(contains('photo_url')));
+      expect(await _columns(db), containsAll(['owner_user_id', 'updated_at']));
+      final fog = (await NotesRepository(db).getNote('fog'))!;
+      expect(fog.cheeseName, 'Humboldt Fog');
+      expect(fog.flavorScore(FlavorNote.lemon), 4);
+      final version = await db.customSelect('PRAGMA user_version').getSingle();
+      expect(version.data.values.single, 5);
+    },
+  );
 
   test('upgrading from v2 leaves existing notes unowned (CHEESE-62)', () async {
     final db = await upgradedFrom(2);

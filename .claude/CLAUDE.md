@@ -68,9 +68,11 @@ Layout so far:
   save, and is **sync metadata excluded from `==`/`hashCode`** so the
   form's dirty check and "stored equals draft" tests are unaffected.
   `NoteTombstone` (id + `deletedAt`) is the deletion marker type.
-- `lib/data/db/app_database.dart` — drift schema v4 (v2 changed no
+- `lib/data/db/app_database.dart` — drift schema v5 (v2 changed no
   table, CHEESE-45; v3 added the sync bookkeeping, CHEESE-58; v4 the
-  ownership model, CHEESE-62): `notes` (16 `fl_*` flavor int columns, ISO
+  ownership model, CHEESE-62; v5 dropped the never-used `photo_url`,
+  CHEESE-82, with drift's `dropColumn`: drift_flutter bundles its own
+  SQLite, so the OS version does not matter): `notes` (16 `fl_*` flavor int columns, ISO
   text dates, enums by name, a normalised `search_text` haystack, plus
   `updated_at`, `dirty` and `owner_user_id`, null = made while signed
   out), `recent_searches`, `settings` (key/value), `note_tombstones` (id +
@@ -490,7 +492,7 @@ Layout so far:
   set a tall viewport (`tallScreen`) so the whole `ListView` is built.
 - `tool/visual/render_screens_test.dart` (CHEESE-48) — renders every
   screen of the real app, seeded, in light and dark, to PNG with the real
-  fonts (134 files; not part of `flutter test`): `RENDER_OUT=<dir> flutter
+  fonts (168 files as of 0.3.0; not part of `flutter test`): `RENDER_OUT=<dir> flutter
   test --concurrency=4 tool/visual/render_screens_test.dart`, default
   `tool/visual/out/` (gitignored). Runs are deterministic within a day
   (the new-note form defaults to today's date, so it and the rind dialog
@@ -709,8 +711,9 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   Settings row shown disabled.
 - **Photos scrapped** (Tim, 2026-10-28): `TastingNote.photoUrl` was
   modelled in the handoff but never got a picker or a view, and the
-  feature is out of scope for good, not deferred. CHEESE-82 removes the
-  field, column and schema entry. Store copy and screenshots must never
+  feature is out of scope for good, not deferred. CHEESE-82 removed the
+  field, column (schema v5) and schema entry; `fromJson` ignores the key
+  from older server rows. Store copy and screenshots must never
   mention photos or CSV export (the latter dropped 2026-10-14).
 - **Portrait-only phone UI**; English only.
 - Tests are behaviour-level widget tests with an in-memory drift DB.

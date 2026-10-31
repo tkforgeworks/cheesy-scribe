@@ -63,7 +63,6 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
   TextureLevel _texture = TextureLevel.semiSoft;
   Map<FlavorNote, int> _flavors = const {};
   String? _cheeseStyleId;
-  String? _photoUrl;
 
   /// What the form held when it opened; the dirty check compares to it.
   TastingNote? _initial;
@@ -156,7 +155,6 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
     _verdict.text = n.verdict ?? '';
     _flavors = n.flavors;
     _cheeseStyleId = n.cheeseStyleId;
-    _photoUrl = n.photoUrl;
   }
 
   static String _formatPrice(double p) =>
@@ -199,7 +197,6 @@ class _NoteFormScreenState extends ConsumerState<NoteFormScreen> {
       verdict: _text(_verdict),
       flavors: _flavors,
       cheeseStyleId: _cheeseStyleId,
-      photoUrl: _photoUrl,
     );
   }
 

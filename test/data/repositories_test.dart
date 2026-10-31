@@ -85,7 +85,6 @@ void main() {
         verdict: 'A dare.',
         flavors: const {FlavorNote.stinky: 5, FlavorNote.crystalline: 1},
         cheeseStyleId: 'washed-rind',
-        photoUrl: 'https://example.com/e.jpg',
       );
       await repo.save(full);
       expect(await repo.getNote('full'), full);
