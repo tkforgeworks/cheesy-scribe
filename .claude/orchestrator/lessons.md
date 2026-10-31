@@ -16,9 +16,12 @@
 |---|---|---|
 | Single-file edit spelled out statement by statement | T1 haiku | T-003: exact, 28 s, no rework |
 | New widget row + provider + test inside existing patterns, Flutter | T2 sonnet | T-001: done first pass, all checks pass, 83 s |
+| Form field + payload + tests inside an existing screen, Flutter | T2 sonnet | T-004: done first pass, one sensible test deviation, 102 s |
+| New widget placed on 8 screens + animation coexistence + tests, Flutter | T3 opus | T-005: done first pass, good 'noticed' list (padding, forge_ui slot), 295 s |
 | New page + client component with platform branching, Next.js | T3 opus | T-002: done first pass, good judgement on a wrong brief assumption, 117 s |
 
 ## Brief gaps found
+- T-005: the brief asked for a `static const key` on a widget, which clashes with `Widget.key`; and named `context.forge.textSecondary`, which does not exist (use `colors.onSurfaceVariant`). Check token names against forge_ui before naming them in a brief. Also: fixing the shared contract inline first (enum + route) let two agents run in parallel on one ticket with no file conflicts; worth repeating. (2026-10-31)
 - T-002 (TKFW-88): the brief told the agent to link `content/projects/cheesy-scribe.md` without checking it exists (it does not; the site has no Cheesy Scribe project page or icon asset). Verify every file a brief names with `ls` before dispatch. The agent handled it well (conditional link, reported it) rather than inventing a page. (2026-10-31)
 
 ## User preferences
