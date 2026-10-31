@@ -57,3 +57,6 @@ app.*.map.json
 
 # Screen renders from tool/visual/render_screens_test.dart
 /tool/visual/out/
+
+# FVM's local SDK link (.fvmrc is committed)
+.fvm/

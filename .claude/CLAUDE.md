@@ -639,9 +639,10 @@ else refers to it).
     `gh api repos/tkforgeworks/cheesy-scribe/rules/branches/<branch>`.
 - CI: `.github/workflows/ci.yml` consumes
   `tkforgeworks/.github/.github/workflows/ci-flutter.yml@main`
-  (`flutter-version: '3.47.5'`, as does `release.yml`; it matches the local
+  (`flutter-version: '3.47.5'`, as does `release.yml` and the repo's
+  `.fvmrc` for FVM checkouts; it matches the local
   toolchain and forge-ui's CI, whose goldens are pinned to it, so move all
-  three together. `environment.sdk` stays `^3.13.2`: nothing needs a newer
+  of them together. `environment.sdk` stays `^3.13.2`: nothing needs a newer
   floor, and a lower floor costs nothing) with the canonical envelope — `push` on every
   branch but `main`, `pull_request` into `main` and `'v*/main'`. Contract from
   the repo root: `dart format --output=none --set-exit-if-changed .`,
