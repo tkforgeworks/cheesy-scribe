@@ -440,10 +440,10 @@ Layout so far:
   fixed upstream and the pin moves.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.2.1-rc.1` since CHEESE-72 (2026-10-31; FU-8 gives `ForgeAboutScreen`
-  a `floatingActionButton` slot, cut as a patch so FU-7 keeps 0.3.0; the
-  `v0.2.1` final is pinned before the 0.4.0 final, as 0.3.0 did with its
-  rcs); `v0.2.0` stable since 2026-10-19 (rc.6 since CHEESE-61; v0.2 added
+  `v0.2.1` since CHEESE-72 (2026-10-31; FU-8 gives `ForgeAboutScreen`
+  a `floatingActionButton` slot, cut as a patch so FU-7 keeps 0.3.0;
+  rc.1 was pinned the same day and the final, identical in code, the same
+  evening); `v0.2.0` stable since 2026-10-19 (rc.6 since CHEESE-61; v0.2 added
   the sign-in panel and screens, check-email and set-password screens,
   typed confirm sheet, `ForgeAccountSettings`, sign-out sheet); local
   checkout `~/Projects/forge-ui`;
@@ -1011,8 +1011,10 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (`scripts/fetch-app-icons.mjs` there), so the brand art stays here.
   CHEESE-72 added the floating feedback button and the `screen` field;
   About needed a FAB slot in `ForgeAboutScreen`, opened as forge-ui FU-8,
-  shipped as `v0.2.1-rc.1` the same day and pinned here (the `v0.2.1`
-  final follows before the 0.4.0 final).
+  shipped as `v0.2.1-rc.1` the same day and as the `v0.2.1` final that
+  evening (forge-ui PR #23), pinned here. Every Flutter repo got a
+  `.fvmrc` pinning 3.47.5 on its release branch (forge-core's
+  `v0.2.0/main` was cut from `main` for it).
   Both tickets ran through the orchestrate skill; the ledger, briefs and
   lessons under `.claude/orchestrator/` are committed as a distinct final
   commit per ticket (Tim's call).
