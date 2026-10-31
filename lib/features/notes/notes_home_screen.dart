@@ -10,6 +10,8 @@ import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/notes_repository.dart';
+import '../feedback/feedback_client.dart';
+import '../feedback/feedback_fab.dart';
 import 'notes_search.dart';
 import 'widgets/featured_note_card.dart';
 import 'widgets/note_row.dart';
@@ -204,7 +206,8 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
               ],
             },
             SliverPadding(
-              padding: const EdgeInsets.only(bottom: 96)
+              // Clears both buttons (40 + 12 + 56 over a 16 margin) with room.
+              padding: const EdgeInsets.only(bottom: 136)
                   .withNavBarInset(context),
             ),
           ],
@@ -216,9 +219,18 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           opacity: _fabVisible ? 1 : 0,
-          child: ForgeFab(
-            label: 'New tasting notes',
-            onPressed: () => context.push('/notes/new'),
+          // Feedback rides above the main action and hides with it.
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const FeedbackFab(source: FeedbackSource.home),
+              const SizedBox(height: 12),
+              ForgeFab(
+                label: 'New tasting notes',
+                onPressed: () => context.push('/notes/new'),
+              ),
+            ],
           ),
         ),
       ),

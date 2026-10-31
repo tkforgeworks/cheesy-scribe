@@ -8,6 +8,8 @@ import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/notes_repository.dart';
+import '../feedback/feedback_client.dart';
+import '../feedback/feedback_fab.dart';
 import '../notes/widgets/note_row.dart';
 import '../notes/widgets/texture_meter.dart';
 
@@ -23,6 +25,9 @@ class StyleDetailScreen extends ConsumerWidget {
     final styleAsync = ref.watch(cheeseStyleProvider(styleId));
     final c = context.colors;
     return Scaffold(
+      floatingActionButton: const FeedbackFab(
+        source: FeedbackSource.styleDetail,
+      ),
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Back',
@@ -74,7 +79,8 @@ class _StyleBody extends ConsumerWidget {
         24,
         4,
         24,
-        32,
+        // 40 dp feedback button + 16 margin + room (CHEESE-72).
+        72,
       ).withNavBarInset(context),
       children: [
         ForgeMonoLabel(

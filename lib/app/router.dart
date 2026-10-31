@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../data/forge_providers.dart';
 import '../features/about/about_screen.dart';
 import '../features/about/licenses_screen.dart';
+import '../features/feedback/feedback_client.dart';
 import '../features/feedback/feedback_screen.dart';
 import '../features/glossary/glossary_screen.dart';
 import '../features/glossary/glossary_terms.dart';
@@ -184,10 +185,16 @@ GoRouter createScribeRouter({
         pageBuilder: (context, state) =>
             _pushedPage(state, const SetPasswordScreen()),
       ),
+      // CHEESE-51 / CHEESE-72: `?screen=` names where the form was opened
+      // from (`FeedbackScreen.location`).
       GoRoute(
         path: '/feedback',
-        pageBuilder: (context, state) =>
-            _pushedPage(state, const FeedbackScreen()),
+        pageBuilder: (context, state) => _pushedPage(
+          state,
+          FeedbackScreen(
+            source: FeedbackSource.fromId(state.uri.queryParameters['screen']),
+          ),
+        ),
       ),
     ],
   );

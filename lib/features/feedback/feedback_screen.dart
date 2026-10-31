@@ -7,11 +7,24 @@ import '../../app/shell/shell_providers.dart';
 import '../../app/widgets/widgets.dart';
 import 'feedback_client.dart';
 
-/// `/feedback` (CHEESE-51), pushed from About: a short form that the app
+/// `/feedback` (CHEESE-51), pushed from About or, since CHEESE-72, from the
+/// floating feedback button on other screens: a short form that the app
 /// sends itself through the TK ForgeWorks relay to support. Nothing leaves
 /// the phone until Send, and the form shows what is attached.
 class FeedbackScreen extends ConsumerStatefulWidget {
-  const FeedbackScreen({super.key});
+  const FeedbackScreen({super.key, required this.source});
+
+  /// Where the form was opened from; shown on the form and sent with it.
+  final FeedbackSource source;
+
+  /// The route that opens the form from [source]
+  /// (`/feedback?screen=<id>`).
+  static String location(FeedbackSource source) =>
+      '/feedback?screen=${source.id}';
+
+  /// The "Sent with your feedback" line naming [source].
+  static String sourceLine(FeedbackSource source) =>
+      'Opened from ${source.label}';
 
   static const intro =
       'Found a bug, have an idea, or got lost somewhere? Tell us. It goes '
@@ -124,6 +137,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
               replyEmail: email.isEmpty ? null : email,
               appVersion: version,
               device: device,
+              source: widget.source,
             ),
           );
     } on FeedbackSendException {
@@ -223,7 +237,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
               errorText: _emailError,
             ),
             _gap,
-            const _AttachedCard(),
+            _AttachedCard(source: widget.source),
             if (_failed) ...[
               _gap,
               ForgeErrorCard(
@@ -266,7 +280,9 @@ const _unknownDevice = FeedbackDevice(
 
 /// What gets sent along with the form, so nothing is attached unseen.
 class _AttachedCard extends ConsumerWidget {
-  const _AttachedCard();
+  const _AttachedCard({required this.source});
+
+  final FeedbackSource source;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -284,6 +300,7 @@ class _AttachedCard extends ConsumerWidget {
           Text('Cheesy Scribe ${version ?? '…'}', style: style),
           Text(d?.os ?? '…', style: style),
           Text(d?.model ?? '…', style: style),
+          Text(FeedbackScreen.sourceLine(source), style: style),
         ],
       ),
     );

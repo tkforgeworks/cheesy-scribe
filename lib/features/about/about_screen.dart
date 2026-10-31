@@ -9,6 +9,9 @@ import '../../app/shell/scribe_shell.dart';
 import '../../app/shell/shell_providers.dart';
 import '../../app/widgets/widgets.dart';
 import '../../data/forge_providers.dart';
+import '../feedback/feedback_client.dart';
+import '../feedback/feedback_fab.dart';
+import '../feedback/feedback_screen.dart';
 
 /// `/about` (DESIGN_SPEC §6 About, CHEESE-33): forge_ui's shared about
 /// screen with this app's badge, blurb, links and privacy line. The
@@ -62,7 +65,8 @@ class AboutScreen extends ConsumerWidget {
       badge: const ForgeLogoBadge(size: 64),
       version: version,
       blurb: blurb,
-      onSendFeedback: () => context.push('/feedback'),
+      onSendFeedback: () =>
+          context.push(FeedbackScreen.location(FeedbackSource.about)),
       onOpenWebsite: () =>
           launchUrl(siteUri, mode: LaunchMode.externalApplication),
       onOpenPrivacyPolicy: () =>
@@ -81,6 +85,8 @@ class AboutScreen extends ConsumerWidget {
             ),
       footnote: privacyLine,
       tintMark: true,
+      // The feedback button (CHEESE-72) in the slot forge_ui 0.2.1 added (FU-8).
+      floatingActionButton: const FeedbackFab(source: FeedbackSource.about),
     );
   }
 }

@@ -18,6 +18,33 @@ enum FeedbackTopic {
   final String label;
 }
 
+/// Where the feedback form was opened from (CHEESE-72): the floating
+/// feedback button on browse-only screens, or About's row. [id] is the
+/// relay's `screen` value (TKFW-89: a route-like label of at most 60
+/// characters); [label] is what the form shows. Always attached, never
+/// editable by the user.
+enum FeedbackSource {
+  home('home', 'Home'),
+  noteDetail('note-detail', 'Note detail'),
+  library('library', 'Cheese library'),
+  styleDetail('style-detail', 'Style detail'),
+  stats('stats', 'Stats'),
+  settings('settings', 'Settings'),
+  about('about', 'About'),
+  glossary('glossary', 'Tasting terms'),
+  other('other', 'Elsewhere');
+
+  const FeedbackSource(this.id, this.label);
+
+  final String id;
+  final String label;
+
+  /// The source for a `?screen=` query value; [other] when it is missing
+  /// or not one of ours.
+  static FeedbackSource fromId(String? id) =>
+      values.firstWhere((s) => s.id == id, orElse: () => other);
+}
+
 /// The phone the feedback comes from, shown on the form and sent with it.
 class FeedbackDevice {
   const FeedbackDevice({required this.os, required this.model});
@@ -30,7 +57,8 @@ class FeedbackDevice {
 }
 
 /// One form's worth of feedback, as the website relay expects it
-/// (TKForgeWorks_website `functions/api/feedback.ts`, TKFW-82).
+/// (TKForgeWorks_website `functions/api/feedback.ts`, TKFW-82; the
+/// optional `screen` field is TKFW-89).
 class FeedbackSubmission {
   const FeedbackSubmission({
     required this.topic,
@@ -39,6 +67,7 @@ class FeedbackSubmission {
     required this.replyEmail,
     required this.appVersion,
     required this.device,
+    required this.source,
   });
 
   final FeedbackTopic topic;
@@ -52,6 +81,9 @@ class FeedbackSubmission {
   final String appVersion;
   final FeedbackDevice device;
 
+  /// The screen the form was opened from; sent as `screen`.
+  final FeedbackSource source;
+
   Map<String, Object?> toJson() => {
     'app': FeedbackClient.appId,
     'topic': topic.id,
@@ -61,6 +93,7 @@ class FeedbackSubmission {
     'appVersion': appVersion,
     'osVersion': device.os,
     'device': device.model,
+    'screen': source.id,
   };
 }
 

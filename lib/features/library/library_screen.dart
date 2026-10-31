@@ -8,6 +8,8 @@ import '../../app/widgets/widgets.dart';
 import '../../data/models/models.dart';
 import '../../data/providers.dart';
 import '../../data/repositories/library_repository.dart';
+import '../feedback/feedback_client.dart';
+import '../feedback/feedback_fab.dart';
 
 /// `/library` (DESIGN_SPEC §6, CHEESE-29): the bundled styles as a two-column
 /// card grid with live "N TASTED" counts; the bar filters by name/examples.
@@ -36,6 +38,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
     final shown = LibraryRepository.search(all, _query.text);
 
     return Scaffold(
+      floatingActionButton: const FeedbackFab(source: FeedbackSource.library),
       body: SafeArea(
         bottom: false,
         child: CustomScrollView(
@@ -110,7 +113,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                   16,
                   0,
                   16,
-                  32,
+                  // 40 dp feedback button + 16 margin + room (CHEESE-72).
+                  72,
                 ).withNavBarInset(context),
                 sliver: SliverGrid.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

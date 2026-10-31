@@ -3,6 +3,8 @@ import 'package:forge_ui/forge_ui.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
+import '../feedback/feedback_client.dart';
+import '../feedback/feedback_fab.dart';
 import 'glossary_terms.dart';
 
 /// `/glossary` (CHEESE-45): the glossary's index, reached from the drawer.
@@ -19,13 +21,15 @@ class GlossaryScreen extends StatelessWidget {
     final x = context.forge;
     final sections = GlossarySection.values;
     return Scaffold(
+      floatingActionButton: const FeedbackFab(source: FeedbackSource.glossary),
       appBar: AppBar(title: const Text('Tasting terms')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(
           20,
           4,
           20,
-          32,
+          // 40 dp feedback button + 16 margin + room (CHEESE-72).
+          72,
         ).withNavBarInset(context),
         children: [
           Text(glossaryIntro, style: context.text.bodyLarge),
@@ -109,6 +113,7 @@ class GlossarySectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = section;
     return Scaffold(
+      floatingActionButton: const FeedbackFab(source: FeedbackSource.glossary),
       appBar: AppBar(title: Text(s?.title ?? 'Tasting terms')),
       body: s == null
           ? const ForgeEmptyState(
@@ -135,7 +140,8 @@ class _SectionBody extends StatelessWidget {
         20,
         4,
         20,
-        32,
+        // 40 dp feedback button + 16 margin + room (CHEESE-72).
+        72,
       ).withNavBarInset(context),
       children: [
         Text(

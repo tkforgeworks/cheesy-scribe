@@ -281,7 +281,9 @@ Layout so far:
   `privacyLine`, the menu-icon `leading`, and the link callbacks:
   tkforgeworks.com and the privacy policy (`privacyUri`,
   `https://tkforgeworks.com/privacy/cheesy-scribe/`) via `url_launcher`, licences via `context.push('/licenses')`, Send feedback via
-  `context.push('/feedback')` (`onSendFeedback`, forge_ui since rc.3), and
+  `context.push('/feedback')` (`onSendFeedback`, forge_ui since rc.3),
+  the floating `FeedbackFab` in its `floatingActionButton` slot (forge_ui
+  0.2.1, FU-8, CHEESE-72), and
   Delete account (`onOpenDeleteAccount`, CHEESE-65: `/account` when signed
   in, the website form `deleteAccountUri` when signed out, hidden without
   a backend). The blurb and `privacyLine` mention the optional backup
@@ -294,6 +296,23 @@ Layout so far:
   card showing app version, Android version and device model
   (`feedbackDeviceProvider`, `device_info_plus`), discard sheet,
   `ForgeErrorCard` with retry on failure, snackbar + pop on success.
+  Since CHEESE-72 the form always carries where it was opened from:
+  `FeedbackSource` (`feedback_client.dart`; `id` is the relay's `screen`
+  value, TKFW-89, ≤ 60 chars; `label` is shown), `FeedbackScreen(source:)`
+  from the `/feedback?screen=<id>` query (`FeedbackScreen.location(source)`;
+  missing or unknown → `other`), a fourth plain-text line on the "Sent with
+  your feedback" card (`sourceLine`), `'screen'` in the payload. The way
+  in is `FeedbackFab` (`feedback_fab.dart`: a `FloatingActionButton.small`,
+  bordered surface, own `heroTag`, `buttonKey`) set as the
+  `floatingActionButton` of every browse-only screen (note detail incl. the
+  gone state, library, style detail, stats, settings, both glossary pages)
+  and on About through `ForgeAboutScreen.floatingActionButton` (forge_ui
+  0.2.1, FU-8; the first commit overlaid it with a `Stack`, since the
+  package had no slot, and the package pads the list for it); on Home
+  it sits above `ForgeFab` in one `Column` inside the slide/fade pair, so
+  both hide on scroll-down (bottom sliver padding 136). Never on the note
+  form, Account, the auth screens, licences or the form itself. Those
+  screens' bottom scroll padding is 72 so the last card clears the button.
   `FeedbackClient` POSTs JSON to `https://tkforgeworks.com/api/feedback`,
   the relay in the TKForgeWorks_website repo (`functions/api/feedback.ts`,
   TKFW-82) that holds the Resend key and emails
@@ -421,9 +440,13 @@ Layout so far:
   fixed upstream and the pin moves.
 - **`forge_ui`** (CHEESE-48) — the shared tkforgeworks package
   (`tkforgeworks/forge-ui`, a git dependency pinned to an exact tag,
-  `v0.2.0` (stable since 2026-10-19; rc.6 since CHEESE-61; v0.2 adds the sign-in panel and screens,
-  check-email and set-password screens, typed confirm sheet,
-  `ForgeAccountSettings`, sign-out sheet); local checkout `~/Projects/forge-ui`;
+  `v0.2.1-rc.1` since CHEESE-72 (2026-10-31; FU-8 gives `ForgeAboutScreen`
+  a `floatingActionButton` slot, cut as a patch so FU-7 keeps 0.3.0; the
+  `v0.2.1` final is pinned before the 0.4.0 final, as 0.3.0 did with its
+  rcs); `v0.2.0` stable since 2026-10-19 (rc.6 since CHEESE-61; v0.2 added
+  the sign-in panel and screens, check-email and set-password screens,
+  typed confirm sheet, `ForgeAccountSettings`, sign-out sheet); local
+  checkout `~/Projects/forge-ui`;
   Jira project `FU` since 2026-10-17, forge-core's is `FC`). It owns the theme
   builder, type, radii, the forge gradient, every component theme, the
   bundled fonts and the shared atoms. A defect in any of that is fixed in
@@ -980,3 +1003,15 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   (CHEESE-74 has the four-PR split). Tim's new `cheesyscribe` domain has
   no site yet (TKFW-90). Jira note: a `- [ ]` checklist line containing
   backticks turns the whole list into literal text.
+- 2026-10-31: CHEESE-71 (Settings → "Share Cheesy Scribe", share_plus, PR
+  #76) and the website's share page + project page (TKFW-88) and relay
+  `screen` field (TKFW-89, one website PR #32) shipped together; the share
+  page fetches the app icon from this repo's `main` at build time
+  (`scripts/fetch-app-icons.mjs` there), so the brand art stays here.
+  CHEESE-72 added the floating feedback button and the `screen` field;
+  About needed a FAB slot in `ForgeAboutScreen`, opened as forge-ui FU-8,
+  shipped as `v0.2.1-rc.1` the same day and pinned here (the `v0.2.1`
+  final follows before the 0.4.0 final).
+  Both tickets ran through the orchestrate skill; the ledger, briefs and
+  lessons under `.claude/orchestrator/` are committed as a distinct final
+  commit per ticket (Tim's call).
