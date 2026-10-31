@@ -8,6 +8,7 @@ import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
 import 'package:cheesy_scribe/data/sync/profile_payload.dart';
 import 'package:cheesy_scribe/data/sync/sync_providers.dart';
 import 'package:cheesy_scribe/features/feedback/feedback_client.dart';
+import 'package:cheesy_scribe/features/settings/share_app.dart';
 import 'package:cheesy_scribe/main.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +60,7 @@ Future<AppDatabase> pumpApp(
   AppDatabase? db,
   AppSettings? settings,
   http.Client? feedbackHttp,
+  ShareText? share,
   FakeForgeAuth? auth,
   FakeForgeAccounts? accounts,
   FakeForgeEntriesRepository<TastingNote>? remote,
@@ -99,6 +101,12 @@ Future<AppDatabase> pumpApp(
               MockClient((request) async {
                 fail('Unexpected network call: ${request.url}');
               }),
+        ),
+        shareAppProvider.overrideWithValue(
+          share ??
+              (text, {subject}) async {
+                fail('Unexpected share: $text');
+              },
         ),
         feedbackDeviceProvider.overrideWith((ref) async => testDevice),
         forgeAuthProvider.overrideWithValue(backup ? fakeAuth : null),

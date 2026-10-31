@@ -33,6 +33,7 @@ dependencies:
   heroicons: ^0.11.0
   http: ^1.6.0
   package_info_plus: ^10.2.2
+  share_plus: ^13.3.1
   url_launcher: ^6.3.3
   uuid: ^4.6.0
 dev_dependencies:

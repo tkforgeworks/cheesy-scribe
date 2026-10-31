@@ -336,7 +336,14 @@ Layout so far:
   dimmed, signed out → `signInRowKey` "Sign in to back up your notes" →
   `/account`, signed in → `BackupStatusRow` + `accountRowKey` (email) →
   `/account`; NOTIFICATIONS reminder row disabled at 45 % until CHEESE-12;
-  ABOUT version, `showLicensePage`, link to `/about`). No DATA group: CSV
+  ABOUT: "Share Cheesy Scribe" (CHEESE-71, `shareRowKey`; `share_app.dart`
+  holds `shareAppUrl` = `https://tkforgeworks.com/apps/cheesy-scribe/`, the
+  website's share page (TKFW-88) that sends each visitor to the right
+  store, so **the app never carries a store URL**; `shareAppMessage`,
+  Tim's copy; `shareAppProvider`, a `ShareText` over share_plus that
+  `pumpApp(share:)` replaces in tests, failing the test on an unexpected
+  call like `feedbackHttp`), then version, `showLicensePage`, link to
+  `/about`). No DATA group: CSV
   export (CHEESE-32) was dropped on 2026-10-14.
   `lib/features/account/backup_status_row.dart` — `BackupStatusRow`
   (CHEESE-63; also `ForgeAccountSettings.status` under "Backup"): title
