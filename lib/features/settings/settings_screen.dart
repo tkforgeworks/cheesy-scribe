@@ -11,6 +11,7 @@ import '../../data/models/models.dart';
 import '../../data/providers.dart';
 import '../account/account_screen.dart';
 import '../account/backup_status_row.dart';
+import 'share_app.dart';
 
 /// `/settings` (DESIGN_SPEC §6, CHEESE-31): mono-labelled groups of
 /// bordered cards. Theme and units persist through [AppSettings]; the
@@ -26,6 +27,11 @@ class SettingsScreen extends ConsumerWidget {
   static const signInTitle = 'Sign in to back up your notes';
   static const signInSubtitle =
       'Optional. Your notes stay on this phone either way.';
+
+  /// Share row (CHEESE-71).
+  static const shareRowKey = Key('settings-share-app');
+  static const shareTitle = 'Share Cheesy Scribe';
+  static const shareSubtitle = 'Send a friend the link.';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -149,6 +155,17 @@ class SettingsScreen extends ConsumerWidget {
           ForgeSettingsGroup(
             label: 'About',
             children: [
+              ListTile(
+                key: shareRowKey,
+                leading: HeroIcon(HeroIcons.share, color: x.textTertiary),
+                title: const Text(shareTitle),
+                subtitle: const Text(shareSubtitle),
+                trailing: chevron,
+                onTap: () => ref.read(shareAppProvider)(
+                  shareAppMessage,
+                  subject: 'Cheesy Scribe',
+                ),
+              ),
               ListTile(
                 title: const Text('Version'),
                 trailing: ForgeMonoLabel(

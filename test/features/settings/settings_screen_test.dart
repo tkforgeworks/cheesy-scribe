@@ -2,6 +2,7 @@ import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/settings_repository.dart';
 import 'package:cheesy_scribe/features/about/licenses_screen.dart';
 import 'package:cheesy_scribe/features/settings/settings_screen.dart';
+import 'package:cheesy_scribe/features/settings/share_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -83,5 +84,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'About Cheesy Scribe'), findsOneWidget);
     expect(find.byTooltip('Open menu'), findsOneWidget);
+  });
+
+  testApp('share row opens the share sheet with the website link only', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final shared = <String>[];
+    await pumpApp(
+      tester,
+      at: '/settings',
+      share: (text, {subject}) async => shared.add(text),
+    );
+    expect(find.text(SettingsScreen.shareTitle), findsOneWidget);
+    await tester.tap(find.byKey(SettingsScreen.shareRowKey));
+    await tester.pump();
+    expect(shared, hasLength(1));
+    expect(shared.single, contains(shareAppUrl));
+    expect(shared.single, isNot(contains('play.google.com')));
+    expect(shared.single, isNot(contains('apps.apple.com')));
   });
 }
