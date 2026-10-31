@@ -47,23 +47,6 @@ class AboutScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // ForgeAboutScreen builds its own Scaffold with no FAB slot, so the
-    // feedback button (CHEESE-72) sits on top where a small end-float FAB
-    // would, above the edge-to-edge nav bar.
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        _about(context, ref),
-        Positioned(
-          right: 16,
-          bottom: 16 + MediaQuery.paddingOf(context).bottom,
-          child: const FeedbackFab(source: FeedbackSource.about),
-        ),
-      ],
-    );
-  }
-
-  Widget _about(BuildContext context, WidgetRef ref) {
     final version = ref.watch(appVersionProvider).asData?.value;
     final backup = ref.watch(backupAvailableProvider);
     final signedIn = ref.watch(sessionProvider) != null;
@@ -102,6 +85,8 @@ class AboutScreen extends ConsumerWidget {
             ),
       footnote: privacyLine,
       tintMark: true,
+      // The feedback button (CHEESE-72) in the slot forge_ui 0.2.1 added (FU-8).
+      floatingActionButton: const FeedbackFab(source: FeedbackSource.about),
     );
   }
 }
