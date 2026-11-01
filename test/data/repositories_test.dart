@@ -418,6 +418,15 @@ void main() {
       expect(after.displayName, isNull);
       expect(after.themeMode, ThemeMode.dark);
     });
+
+    test('the tour version survives other updates (CHEESE-49)', () async {
+      final repo = SettingsRepository(openTestDatabase());
+      await repo.update((s) => s.copyWith(tourVersion: 1));
+      await repo.update((s) => s.copyWith(themeMode: ThemeMode.light));
+      final after = await repo.load();
+      expect(after.tourVersion, 1);
+      expect(after.themeMode, ThemeMode.light);
+    });
   });
 
   group('RecentSearchesRepository', () {

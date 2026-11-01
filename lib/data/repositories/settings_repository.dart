@@ -1,7 +1,8 @@
 import '../db/app_database.dart';
 import '../models/models.dart';
 
-/// [AppSettings] persisted as key/value rows (keys = `toJson` keys).
+/// [AppSettings] persisted as key/value rows (keys = `toJson` keys,
+/// values as text).
 class SettingsRepository {
   SettingsRepository(this._db);
 
@@ -21,9 +22,7 @@ class SettingsRepository {
     for (final e in json.entries) {
       await _db
           .into(_db.settings)
-          .insert(
-            SettingsCompanion.insert(key: e.key, value: e.value as String),
-          );
+          .insert(SettingsCompanion.insert(key: e.key, value: '${e.value}'));
     }
   });
 
