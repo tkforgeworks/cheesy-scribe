@@ -227,7 +227,7 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
               const FeedbackFab(source: FeedbackSource.home),
               const SizedBox(height: 12),
               ForgeFab(
-                label: 'New tasting notes',
+                label: 'New tasting note',
                 onPressed: () => context.push('/notes/new'),
               ),
             ],
@@ -251,17 +251,12 @@ class _NotesHomeScreenState extends ConsumerState<NotesHomeScreen> {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: ForgeEmptyState(
-            icon: const WedgeGlyph(size: 28),
+          // No button of its own: the FAB below is the one way in
+          // (CHEESE-49).
+          child: const ForgeEmptyState(
+            icon: WedgeGlyph(size: 28),
             title: 'No tastings yet',
             aside: "The cheese isn't going to review itself.",
-            action: SizedBox(
-              width: 220,
-              child: FilledButton(
-                onPressed: () => context.push('/notes/new'),
-                child: const Text('New tasting notes'),
-              ),
-            ),
           ),
         ),
       ];

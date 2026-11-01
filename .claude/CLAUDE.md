@@ -31,7 +31,7 @@ Layout so far:
   root-navigator routes `/notes/new` and `/notes/:id/edit` (`slideUpPage`,
   fullscreen dialog), `/notes/:id`, `/library/:styleId`,
   `/account/check-email`, `/auth/set-password` (CHEESE-61),
-  `/account/add-password` (CHEESE-64),
+  `/account/add-password` (CHEESE-64), `/tour` (CHEESE-49, `slideUpPage`),
   `/licenses`, `/feedback`, `/glossary`, `/glossary/:section` (`_pushedPage` = Flutter's `MaterialPage`: Android
   slide-and-fade + predictive back). No `/login`. `new` is declared before
   `:id`. **Every root route needs a `pageBuilder`**: go_router 18 looks for
@@ -355,7 +355,8 @@ Layout so far:
   dimmed, signed out → `signInRowKey` "Sign in to back up your notes" →
   `/account`, signed in → `BackupStatusRow` + `accountRowKey` (email) →
   `/account`; NOTIFICATIONS reminder row disabled at 45 % until CHEESE-12;
-  ABOUT: "Share Cheesy Scribe" (CHEESE-71, `shareRowKey`; `share_app.dart`
+  ABOUT: "Take the tour again" (CHEESE-49, `tourRowKey` → `/tour`), then
+  "Share Cheesy Scribe" (CHEESE-71, `shareRowKey`; `share_app.dart`
   holds `shareAppUrl` = `https://tkforgeworks.com/apps/cheesy-scribe/`, the
   website's share page (TKFW-88) that sends each visitor to the right
   store, so **the app never carries a store URL**; `shareAppMessage`,
@@ -394,7 +395,9 @@ Layout so far:
   named via the library), `FeaturedNoteCard` (newest note, hidden while a
   filter is active, and excluded from the rows), `NoteRow`s with dividers,
   paging by growing `NotesQuery.limit`, long-press sheet Edit / Delete →
-  confirm sheet, FAB slides/fades out on scroll-down. Providers:
+  confirm sheet, FAB slides/fades out on scroll-down. The FAB ("New
+  tasting note", singular everywhere since CHEESE-49) is the one way to
+  start a note: the empty state has no button of its own. Providers:
   `notesPageProvider(query)`, `notesCountProvider(query)`,
   `newestNoteProvider`, `topStyleIdsProvider`. The header's bar is
   `NotesSearchAnchor` (`notes_search.dart`, CHEESE-25): a full-screen
@@ -497,7 +500,9 @@ Layout so far:
 - Tests: `test/support.dart` — `wrap()` (themed MaterialApp for atoms),
   `openTestDatabase()` (in-memory drift, closed on teardown), `pumpApp()`
   (real app on an in-memory DB, optional seeded `AppSettings`, mocked
-  package info, `testDevice` for the feedback form, and `feedbackHttp:` a
+  package info (`version:`, default `0.1.0`), the first-use tour marked
+  seen unless `tourSeen: false` (merged into what is stored, so a
+  re-launch on the same DB keeps the test's settings), `testDevice` for the feedback form, and `feedbackHttp:` a
   `MockClient` for the relay; without one any network call fails the
   test; `auth:` / `accounts:` / `remote:` a `FakeForgeAuth` /
   `FakeForgeAccounts` / `FakeForgeEntriesRepository<TastingNote>`, fresh
@@ -530,6 +535,16 @@ Layout so far:
   compare with ImageMagick `compare -metric
   AE`: zero means pixel-identical. Use it for any change meant to leave
   the look alone, and add a scene when a screen is added.
+- `tool/visual/build_tour_assets.sh` (CHEESE-49) — rebuilds the tour's
+  pictures: `render_tour_test.dart` drives the real app through the demo
+  notebook in `tour_demo.dart` ("Chuck", 18 tastings, Brie de Meaux
+  featured; no debug banner; package info reports `tourAppVersion`) and
+  measures each slide's highlight from the widgets themselves;
+  ImageMagick converts the 40 PNGs to 720×1600 WebP in `assets/tour/`
+  (~1.6 MB) and `write_tour_highlights.dart` regenerates
+  `lib/features/tour/tour_highlights.dart` (never edit it by hand). Re-run
+  it after any change to a screen the tour shows; `test/features/tour/`
+  fails if a slide's picture or highlight is missing or left over.
 
 Local toolchain (Tim's machine, reinstalled 2026-09-26): Flutter 3.47.5
 (Dart 3.13.4; the same version CI and release builds pin since CHEESE-54)
@@ -1018,3 +1033,19 @@ Decided 2026-09-05 during CHEESE-1; reasoning in `docs/CHEESE-1-decomposition.md
   Both tickets ran through the orchestrate skill; the ledger, briefs and
   lessons under `.claude/orchestrator/` are committed as a distinct final
   commit per ticket (Tim's call).
+- 2026-11-01: CHEESE-49 first-use tour. Tim's review of a screens page
+  and then a tour design page (both Claude artifacts) settled it: a
+  19-slide, four-chapter slide show (your first note, find your way
+  around, backup if you want it, tell us) of pictures of the real app
+  with highlights, Tim's copy in `tour_slides.dart`. `TourScreen`
+  (`/tour`, `lib/features/tour/`): Skip on every slide (Done on the
+  last), Back/Next, swipe, chapter dots, system back steps back and
+  closes on the first slide, "Write my first note" on the last pushes
+  `/notes/new`. Shown once to everyone, testers upgrading included:
+  `AppSettings.tourVersion` (local, never synced; text in the settings
+  table) below `TourScreen.version` opens it on launch, only when the
+  launch lands on `/notes` (`ScribeApp._maybeShowTour`); finishing,
+  skipping or backing out stores the version; raise the constant to show
+  a revised tour once more. Replay from Settings. The empty journal lost
+  its duplicate button and the CTA reads "New tasting note" everywhere
+  (criteria 7 and 8 added to the ticket).

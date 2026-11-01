@@ -9,11 +9,13 @@ import 'app/router.dart';
 import 'app/session_guard.dart';
 import 'app/theme/scribe_theme.dart';
 import 'data/forge_providers.dart';
+import 'data/models/models.dart';
 import 'data/providers.dart';
 import 'data/sync/sync_providers.dart';
 import 'features/account/auth_copy.dart';
 import 'features/account/check_email_screen.dart';
 import 'features/account/set_password_screen.dart';
+import 'features/tour/tour_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,6 +60,37 @@ class _ScribeAppState extends ConsumerState<ScribeApp> {
   ForgeMailLink? _pendingLink;
   final _messenger = GlobalKey<ScaffoldMessengerState>();
   late final _guard = SessionGuard(ref, _messenger);
+
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(
+      appSettingsProvider,
+      _maybeShowTour,
+      fireImmediately: true,
+    );
+  }
+
+  /// Whether this launch has decided about the tour yet.
+  bool _tourChecked = false;
+
+  /// CHEESE-49: the first settings this launch reads decide whether the
+  /// tour opens. Only over the journal: a launch from a mail link lands on
+  /// Account, and the tour waits for the next one.
+  void _maybeShowTour(
+    AsyncValue<AppSettings>? _,
+    AsyncValue<AppSettings> next,
+  ) {
+    final settings = next.asData?.value;
+    if (_tourChecked || settings == null) return;
+    _tourChecked = true;
+    if (settings.tourVersion >= TourScreen.version) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _router.state.uri.path == '/notes') {
+        _router.push(TourScreen.path);
+      }
+    });
+  }
 
   @override
   void dispose() {

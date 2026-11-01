@@ -9,6 +9,8 @@ import 'package:cheesy_scribe/data/db/app_database.dart';
 import 'package:cheesy_scribe/data/models/models.dart';
 import 'package:cheesy_scribe/data/repositories/notes_repository.dart';
 import 'package:cheesy_scribe/features/account/account_screen.dart';
+import 'package:cheesy_scribe/features/tour/tour_screen.dart';
+import 'package:cheesy_scribe/features/tour/tour_slides.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -443,6 +445,34 @@ void main() {
       await tester.pumpAndSettle();
       await scrolled(tester, p);
     });
+    // CHEESE-49: the tour's first slide, the two-picture slide and the
+    // last. Its pictures decode on the real event loop.
+    Future<void> tourSlide(WidgetTester tester, String p, int page) async {
+      for (var i = 0; i < page; i++) {
+        await tester.tap(find.byKey(TourScreen.nextKey));
+        await tester.pumpAndSettle();
+      }
+      final context = tester.element(find.byType(TourScreen));
+      final brightness = Theme.of(context).brightness;
+      await tester.runAsync(() async {
+        for (final f in tourSlides[page].frames) {
+          await precacheImage(
+            AssetImage(TourScreen.asset(f, brightness)),
+            context,
+          );
+        }
+      });
+      await tester.pumpAndSettle();
+      await _shot(tester, p);
+    }
+
+    scene('tour', TourScreen.path, (t, p) => tourSlide(t, p, 0));
+    scene('tour-split', TourScreen.path, (t, p) => tourSlide(t, p, 4));
+    scene(
+      'tour-last',
+      TourScreen.path,
+      (t, p) => tourSlide(t, p, tourSlides.length - 1),
+    );
     // CHEESE-45: the index from the drawer, then each section from it.
     Future<void> openGlossary(WidgetTester tester) async {
       await tester.tap(find.byTooltip('Open menu'));

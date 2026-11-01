@@ -20,6 +20,7 @@ import '../features/notes/note_form_screen.dart';
 import '../features/notes/notes_home_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/stats/stats_screen.dart';
+import '../features/tour/tour_screen.dart';
 import 'shell/scribe_shell.dart';
 
 /// Builds the app router (DESIGN_SPEC §7, minus `/login`: sign-in lives on
@@ -184,6 +185,12 @@ GoRouter createScribeRouter({
         path: SetPasswordScreen.path,
         pageBuilder: (context, state) =>
             _pushedPage(state, const SetPasswordScreen()),
+      ),
+      // CHEESE-49: the first-use tour, over everything; ScribeApp opens it
+      // on launch, Settings on request.
+      GoRoute(
+        path: TourScreen.path,
+        pageBuilder: (context, state) => slideUpPage(state, const TourScreen()),
       ),
       // CHEESE-51 / CHEESE-72: `?screen=` names where the form was opened
       // from (`FeedbackScreen.location`).

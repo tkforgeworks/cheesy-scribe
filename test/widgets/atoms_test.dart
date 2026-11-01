@@ -62,7 +62,7 @@ void main() {
           Column(
             children: [
               const ForgeLogoBadge(),
-              ForgeFab(label: 'New tasting notes', onPressed: () {}),
+              ForgeFab(label: 'New tasting note', onPressed: () {}),
               const ForgeSkeletonList(),
             ],
           ),
@@ -70,7 +70,7 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('New tasting notes'), findsOneWidget);
+      expect(find.text('New tasting note'), findsOneWidget);
       expect(find.byType(ForgeSkeletonRow), findsNWidgets(3));
     }
   });

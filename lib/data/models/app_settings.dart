@@ -15,6 +15,7 @@ class AppSettings {
     this.themeMode = ThemeMode.system,
     this.units = PriceUnit.usdPerLb,
     this.memberSince,
+    this.tourVersion = 0,
   });
 
   /// Shown in the drawer account row and search-bar avatar; null = unset.
@@ -28,11 +29,17 @@ class AppSettings {
   /// "MEMBER SINCE" falls back to it when there are no notes yet.
   final DateTime? memberSince;
 
+  /// The first-use tour this phone has finished or skipped (CHEESE-49);
+  /// 0 = never. Local to the phone, never synced. The tour shows on launch
+  /// while this is below `TourScreen.version`.
+  final int tourVersion;
+
   AppSettings copyWith({
     Object? displayName = _unset,
     ThemeMode? themeMode,
     PriceUnit? units,
     Object? memberSince = _unset,
+    int? tourVersion,
   }) => AppSettings(
     displayName: identical(displayName, _unset)
         ? this.displayName
@@ -42,6 +49,7 @@ class AppSettings {
     memberSince: identical(memberSince, _unset)
         ? this.memberSince
         : memberSince as DateTime?,
+    tourVersion: tourVersion ?? this.tourVersion,
   );
 
   factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
@@ -53,6 +61,12 @@ class AppSettings {
     memberSince: json['memberSince'] == null
         ? null
         : TastingNote.parseDate(json['memberSince'] as String),
+    // Settings rows store text, so accept "2" as well as 2.
+    tourVersion: switch (json['tourVersion']) {
+      final int v => v,
+      final String v => int.tryParse(v) ?? 0,
+      _ => 0,
+    },
   );
 
   Map<String, dynamic> toJson() => {
@@ -61,6 +75,7 @@ class AppSettings {
     'units': units.name,
     if (memberSince != null)
       'memberSince': TastingNote.formatDate(memberSince!),
+    if (tourVersion > 0) 'tourVersion': tourVersion,
   };
 
   @override
@@ -70,10 +85,12 @@ class AppSettings {
           other.displayName == displayName &&
           other.themeMode == themeMode &&
           other.units == units &&
-          other.memberSince == memberSince;
+          other.memberSince == memberSince &&
+          other.tourVersion == tourVersion;
 
   @override
-  int get hashCode => Object.hash(displayName, themeMode, units, memberSince);
+  int get hashCode =>
+      Object.hash(displayName, themeMode, units, memberSince, tourVersion);
 }
 
 const _unset = Object();

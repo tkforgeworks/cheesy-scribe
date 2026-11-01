@@ -210,7 +210,9 @@ void main() {
         displayName: 'Tim',
         themeMode: ThemeMode.dark,
         units: PriceUnit.eurPerKg,
+        tourVersion: 1,
       );
+      expect(defaults.tourVersion, 0);
       final schema = loadSchema('app-settings.schema.json');
       for (final s in [defaults, set]) {
         final json = roundTrip(s.toJson());
@@ -220,6 +222,10 @@ void main() {
       expect(AppSettings.fromJson(const {}), defaults);
       expect(set.copyWith(displayName: null).displayName, isNull);
       expect(set.copyWith().displayName, 'Tim');
+      // Settings rows hold text; the tour version reads back from either.
+      expect(AppSettings.fromJson(const {'tourVersion': '2'}).tourVersion, 2);
+      expect(AppSettings.fromJson(const {'tourVersion': 'x'}).tourVersion, 0);
+      expect(defaults.toJson().containsKey('tourVersion'), isFalse);
     });
   });
 

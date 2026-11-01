@@ -13,6 +13,7 @@ import '../account/account_screen.dart';
 import '../account/backup_status_row.dart';
 import '../feedback/feedback_client.dart';
 import '../feedback/feedback_fab.dart';
+import '../tour/tour_screen.dart';
 import 'share_app.dart';
 
 /// `/settings` (DESIGN_SPEC §6, CHEESE-31): mono-labelled groups of
@@ -29,6 +30,10 @@ class SettingsScreen extends ConsumerWidget {
   static const signInTitle = 'Sign in to back up your notes';
   static const signInSubtitle =
       'Optional. Your notes stay on this phone either way.';
+
+  /// Replays the first-use tour (CHEESE-49).
+  static const tourRowKey = Key('settings-tour');
+  static const tourTitle = 'Take the tour again';
 
   /// Share row (CHEESE-71).
   static const shareRowKey = Key('settings-share-app');
@@ -159,6 +164,16 @@ class SettingsScreen extends ConsumerWidget {
           ForgeSettingsGroup(
             label: 'About',
             children: [
+              ListTile(
+                key: tourRowKey,
+                leading: HeroIcon(
+                  HeroIcons.questionMarkCircle,
+                  color: x.textTertiary,
+                ),
+                title: const Text(tourTitle),
+                trailing: chevron,
+                onTap: () => context.push(TourScreen.path),
+              ),
               ListTile(
                 key: shareRowKey,
                 leading: HeroIcon(HeroIcons.share, color: x.textTertiary),
