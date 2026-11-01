@@ -72,7 +72,7 @@ final seed = [
 ];
 
 void main() {
-  testApp('empty state with an inline button', (tester) async {
+  testApp('empty state leaves the FAB as the one way in', (tester) async {
     await pumpApp(tester);
     expect(find.text('No tastings yet'), findsOneWidget);
     expect(
@@ -80,7 +80,9 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('0 NOTES'), findsOneWidget);
-    await tester.tap(find.widgetWithText(FilledButton, 'New tasting notes'));
+    expect(find.byType(FilledButton), findsNothing);
+    expect(find.text('New tasting note'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ForgeFab, 'New tasting note'));
     await tester.pumpAndSettle();
     expect(find.widgetWithText(AppBar, 'New tasting note'), findsOneWidget);
   });
