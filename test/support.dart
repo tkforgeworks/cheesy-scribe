@@ -9,6 +9,7 @@ import 'package:cheesy_scribe/data/sync/profile_payload.dart';
 import 'package:cheesy_scribe/data/sync/sync_providers.dart';
 import 'package:cheesy_scribe/features/feedback/feedback_client.dart';
 import 'package:cheesy_scribe/features/settings/share_app.dart';
+import 'package:cheesy_scribe/features/tour/tour_screen.dart';
 import 'package:cheesy_scribe/main.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,10 @@ const testDevice = FeedbackDevice(
 /// account row (a `FakeForgeAccounts` over [auth] by default) and [remote]
 /// the server's notes table (a `FakeForgeEntriesRepository`, CHEESE-62).
 /// Pass `backup: false` for a build with no configuration, where all three
-/// are null and the app says backup isn't available.
+/// are null and the app says backup isn't available. [version] is what
+/// package info reports (the tour renders pass the release they show).
+/// [tourSeen] marks the first-use tour as done so it doesn't cover the
+/// screen under test; pass false to see it open on launch (CHEESE-49).
 /// Returns the database so tests can seed or inspect it.
 Future<AppDatabase> pumpApp(
   WidgetTester tester, {
@@ -66,6 +70,8 @@ Future<AppDatabase> pumpApp(
   FakeForgeEntriesRepository<TastingNote>? remote,
   FakeForgeEntriesRepository<ProfilePayload>? remoteProfile,
   bool backup = true,
+  String version = '0.1.0',
+  bool tourSeen = true,
 }) async {
   final database = db ?? openTestDatabase();
   final library = LibraryRepository();
@@ -77,13 +83,19 @@ Future<AppDatabase> pumpApp(
   final fakeProfile =
       remoteProfile ?? FakeForgeEntriesRepository<ProfilePayload>(fakeAuth);
   await tester.runAsync(() async {
-    if (settings != null) await SettingsRepository(database).save(settings);
+    final repo = SettingsRepository(database);
+    if (settings != null) await repo.save(settings);
+    // Merged into what is stored, so a re-launch on the same database
+    // keeps the settings the test saved.
+    if (tourSeen) {
+      await repo.update((s) => s.copyWith(tourVersion: TourScreen.version));
+    }
     await library.load();
   });
   PackageInfo.setMockInitialValues(
     appName: 'Cheesy Scribe',
     packageName: 'com.tkforgeworks.cheesy_scribe',
-    version: '0.1.0',
+    version: version,
     buildNumber: '1',
     buildSignature: '',
   );

@@ -50,6 +50,9 @@ flutter:
 
   assets:
     - assets/data/
+    # The first-use tour's pictures (CHEESE-49), built by
+    # tool/visual/build_tour_assets.sh.
+    - assets/tour/
 
 # Launcher icon (CHEESE-18). Sources are rendered from the app's own brand
 # widgets: see assets/brand/README.md for the regenerate recipe.
